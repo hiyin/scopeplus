@@ -18,7 +18,7 @@ from .forms import (SignupForm, LoginForm, RecoverPasswordForm,
 from .models import ContactUs
 
 from ..emails import send_async_email
-
+import sqlite3
 
 frontend = Blueprint('frontend', __name__)
 

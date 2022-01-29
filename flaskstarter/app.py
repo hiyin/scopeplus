@@ -7,6 +7,10 @@ from .user import Users, UsersAdmin
 from .settings import settings
 from .tasks import tasks, MyTaskModelAdmin
 from .frontend import frontend, ContactUsAdmin
+from .sample_meta_all import SampleMetaAllModel, SampleMetaAllAdmin
+from .covid2k_meta import covid2k_metaModel, covid2k_metaAdmin
+from .covid2k_dense import covid2k_denseModel, covid2k_denseAdmin
+from .covid2k_dense_2k import covid2k_dense2kModel, covid2k_dense2kAdmin
 from .extensions import db, mail, cache, login_manager, admin
 from .utils import INSTANCE_FOLDER_PATH, pretty_date
 
@@ -70,6 +74,10 @@ def configure_extensions(app):
     admin.add_view(ContactUsAdmin(db.session))
     admin.add_view(UsersAdmin(db.session))
     admin.add_view(MyTaskModelAdmin(db.session))
+    admin.add_view(SampleMetaAllAdmin(db.session))
+    admin.add_view(covid2k_metaAdmin(db.session))
+    admin.add_view(covid2k_denseAdmin(db.session))
+    admin.add_view(covid2k_dense2kAdmin(db.session))
     admin.init_app(app)
 
     @login_manager.user_loader

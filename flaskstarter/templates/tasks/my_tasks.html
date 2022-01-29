@@ -7,36 +7,90 @@
 {% block body %}
   <div class="container">
     <div class="row mt-5">
-      <div class="col-6 offset-3">
-        <table class="table table-hover">
+        <form action="{{ url_for('tasks.showall')}}" method="post" style="display:inline-block">
+          <button class="btn btn-primary active" name="showall"  type="submit"> Show All</button>
+        </form>
+
+        <form action="{{ url_for('tasks.age_filter')}}" method="post" style="display:inline-block">
+            <button class="btn btn-primary" name="age52"  type="submit"> Age = 52</button>
+        </form>
+
+        <table id="data" class="table table-hover">
                       <thead>
                         <tr>
-                          <th>My Tasks</th>
-                          <th>Actions</th>
+                          <th>sample_id</th>
+                          <th>donor</th>
+                          <th>X</th>
+                          <th>age</th>
+                          <th>status</th>
+                          <th>dataset</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {% if all_tasks|length > 0 %}
+
                           {% for task in all_tasks %}
                           <tr>
-                            <td>{{ task.task }}</td>
-                            <td>
-                              <div class="btn-group" role="group" aria-label="Task Actions">
-                                <a style="margin-right: 5px; margin-left: 5px;" class="btn btn-outline-primary" href="{{ url_for('tasks.view_task', id=task.id) }}">View</a>
-                                <a style="margin-right: 5px; margin-left: 5px;" class="btn btn-outline-secondary" href="{{ url_for('tasks.edit_task', id=task.id) }}">Edit</a>
-                                <a style="margin-right: 5px; margin-left: 5px;" class="btn btn-outline-danger" href="{{ url_for('tasks.delete_task', id=task.id) }}">Delete</a>
-                              </div>
-                            </td>
+                            <td>{{ task.sample_id }}</td>
+                            <td>{{ task.donor }}</td>
+                            <td>{{ task.X }}</td>git
+                            <td>{{ task.age }}</td>
+                            <td>{{ task.Status_on_day_collection_summary }}</td>
+                            <td>{{ task.dataset }}</td>
                           </tr>
                           {% endfor %}
-                        {% else %}
-                          <tr>
-                            <td>No Task Added. Please <a href="{{ url_for('tasks.add_task')}}">add a task</a></td><td></td>
-                          </tr>
-                        {% endif %}
                       </tbody>
                     </table>
+
+
+        <form action="{{ url_for('tasks.download')}}" method="post" style="display:inline-block">
+            <button class="btn btn-primary" name="download"  type="submit"> Download Data </button>
+        </form>
+
+        <form action="{{ url_for('tasks.get_multiselect')}}" method="post" style="display:inline-block">
+            <select multiple id="multiselect" name="multiselect" data-live-search="true" class="selectpicker" data-actions-box="true">
+                {% for val in col_values %}
+                    <option value="{{val}}">{{val}}</option>
+                {% endfor %}
+            </select>
+            <button class="btn btn-primary" id="select" name="select"  type="submit"> Select </button>
+        </form>
+
+
+
       </div>
-    </div>
+
+      <div id="chart" class="chart"></div>
+
   </div>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    $(document).ready(function () {
+      $('#data').DataTable();
+    });
+
+    $('select').selectpicker();
+
+    document.getElementById('select').onclick = function() {
+    var selected = [];
+    for (var option of document.getElementById('multiselect').options)
+    {
+        if (option.selected) {
+            selected.push(option.value);
+        }
+    }
+    alert("Successfully selected the following donors for filtering" + selected);
+
+    }
+
+  </script>
+
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script type="text/javascript">
+    var graphs = {{graphJSON | safe}};
+    Plotly.plot('chart',graphs,{});
+    </script>
+
+
 {% endblock %}

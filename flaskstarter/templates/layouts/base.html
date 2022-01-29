@@ -13,6 +13,17 @@
   <!-- Bootstrap core CSS -->
   <link href="{{ url_for('static', filename='bootstrap.min.css')}}" rel="stylesheet">
 
+  <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/dataTables.bootstrap4.min.css">
+
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css" />
+
+
+
+
+
+
+
 </head>
 
 <body>
@@ -32,10 +43,17 @@
   {% block body %}
 
   {% endblock %}
-
   <!-- Bootstrap core JavaScript -->
   <script src="{{ url_for('static', filename='jquery.slim.min.js')}}"></script>
   <script src="{{ url_for('static', filename='bootstrap.bundle.min.js')}}"></script>
+
+
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.4/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.4/js/dataTables.bootstrap4.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
+
+  {% block scripts %}{% endblock %}
 
 </body>
 
