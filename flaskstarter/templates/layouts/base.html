@@ -15,13 +15,10 @@
 
   <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.4/css/dataTables.bootstrap4.min.css">
 
-
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css" />
 
-
-
-
-
+  <!-- CSS -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/template.css') }}">
 
 
 </head>
@@ -29,9 +26,9 @@
 <body>
 
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark static-top">
+  <nav class="navbar navbar-expand-lg navbar-light bg-white static-top">
     <div class="container">
-      <a class="navbar-brand" href="{{ url_for('frontend.index') }}">Flask-Starter</a>
+      <a class="navbar-brand" href="{{ url_for('frontend.index') }}"><img src="{{url_for('static', filename='D24H_Logo.png')}}" width="273" height="129"/></a>
       <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>

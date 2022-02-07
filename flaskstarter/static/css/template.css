@@ -1,0 +1,101 @@
+#navbarResponsive {
+    padding-top: 45px;
+}
+
+.navbar-nav>.active>a {
+    color: aqua !important;
+}
+
+.nav-item>a:hover {
+    color: aqua;
+}
+
+#banner {
+    background-image: url(../Dataset_Banner.jpeg);
+    height: 550px;
+}
+
+#projectName {
+    font-family: Roboto;
+    font-style: normal;
+    font-weight: 500;
+    font-size: 26.6159px;
+    line-height: 39px;
+    text-align: center;
+    letter-spacing: 0.105em;
+    margin-bottom: 10px;
+    color: #6EA69D;
+}
+
+#projectName span {
+    color: #757779;
+}
+
+#projectAim0, #projectAim1 {
+    font-style: normal;
+    font-weight: bold;
+    font-size: 47px;
+    line-height: 70px;
+    text-align: center;
+    color: #000000;
+}
+
+#projectDisp {
+    font-family: Inter;
+    font-style: normal;
+    font-weight: 300;
+    font-size: 18.9103px;
+    line-height: 35px;
+    text-align: center;
+    letter-spacing: 0.165em;
+    text-indent: 0.10809px;
+    color: rgba(0, 0, 0, 0.7);
+    margin-top: 10px;
+}
+
+#dashrow {
+    margin-top: -75px;
+    margin-bottom: 118px;
+    padding-left: 150px;
+    padding-right: 150px;
+}
+
+#dashboard {
+    background: #FFFFFF;
+    box-shadow: 2px 12px 60px -5px rgba(170, 170, 170, 0.35);
+    border-radius: 40px;
+    height: 150px;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.dash-item {
+    padding: 20px;
+    color: #6EA69D;
+    display: grid;
+    grid-template-columns: auto 15px auto;
+    grid-template-rows: auto auto auto;
+    grid-template-areas:
+        "a . b"
+        "a . b"
+        "a . c";
+}
+
+.item1 {
+    grid-area: a;
+    align-self: center;
+    justify-items: start;
+}
+
+.item2 {
+    grid-area: b;
+    align-self: end;
+    justify-items: start;
+}
+
+.item3 {
+    grid-area: c;
+    align-self: start;
+    justify-items: start;
+}
+
