@@ -7,4 +7,8 @@ Flask-Login
 Flask-Admin
 email-validator
 itsdangerous
+WTForms==2.3.3
 pytest
+pandas
+plotly
+numpy
