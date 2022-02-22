@@ -1,16 +1,41 @@
 {% from "macros/_form.html" import render_form %}
 
-{% set page_title = 'Flask-Starter Template for Python Flask Applications' %}
+{% set page_title = 'Home' %}
 
 {% extends 'layouts/base.html' %}
 
 {% block body %}
-  <div class="container">
-    <div class="row">
-      <div class="col-lg-12 text-center">
-        <h2 class="mt-5">Welcome, build something great!</h3>
-        <p class="lead">Let's start with Python & Flask</p>
-      </div>
-    </div>
+{% include 'layouts/banner.html' %}
+<div class="container">
+  <div class="row justify-content-center">
+    <h2>Home</h2>
   </div>
+
+  <div id="chart" class="chart"></div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  $(document).ready(function () {
+    $('#data').DataTable();
+  });
+
+  $('select').selectpicker();
+
+  document.getElementById('select').onclick = function () {
+    var selected = [];
+    for (var option of document.getElementById('multiselect').options) {
+      if (option.selected) {
+        selected.push(option.value);
+      }
+    }
+    alert("Successfully selected the following donors for filtering" + selected);
+
+  }
+</script>
+
+
+
 {% endblock %}

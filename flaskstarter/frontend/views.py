@@ -39,8 +39,12 @@ def index():
     if current_user.is_authenticated:
         return redirect(url_for('frontend.dashboard'))
 
-    return render_template('frontend/landing.html', _active_home=True)
+    return render_template('tasks/landing.html', _active_home=True)
 
+#@frontend.route('/home')
+#def home():
+
+#   return render_template('frontend/landing.html', _active_home=True)
 
 @frontend.route('/contact-us', methods=['GET', 'POST'])
 def contact_us():

@@ -17,8 +17,6 @@ import plotly.express as px
 import json
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
-
-
 @tasks.route('/my_tasks', methods=['GET', 'POST'])
 @login_required
 def my_tasks(condition=''):
@@ -62,7 +60,45 @@ def my_tasks(condition=''):
                            _active_tasks=True)
 
 
+@tasks.route('/home', methods=['GET', 'POST'])
+def home(condition=''):
+    print('debug...')
+    print('change condition...')
+    print(condition)
+    graphJSON = {}
 
+    if not condition:
+        _all_tasks = covid2k_metaModel.query.all()
+        print('show default')
+
+    else:
+        if isinstance(condition, str):
+            if condition == 'all':
+                _all_tasks = covid2k_metaModel.query.all()
+                writefile('/tmp/flaskstarter-instance/', _all_tasks)
+                print('show all')
+            else:
+                print('show' + condition)
+                # _all_tasks = db.session.execute('SELECT * FROM covid2k_meta WHERE age LIKE 52')
+                _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.age.contains(condition)).all()
+                writefile('/tmp/flaskstarter-instance/', _all_tasks)
+                graphJSON = plot()
+        elif isinstance(condition, list):
+            _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.donor.in_(condition)).all()
+            writefile('/tmp/flaskstarter-instance/', _all_tasks)
+            graphJSON = plot()
+            print('show donors')
+
+
+    print("reload...")
+    print(condition)
+    col_values = get_col_values()
+
+    return render_template('tasks/landing.html',
+                           all_tasks=_all_tasks,
+                           col_values=col_values,
+                           graphJSON=graphJSON,
+                           _active_tasks=True)
 
 def writefile(path, towrite):
     print('writing data' + path)
@@ -100,7 +136,7 @@ def get_multiselect():
      selected_vals = request.form.getlist('multiselect')
      print(request.form)
      print(selected_vals)
-     return my_tasks(selected_vals)
+     return home(selected_vals)
 
 
 def plot():

@@ -5,12 +5,14 @@
 {% extends 'layouts/base.html' %}
 
 {% block body %}
-  <div class="container">
-    <div class="row mt-5">
-      <div class="col-4 offset-4">
+<div class="log-in">
+  <div class="log-container flex-column">
+    <h3>Sign In</h3>
         {{ render_form(url_for('frontend.login'), form)}}
         <a href="{{url_for('frontend.reset_password')}}" class="auth-link">Forgot Password?</a>
       </div>
     </div>
   </div>
+</div>
+  {% include 'layouts/footer.html' %}
 {% endblock %}

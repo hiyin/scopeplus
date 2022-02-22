@@ -5,11 +5,50 @@
 {% extends 'layouts/base.html' %}
 
 {% block body %}
-  <div class="container">
-    <div class="row mt-5">
-      <div class="col-6 offset-3">
-        {{ render_form(url_for('tasks.add_task'), form)}}
-      </div>
+{% include 'layouts/banner.html' %}
+  <div class="container contribute">
+    <div class="row justify-content-center contribute-t"><h1>Contribute</h1></div>
+    <div class="introduction">
+      2.5 million single cell is build for the benefit of scientific community in health sector. Our team welcomes contributions of raw data of PBMC Single Cells, as long as it is consented for open access to the public.
+    </div>
+    <div class="row flex-column contribute-p">
+      <div class="title">Data Submission Process</div>
+      <div class="descp">We currenly accept csv form of dataset. Please follow the following steps to upload data.</div>
+      <table class="intro-tb">
+        <tr>
+          <td><img src="{{url_for('static', filename='folder-2.png')}}" width="140" height="140"/></td>
+          <td><img src="{{url_for('static', filename='Pointer.png')}}" width="95" height="95"/></td>
+          <td><img src="{{url_for('static', filename='folder.png')}}" width="140" height="140"/></td>
+          <td><img src="{{url_for('static', filename='Pointer.png')}}" width="95" height="95"/></td>
+          <td><img src="{{url_for('static', filename='newspaper.png')}}" width="140" height="140"/></td>
+        </tr>
+        <tr>
+          <th>
+            Prepare metadata
+          </th>
+          <th></th>
+          <th>
+            Upload data
+          </td>
+          <th></th>
+          <th>
+            See and share
+          </th>
+        </tr>
+        <tr>
+          <td>in communication with our team</td>
+          <td></td>
+          <td>to a secure data storage area</td>
+          <td></td>
+          <td>accessioned data on the portal</td>
+        </tr>
+      </table>
+    </div>
+    <div class="button d-flex justify-content-center">
+      <form action="{{ url_for('tasks.download')}}" method="post" style="display:inline-block">
+        <button class="btn btn-outline-success" name="upload" type="submit"> Upload Data </button>
+      </form>
     </div>
   </div>
+{% include 'layouts/footer.html' %}
 {% endblock %}
