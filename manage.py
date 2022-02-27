@@ -6,8 +6,13 @@ from flaskstarter import create_app
 from flaskstarter.extensions import db
 from flaskstarter.user import Users, ADMIN, USER, ACTIVE
 from flaskstarter.tasks import MyTaskModel
-
+from flask_pymongo import PyMongo
 application = create_app()
+
+
+if __name__ == "__main__":
+    application.run()
+
 
 
 @application.cli.command("initdb")

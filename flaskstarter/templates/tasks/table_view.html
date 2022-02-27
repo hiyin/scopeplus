@@ -1,0 +1,120 @@
+{% from "macros/_form.html" import render_form %}
+
+{% set page_title = 'My Tasks' %}
+
+{% extends 'layouts/base.html' %}
+
+{% block body %}
+{% include 'layouts/banner.html' %}
+
+<div class="container">
+  <div class="row justify-content-center">
+    <h2>Explore Data</h2>
+  </div>
+  <div class="row mt-5">
+    <form action="{{ url_for('tasks.showall')}}" method="post" style="display:inline-block">
+      <button class="btn btn-primary active" name="showall" type="submit"> Show All</button>
+    </form>
+
+    <form action="{{ url_for('tasks.filter_by_age')}}" method="post" style="display:inline-block">
+      <button class="btn btn-primary" name="age52" type="submit"> Age = 52</button>
+    </form>
+
+    <table id="empTable" class="table table-hover table-striped table-responsive">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>sampleId</th>
+            <th>age</th>
+            <th>prediction</th>
+            <th>donor</th>
+            <th>dataset</th>
+            <th>status</th>
+        </tr>
+        </thead>
+    </table>
+
+
+    <form action="{{ url_for('tasks.download')}}" method="post" style="display:inline-block">
+      <button class="btn btn-primary" name="download" type="submit"> Download Data </button>
+    </form>
+
+    <form action="{{ url_for('tasks.get_multiselect')}}" method="post" style="display:inline-block">
+      <select multiple id="multiselect" name="multiselect" data-live-search="true" class="selectpicker"
+        data-actions-box="true">
+        {% for val in col_values %}
+        <option value="{{val}}">{{val}}</option>
+        {% endfor %}
+      </select>
+      <button class="btn btn-primary" id="select" name="select" type="submit"> Select </button>
+    </form>
+
+
+
+  </div>
+{% endblock %}
+
+{% block scripts %}
+
+<script>
+$(document).ready(function() {
+
+
+    $('#empTable').DataTable({
+                'processing':true,
+                'serverSide': true,
+                'serverMethod': 'post',
+                'ajax': {
+                    'url':'{{ url_for('tasks.api_db')}}'
+                },
+                'lengthMenu': [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+                searching: true,
+                sort: false,
+                'columns': [
+                    { data: 'id' },
+                    { data: 'sample_id' },
+                    { data: 'age' },
+                    { data: 'prediction' },
+                    { data: 'donor' },
+                    { data: 'dataset' },
+                    { data: 'status'}
+                ],
+                initComplete : function() {
+                    var input = $('.dataTables_filter input').unbind(),
+                        self = this.api(),
+                        $searchButton = $('<button>')
+                                   .text('search')
+                                   .click(function() {
+                                      self.search(input.val()).draw();
+                                   }),
+                        $clearButton = $('<button>')
+                                   .text('clear')
+                                   .click(function() {
+                                      input.val('');
+                                      $searchButton.click();
+                                   })
+                    $('.dataTables_filter').append($searchButton, $clearButton);
+                }
+
+            });
+
+});
+
+
+$('select').selectpicker();
+
+  document.getElementById('select').onclick = function () {
+    var selected = [];
+    for (var option of document.getElementById('multiselect').options) {
+      if (option.selected) {
+        selected.push(option.value);
+      }
+    }
+    alert("Successfully selected the following donors for filtering" + selected);
+
+  }
+
+</script>
+
+
+{% endblock %}

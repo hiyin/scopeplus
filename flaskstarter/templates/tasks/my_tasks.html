@@ -34,12 +34,12 @@
 
         {% for task in all_tasks %}
         <tr>
-          <td>{{ task.sample_id }}</td>
-          <td>{{ task.donor }}</td>
-          <td>{{ task.X }}</td>
-          <td>{{ task.age }}</td>
-          <td>{{ task.Status_on_day_collection_summary }}</td>
-          <td>{{ task.dataset }}</td>
+          <td>{{ task['sample_id'] }}</td>
+          <td>{{ task['donor'] }}</td>
+          <td>{{ task['id'] }}</td>
+          <td>{{ task['age'] }}</td>
+          <td>{{ task['Status_on_day_collection_summary'] }}</td>
+          <td>{{ task['dataset'] }}</td>
         </tr>
         {% endfor %}
       </tbody>

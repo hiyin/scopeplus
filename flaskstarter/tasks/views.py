@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request
+from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify
 from flask_login import login_required, current_user
 
 from ..extensions import db
@@ -15,6 +15,11 @@ import numpy as np
 import plotly
 import plotly.express as px
 import json
+
+from pymongo import MongoClient
+client = MongoClient('mongodb://localhost:27017/')
+db = client.cov19atlas
+
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 
@@ -28,7 +33,10 @@ def my_tasks(condition=''):
     graphJSON = {}
 
     if not condition:
-        _all_tasks = covid2k_metaModel.query.all()
+        #_all_tasks = covid2k_metaModel.query.limit(10).all()
+        _all_tasks = db.single_cell_meta.find({}).limit(10)
+        #print(list(meta))
+        #print(len(list(_all_tasks)))
         print('show default')
 
     else:
@@ -63,6 +71,112 @@ def my_tasks(condition=''):
 
 
 
+@tasks.route('/table_view')
+def table_view():
+    col_values = get_col_values()
+    return render_template('tasks/table_view.html', col_values=col_values)
+
+
+
+import pandas as pd
+from itertools import chain
+import time
+start_time = time.time()
+
+print("--- %s seconds ---" % (time.time() - start_time))
+
+
+# New code for pagination
+print('regetting ids...')
+
+#ids = [x["_id"] for x in list(db.single_cell_meta.find({}, {"_id": 1}))]
+print('default ids')
+
+@tasks.route('/filter_by_age',methods=['POST'])
+def filter_by_age():
+    query = {'age': { '$in': [52] }}
+    ids = [x["_id"] for x in list(db.single_cell_meta.find(query, {"_id": 1}))]
+    print('return new ids')
+    return api_db()
+
+collection = []
+
+collection_s = []
+
+@tasks.route('/api_db', methods=['GET', 'POST'])
+@login_required
+def api_db():
+    print('testing db')
+
+    data = []
+    if request.method == 'POST':
+
+        print('testing 1')
+        #print(request)
+
+        draw = request.form['draw']
+        row = int(request.form['start'])
+        rowperpage = int(request.form['length'])
+        page_no = int(row/rowperpage + 1)
+        searchValue = request.form["search[value]"]
+        print(request.form)
+        print(draw)
+        print(row)
+        print(rowperpage)
+        print(page_no)
+        print("print searchValue")
+        print(searchValue)
+        start = (page_no - 1)*rowperpage
+        end = start + rowperpage
+
+        if searchValue == '':
+            if len(collection) == 0:
+                ids = [x["_id"] for x in list(db.single_cell_meta.find({}, {"_id": 1}))]
+                collection.extend(ids)
+                tmp = db.single_cell_meta.find({'_id': {'$in': collection[start:end]}})
+                totalRecords = len(collection)
+
+            else:
+                # refresh searchValue's stored ids when clicked "clear"
+                collection_s.clear()
+                tmp = db.single_cell_meta.find({'_id': {'$in': collection[start:end]}})
+                totalRecords = len(collection)
+
+        else:
+            if len(collection_s) == 0:
+                ids = [x["_id"] for x in list(db.single_cell_meta.find(json.loads(searchValue), {"_id": 1}))]
+                collection_s.extend(ids)
+                tmp = db.single_cell_meta.find({'_id': {'$in': collection_s[start:end]}})
+                totalRecords = len(collection_s)
+            else:
+                tmp = db.single_cell_meta.find({'_id': {'$in': collection_s[start:end]}})
+                totalRecords = len(collection_s)
+
+
+        totalRecordwithFilter = totalRecords
+        print('testing 2')
+        for r in tmp:
+
+            #print(r)
+            data.append({
+                    'id': r['id'],
+                    'sample_id': r['sample_id'],
+                    'age': r['age'],
+                    'prediction': r['scClassify_prediction'],
+                    'donor': r['donor'],
+                    'dataset': r['dataset'],
+                    'status': r['Status_on_day_collection_summary']
+                })
+            #print(data)
+            response = {
+                'draw': draw,
+                'iTotalRecords': totalRecords,
+                'iTotalDisplayRecords': totalRecordwithFilter,
+                'aaData': data,
+            }
+            #print(response)
+        return jsonify(response)
+
 
 def writefile(path, towrite):
     print('writing data' + path)
@@ -94,15 +208,18 @@ def get_col_values():
     print(len(donors))
     return donors
 
-@tasks.route('/get_multiselect', methods=['POST'])
+#@tasks.route('/get_multiselect', methods=['POST'])
 # uses list to store returned condition for my_tasks
 def get_multiselect():
      selected_vals = request.form.getlist('multiselect')
      print(request.form)
      print(selected_vals)
+     query = { 'donor': {'$in': selected_vals}}
+     ids = [x["_id"] for x in list(db.single_cell_meta.find(query, {"_id": 1}))]
+     #my_tasks(selected_vals)
      return my_tasks(selected_vals)
 
-
+# to move outside of web app
 def plot():
     path = '/tmp/flaskstarter-instance/'
     result = pd.read_csv(path + 'result.csv', header=None)

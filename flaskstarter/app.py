@@ -37,6 +37,9 @@ def create_app(config=None, app_name=None, blueprints=None):
                 instance_path=INSTANCE_FOLDER_PATH,
                 instance_relative_config=True)
 
+    # add db
+
+
     configure_app(app, config)
     configure_hook(app)
     configure_blueprints(app, blueprints)
@@ -133,3 +136,4 @@ def configure_error_handlers(app):
     @app.errorhandler(500)
     def server_error_page(error):
         return "Oops! Internal server error. Please try after sometime.", 500
+

@@ -18,7 +18,12 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/css/bootstrap-select.css" />
 
   <!-- CSS -->
+
   <link rel="stylesheet" href="{{ url_for('static', filename='css/template.css') }}">
+
+
+  <!-- Select2 plugin -->
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/css/select2.min.css">
 
 
 </head>
@@ -41,7 +46,7 @@
 
   {% endblock %}
   <!-- Bootstrap core JavaScript -->
-  <script src="{{ url_for('static', filename='jquery.slim.min.js')}}"></script>
+  <script type="text/javascript" charset="utf8" src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js></script>
   <script src="{{ url_for('static', filename='bootstrap.bundle.min.js')}}"></script>
 
 
@@ -49,6 +54,9 @@
   <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.11.4/js/dataTables.bootstrap4.min.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.1/js/bootstrap-select.min.js"></script>
+
+  <!-- Select2 plugin -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.3/js/select2.min.js"></script>
 
   {% block scripts %}{% endblock %}
 
