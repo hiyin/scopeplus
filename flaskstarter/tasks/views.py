@@ -24,52 +24,7 @@ tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 
 
-@tasks.route('/my_tasks', methods=['GET', 'POST'])
-@login_required
-def my_tasks(condition=''):
-    print('debug...')
-    print('change condition...')
-    print(condition)
-    graphJSON = {}
-
-    if not condition:
-        #_all_tasks = covid2k_metaModel.query.limit(10).all()
-        _all_tasks = db.single_cell_meta.find({}).limit(10)
-        #print(list(meta))
-        #print(len(list(_all_tasks)))
-        print('show default')
-
-    else:
-        if isinstance(condition, str):
-            if condition == 'all':
-                _all_tasks = covid2k_metaModel.query.all()
-                writefile('/tmp/flaskstarter-instance/', _all_tasks)
-                print('show all')
-            else:
-                print('show' + condition)
-                # _all_tasks = db.session.execute('SELECT * FROM covid2k_meta WHERE age LIKE 52')
-                _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.age.contains(condition)).all()
-                writefile('/tmp/flaskstarter-instance/', _all_tasks)
-                graphJSON = plot()
-        elif isinstance(condition, list):
-            _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.donor.in_(condition)).all()
-            writefile('/tmp/flaskstarter-instance/', _all_tasks)
-            graphJSON = plot()
-            print('show donors')
-
-
-    print("reload...")
-    print(condition)
-    col_values = get_col_values()
-
-
-    return render_template('tasks/my_tasks.html',
-                           all_tasks=_all_tasks,
-                           col_values=col_values,
-                           graphJSON=graphJSON,
-                           _active_tasks=True)
-
-
+# New view
 
 @tasks.route('/table_view')
 def table_view():
@@ -99,10 +54,26 @@ def filter_by_age():
     print('return new ids')
     return api_db()
 
+data = []
+# Write big file
+def write_file_byid(path, towrite):
+    print('writing data' + path)
+    file = open(path + 'ids.csv', 'w+', newline='\n')
+    print(towrite[0])
+    data = [[r['id']] for r in towrite]
+    print(data)
+    with file:
+        write = csv.writer(file)
+        write.writerows(data)
+
+# Download big file
+@tasks.route('/download_file',methods=['POST'])
+def download_file():
+    return send_file('/tmp/flaskstarter-instance/' + 'ids.csv', as_attachment=True)
+
+# set in-memory storage for collection of ids for meta data table display
 collection = []
-
 collection_s = []
-
 @tasks.route('/api_db', methods=['GET', 'POST'])
 @login_required
 def api_db():
@@ -154,6 +125,7 @@ def api_db():
 
 
         totalRecordwithFilter = totalRecords
+
         print('testing 2')
         for r in tmp:
 
@@ -175,8 +147,62 @@ def api_db():
                 'aaData': data,
             }
             #print(response)
+
+        if totalRecords != len(collection):
+            towrite = list(db.single_cell_meta.find({'_id': {'$in': collection_s}}))
+            print('writing ids to csv file')
+            write_file_byid('/tmp/flaskstarter-instance/', towrite)
+
         return jsonify(response)
 
+
+
+# Old code for small sample dataset before server-side processing is introduced 2022.2.27
+# Old logic
+@tasks.route('/my_tasks', methods=['GET', 'POST'])
+@login_required
+def my_tasks(condition=''):
+    print('debug...')
+    print('change condition...')
+    print(condition)
+    graphJSON = {}
+
+    if not condition:
+        #_all_tasks = covid2k_metaModel.query.limit(10).all()
+        _all_tasks = db.single_cell_meta.find({}).limit(10)
+        #print(list(meta))
+        #print(len(list(_all_tasks)))
+        print('show default')
+
+    else:
+        if isinstance(condition, str):
+            if condition == 'all':
+                _all_tasks = covid2k_metaModel.query.all()
+                writefile('/tmp/flaskstarter-instance/', _all_tasks)
+                print('show all')
+            else:
+                print('show' + condition)
+                # _all_tasks = db.session.execute('SELECT * FROM covid2k_meta WHERE age LIKE 52')
+                _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.age.contains(condition)).all()
+                writefile('/tmp/flaskstarter-instance/', _all_tasks)
+                graphJSON = plot()
+        elif isinstance(condition, list):
+            _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.donor.in_(condition)).all()
+            writefile('/tmp/flaskstarter-instance/', _all_tasks)
+            graphJSON = plot()
+            print('show donors')
+
+
+    print("reload...")
+    print(condition)
+    col_values = get_col_values()
+
+
+    return render_template('tasks/my_tasks.html',
+                           all_tasks=_all_tasks,
+                           col_values=col_values,
+                           graphJSON=graphJSON,
+                           _active_tasks=True)
 
 def writefile(path, towrite):
     print('writing data' + path)
@@ -208,7 +234,7 @@ def get_col_values():
     print(len(donors))
     return donors
 
-#@tasks.route('/get_multiselect', methods=['POST'])
+@tasks.route('/get_multiselect', methods=['POST'])
 # uses list to store returned condition for my_tasks
 def get_multiselect():
      selected_vals = request.form.getlist('multiselect')
@@ -217,7 +243,7 @@ def get_multiselect():
      query = { 'donor': {'$in': selected_vals}}
      ids = [x["_id"] for x in list(db.single_cell_meta.find(query, {"_id": 1}))]
      #my_tasks(selected_vals)
-     return my_tasks(selected_vals)
+     return table_view()
 
 # to move outside of web app
 def plot():
