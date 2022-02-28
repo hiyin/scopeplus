@@ -36,7 +36,14 @@
 
 
     <form action="{{ url_for('tasks.download_file')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary" name="download" type="submit"> Download Data </button>
+      <button class="btn btn-primary" name="download" type="submit"> Download BarcodeIds </button>
+    </form>
+    <form action="{{ url_for('tasks.download_umap')}}" method="post" style="display:inline-block">
+      <button class="btn btn-primary" name="download_umap" type="submit"> Download UMAP coordinates </button>
+    </form>
+
+    <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
+      <button class="btn btn-primary" name="download_matrix" type="submit"> Download Matrix </button>
     </form>
 
     <form action="{{ url_for('tasks.get_multiselect')}}" method="post" style="display:inline-block">

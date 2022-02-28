@@ -59,9 +59,30 @@ data = []
 def write_file_byid(path, towrite):
     print('writing data' + path)
     file = open(path + 'ids.csv', 'w+', newline='\n')
-    print(towrite[0])
+    #print(towrite[0])
     data = [[r['id']] for r in towrite]
-    print(data)
+    #print(data)
+    with file:
+        write = csv.writer(file)
+        write.writerows(data)
+
+def write_umap(path, towrite):
+    print('writing data' + path)
+    file = open(path + 'umap.csv', 'w+', newline='\n')
+    #print(towrite[0])
+    data = [[r['id'],r['UMAP1'], r['UMAP2']] for r in towrite]
+    #print(data)
+    with file:
+        write = csv.writer(file)
+        write.writerows(data)
+
+
+def write_mtx(path, towrite):
+    print('writing data' + path)
+    file = open(path + 'mtx.csv', 'w+', newline='\n')
+    #print(towrite[0])
+    data = [[r['id'],r['UMAP1'], r['UMAP2']] for r in towrite]
+    #print(data)
     with file:
         write = csv.writer(file)
         write.writerows(data)
@@ -70,6 +91,14 @@ def write_file_byid(path, towrite):
 @tasks.route('/download_file',methods=['POST'])
 def download_file():
     return send_file('/tmp/flaskstarter-instance/' + 'ids.csv', as_attachment=True)
+
+@tasks.route('/download_umap',methods=['POST'])
+def download_umap():
+    return send_file('/tmp/flaskstarter-instance/' + 'umap.csv', as_attachment=True)
+
+@tasks.route('/download_matrix',methods=['POST'])
+def download_matrix():
+    return send_file('/tmp/flaskstarter-instance/' + 'umap.csv', as_attachment=True)
 
 # set in-memory storage for collection of ids for meta data table display
 collection = []
@@ -149,9 +178,20 @@ def api_db():
             #print(response)
 
         if totalRecords != len(collection):
-            towrite = list(db.single_cell_meta.find({'_id': {'$in': collection_s}}))
+            meta = list(db.single_cell_meta.find({'_id': {'$in': collection_s}}))
             print('writing ids to csv file')
-            write_file_byid('/tmp/flaskstarter-instance/', towrite)
+            write_file_byid('/tmp/flaskstarter-instance/', meta)
+
+            _byid = pd.read_csv('/tmp/flaskstarter-instance/ids.csv').values.tolist()
+            lookups = list(np.squeeze(_byid))
+            umap = list(db.umap.find({'id': {'$in': lookups}}))
+
+            write_umap('/tmp/flaskstarter-instance/', umap)
+            # change here to mtx
+            start_time2 = time.time()
+            #umap = list(db.umap.find({'id': {'$in': lookups}}))
+            print("--- %s seconds ---" % (time.time() - start_time2))
+            write_mtx('/tmp/flaskstarter-instance/', umap)
 
         return jsonify(response)
 
