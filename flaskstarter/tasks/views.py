@@ -181,14 +181,17 @@ def api_db():
                 collection_s.extend(ids)
                 tmp = list(db.single_cell_meta.find({'_id': {'$in': collection_s[start:end]}}))
                 totalRecords = len(collection_s)
-                print('writing ids to csv file')
-                write_file_byid('/tmp/flaskstarter-instance/', tmp)
+                meta = list(db.single_cell_meta.find({'_id': {'$in': collection_s}}))
+                print('writing ids to csv file only once first load the data')
+                write_file_byid('/tmp/flaskstarter-instance/', meta)
+
             else:
                 tmp = db.single_cell_meta.find({'_id': {'$in': collection_s[start:end]}})
                 totalRecords = len(collection_s)
 
 
         totalRecordwithFilter = totalRecords
+
 
         print('testing 2')
         for r in tmp:
