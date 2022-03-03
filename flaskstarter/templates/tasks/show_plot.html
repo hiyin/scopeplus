@@ -1,0 +1,27 @@
+{% from "macros/_form.html" import render_form %}
+
+{% set page_title = 'My Tasks' %}
+
+{% extends 'layouts/base.html' %}
+
+{% block body %}
+{% include 'layouts/banner.html' %}
+
+<div class="container">
+  <div class="row justify-content-center">
+    <h2>Discover Plot</h2>
+  </div>
+
+   <div id="chart" class="chart"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+  var graphs = {{ graphJSON | safe }};
+  Plotly.plot('chart', graphs, {});
+</script>
+
+{% endblock %}

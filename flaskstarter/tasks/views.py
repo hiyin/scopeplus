@@ -38,6 +38,14 @@ def upload_file():
     return redirect(url_for('tasks.contribute'))
 
 
+@tasks.route('/show_plot', methods=['GET', 'POST'])
+def show_plot():
+    graphJSON = plot_tse()
+    print(graphJSON)
+    return render_template('tasks/show_plot.html', graphJSON=graphJSON)
+
+
+
 
 
 @tasks.route('/table_view')
@@ -309,6 +317,23 @@ def plot():
                 print(i)
                 print(df.loc[i].values)
                 l.append(df.loc[i].values)
+    sln = np.stack(l)
+    projections = sln
+    fig = px.scatter(
+        projections, x=0, y=1)
+    fig.update_layout(
+        autosize=False, width=900, height=600
+    )
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    return graphJSON
+
+def plot_tse():
+    path = '/tmp/flaskstarter-instance/'
+    df = pd.read_csv(path + 'umap.csv', index_col=0)
+    l = []
+    for i in df.index:
+        print(df.loc[i].values)
+        l.append(df.loc[i].values)
     sln = np.stack(l)
     projections = sln
     fig = px.scatter(
