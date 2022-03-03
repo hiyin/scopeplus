@@ -22,9 +22,23 @@ db = client.cov19atlas
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
-
+import os
 
 # New view
+@tasks.route('/contribute')
+def contribute():
+    return render_template('tasks/contribute.html')
+
+@tasks.route('/uploader', methods = ['POST'])
+def upload_file():
+    uploaded_file = request.files['file']
+    if uploaded_file.filename != '':
+        uploaded_file.save(os.path.join('/tmp/flaskstarter-instance/',uploaded_file.filename))
+        flash('Document uploaded successfully.')
+    return redirect(url_for('tasks.contribute'))
+
+
+
 
 @tasks.route('/table_view')
 def table_view():
@@ -94,10 +108,21 @@ def download_file():
 
 @tasks.route('/download_umap',methods=['POST'])
 def download_umap():
+    _byid = pd.read_csv('/tmp/flaskstarter-instance/ids.csv').values.tolist()
+    lookups = list(np.squeeze(_byid))
+    umap = list(db.umap.find({'id': {'$in': lookups}}))
+    write_umap('/tmp/flaskstarter-instance/', umap)
     return send_file('/tmp/flaskstarter-instance/' + 'umap.csv', as_attachment=True)
 
 @tasks.route('/download_matrix',methods=['POST'])
 def download_matrix():
+    _byid = pd.read_csv('/tmp/flaskstarter-instance/ids.csv').values.tolist()
+    lookups = list(np.squeeze(_byid))
+    start_time2 = time.time()
+    umap = list(db.umap.find({'id': {'$in': lookups}}))
+    print("--- %s seconds ---" % (time.time() - start_time2))
+    write_mtx('/tmp/flaskstarter-instance/', umap)
+
     return send_file('/tmp/flaskstarter-instance/' + 'umap.csv', as_attachment=True)
 
 # set in-memory storage for collection of ids for meta data table display
@@ -146,8 +171,10 @@ def api_db():
             if len(collection_s) == 0:
                 ids = [x["_id"] for x in list(db.single_cell_meta.find(json.loads(searchValue), {"_id": 1}))]
                 collection_s.extend(ids)
-                tmp = db.single_cell_meta.find({'_id': {'$in': collection_s[start:end]}})
+                tmp = list(db.single_cell_meta.find({'_id': {'$in': collection_s[start:end]}}))
                 totalRecords = len(collection_s)
+                print('writing ids to csv file')
+                write_file_byid('/tmp/flaskstarter-instance/', tmp)
             else:
                 tmp = db.single_cell_meta.find({'_id': {'$in': collection_s[start:end]}})
                 totalRecords = len(collection_s)
@@ -177,21 +204,6 @@ def api_db():
             }
             #print(response)
 
-        if totalRecords != len(collection):
-            meta = list(db.single_cell_meta.find({'_id': {'$in': collection_s}}))
-            print('writing ids to csv file')
-            write_file_byid('/tmp/flaskstarter-instance/', meta)
-
-            _byid = pd.read_csv('/tmp/flaskstarter-instance/ids.csv').values.tolist()
-            lookups = list(np.squeeze(_byid))
-            umap = list(db.umap.find({'id': {'$in': lookups}}))
-
-            write_umap('/tmp/flaskstarter-instance/', umap)
-            # change here to mtx
-            start_time2 = time.time()
-            #umap = list(db.umap.find({'id': {'$in': lookups}}))
-            print("--- %s seconds ---" % (time.time() - start_time2))
-            write_mtx('/tmp/flaskstarter-instance/', umap)
 
         return jsonify(response)
 

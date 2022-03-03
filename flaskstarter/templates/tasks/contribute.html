@@ -1,0 +1,58 @@
+{% from "macros/_form.html" import render_form %}
+
+{% set page_title = 'My Tasks' %}
+
+{% extends 'layouts/base.html' %}
+
+{% block body %}
+{% include 'layouts/banner.html' %}
+
+<div class="container">
+  <div class="row justify-content-center">
+    <h2>Upload your data</h2>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                <span>{{ message }}</span>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">×</span>
+                </button>
+            </div>
+        {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <div class="row mt-5">
+
+    <form method="POST" action="{{ url_for('tasks.upload_file')}}" enctype="multipart/form-data">
+
+      <div class="input-group">
+        <div class="custom-file">
+          <input type="file" class="custom-file-input" id="inputGroupFile01"
+            aria-describedby="inputGroupFileAddon01" name="file">
+          <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+        </div>
+        <button class="btn btn-primary">Upload</button>
+      </div>
+
+
+
+
+    </form>
+
+    <button class="btn btn-primary">Run Analysis</button>
+
+
+  </div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+    $(document).on('change', '.custom-file-input', function (event) {
+        $(this).next('.custom-file-label').html(event.target.files[0].name);
+    })
+</script>
+{% endblock %}
