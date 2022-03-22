@@ -10,8 +10,6 @@
     <h3>Sign In</h3>
         {{ render_form(url_for('frontend.login'), form)}}
         <a href="{{url_for('frontend.reset_password')}}" class="auth-link">Forgot Password?</a>
-      </div>
-    </div>
   </div>
 </div>
   {% include 'layouts/footer.html' %}

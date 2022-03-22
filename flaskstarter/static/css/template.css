@@ -67,9 +67,10 @@
     background: #FFFFFF;
     box-shadow: 2px 12px 60px -5px rgba(170, 170, 170, 0.35);
     border-radius: 40px;
-    height: 150px;
+    min-height: 150px;
     padding-left: 50px;
     padding-right: 50px;
+    flex-wrap: wrap;
 }
 
 .dash-item {
@@ -104,6 +105,123 @@
 
 
 /*my_tasks*/
+
+p {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 16px;
+    text-align: center;
+    align-self: center;
+}
+
+.popup-container {
+    position: relative;
+}
+
+.btn-primary {
+    margin-left: 8px;
+    margin-right: 8px;
+    margin-bottom: 12px;
+    width: 150px;
+    height: 45px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-right: 20px;
+    padding-left: 20px;
+    background: #FFFFFF;
+    border: 1px solid #B4B6B8;
+    box-sizing: border-box;
+    box-shadow: 0px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 30px;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 16px;
+    text-align: center;
+    color: #000000;
+}
+
+.button-container form {
+    display: flex;
+    flex-wrap: wrap;
+
+}
+
+.btn-primary:hover {
+    background: #04AA6D;
+    border: #ffffff;
+}
+
+.btn-primary:active {
+    box-shadow: none;
+    background: #04AA6D;
+    border: #ffffff;
+}
+
+body {
+    box-sizing: border-box;
+}
+
+
+/* The popup form - hidden by default */
+.form-popup {
+    display: none;
+    position: absolute;
+    overflow: hidden;
+    top: 10px;
+    border: 3px solid #f1f1f1;
+    z-index: 9;
+}
+
+/* Add styles to the form container */
+.form-container {
+    padding: 20px;
+    background-color: white;
+}
+
+.form-columns {
+    display: flex;
+}
+
+.form-column {
+    display: block;
+    padding-left: 20px;
+    padding-right: 20px;
+    width: 200px;
+}
+
+/* Full-width input fields */
+.form-container input[type=text] {
+    width: 100%;
+    padding: 5px;
+    margin: 0px 0 15px 0;
+    border: none;
+    background: #f1f1f1;
+}
+
+/* When the inputs get focus, do something */
+.form-container input[type=text]:focus {
+    background-color: #ddd;
+    outline: none;
+}
+
+/* Set a style for the submit/login button */
+
+
+/* Add a red background color to the cancel button */
+.form-container .cancel {
+    background-color: red;
+}
+
+/* Add some hover effects to buttons */
+.form-container .btn:hover,
+.open-button:hover {
+    opacity: 1;
+}
 
 .data {
     margin-bottom: 100px;
@@ -335,7 +453,7 @@
 }
 
 .log-container {
-    background: linear-gradient(22.33deg, #FFFFFF 4.6%, rgba(255, 255, 255, 0.32) 91.13%);    
+    background: linear-gradient(22.33deg, #FFFFFF 4.6%, rgba(255, 255, 255, 0.32) 91.13%);
     border: 1px solid #FFFFFF;
     box-sizing: border-box;
     border-radius: 10px;
@@ -350,10 +468,62 @@
     justify-content: center;
 }
 
-.sign-up .log-container{
+.sign-up .log-container {
     padding: 80px 35px 100px;
 }
 
 .log-container h3 {
     text-align: center;
+}
+
+/* Contact Us */
+
+#contact {
+    margin-top: -75px;
+    margin-bottom: 118px;
+    padding-left: 180px;
+    padding-right: 180px;
+}
+
+.contactboard {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    background: #FFFFFF;
+    box-shadow: 2px 12px 60px -5px rgba(170, 170, 170, 0.35);
+    border-radius: 40px;
+    padding: 100px 100px 200px;
+}
+
+.contact-row {
+    display: flex;
+    width: 100%;
+    justify-content: space-evenly;
+}
+
+.contact-item {
+    display: inline-block;
+    text-align: center;
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 40px;
+    line-height: 59px;
+    letter-spacing: 0.015em;
+    color: #6EA69D;
+    margin-top: 60px;
+    margin-bottom: 60px;
+}
+
+.contact-item p {
+    color: #000000;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 40px;
+}
+
+
+.contact-item hr {
+    border: 2.5px solid #6EA69D;
+    width: 180px;
 }

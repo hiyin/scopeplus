@@ -116,7 +116,7 @@ def showall():
 
 @tasks.route('/age52',methods=['POST'])
 def age_filter():
-    return my_tasks('52')
+    return my_tasks('20')
 
 @tasks.route('/download',methods=['POST'])
 def download():
