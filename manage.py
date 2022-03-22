@@ -9,10 +9,10 @@ from flaskstarter.tasks import MyTaskModel
 from flask_pymongo import PyMongo
 application = create_app()
 
-
-if __name__ == "__main__":
-    application.run()
-
+#
+# if __name__ == "__main__":
+#     application.run()
+#
 
 
 @application.cli.command("initdb")

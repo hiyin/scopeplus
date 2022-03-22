@@ -33,7 +33,7 @@ def contribute():
 def upload_file():
     uploaded_file = request.files['file']
     if uploaded_file.filename != '':
-        uploaded_file.save(os.path.join('/tmp/flaskstarter-instance/',uploaded_file.filename))
+        uploaded_file.save(os.path.join('/tmp/flaskstarter-instance/', uploaded_file.filename))
         flash('Document uploaded successfully.')
     return redirect(url_for('tasks.contribute'))
 
@@ -44,8 +44,10 @@ def show_plot():
     print(graphJSON)
     return render_template('tasks/show_plot.html', graphJSON=graphJSON)
 
-
-
+import subprocess
+@tasks.route('/run_scclassify', methods=['GET', 'POST'])
+def run_scclassify():
+    subprocess.call("/usr/local/bin/Rscript ~/Downloads/scClassify_codes/scClassify_example_codes.r ", shell=True)
 
 
 @tasks.route('/table_view')

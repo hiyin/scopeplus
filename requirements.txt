@@ -12,3 +12,4 @@ pytest
 pandas
 plotly
 numpy
+pymongo
