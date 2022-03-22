@@ -13,3 +13,5 @@ pandas
 plotly
 numpy
 pymongo
+shortuuid
+gunicorn

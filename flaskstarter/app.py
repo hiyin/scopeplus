@@ -10,10 +10,13 @@ from .frontend import frontend, ContactUsAdmin
 from .sample_meta_all import SampleMetaAllModel, SampleMetaAllAdmin
 from .covid2k_meta import covid2k_metaModel, covid2k_metaAdmin
 from .covid2k_dense import covid2k_denseModel, covid2k_denseAdmin
-from .extensions import db, mail, cache, login_manager, admin
+from .extensions import db, mail, cache, login_manager, admin, mongo
 from .utils import pretty_date
 import logging
 import os
+from pymongo import MongoClient
+from .model.umap import UmapView
+from .model.meta import MetaView
 
 # For import *
 __all__ = ['create_app']
@@ -66,7 +69,7 @@ def configure_app(app, config=None):
         app.config.from_object(DefaultConfig)
     # if exists under root ./instance/X.cfg
     # app.config.from_pyfile('secret_config.cfg')
-    print(app.instance_path)
+    # print(app.instance_path)
     if config:
         app.config.from_object(config)
 
@@ -82,18 +85,15 @@ def configure_extensions(app):
     # flask-cache
     cache.init_app(app)
 
-    from pymongo import MongoClient
-    client = MongoClient('mongodb://localhost:27017/')
-    mongo = client.cov19atlas
-    from .model.umap import UmapView
-    from .model.meta import MetaView
     # flask-admin
+    # sqlite db data
     admin.add_view(ContactUsAdmin(db.session))
     admin.add_view(UsersAdmin(db.session))
     admin.add_view(MyTaskModelAdmin(db.session))
     admin.add_view(SampleMetaAllAdmin(db.session))
     admin.add_view(covid2k_metaAdmin(db.session))
     admin.add_view(covid2k_denseAdmin(db.session))
+    # mongo db data
     admin.add_view(UmapView(mongo['umap']))
     admin.add_view(MetaView(mongo['single_cell_meta']))
 

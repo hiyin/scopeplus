@@ -9,9 +9,6 @@ from flask_login import current_user
 from flask_admin.contrib import sqla
 import sqlite3
 
-connection = sqlite3.connect('/tmp/flaskstarter-instance/db.sqlite')
-cursor = connection.execute('select * from covid2k_dense_2k')
-
 
 class covid2k_denseModel(db.Model):
 

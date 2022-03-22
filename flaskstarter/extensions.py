@@ -6,9 +6,13 @@ from flask_caching import Cache
 from flask_login import LoginManager
 from flask_admin import Admin, AdminIndexView
 from flask_admin.menu import MenuLink
-
-
+from pymongo import MongoClient
+# connect to default sqlite db
 db = SQLAlchemy()
+
+# connect to mongo db
+client = MongoClient('mongodb://localhost:27017/')
+mongo = client.cov19atlas
 
 mail = Mail()
 

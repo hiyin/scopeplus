@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-
+from .utils import TMP_FOLDER
 class BaseConfig(object):
     # Change these settings as per your needs
 
@@ -28,7 +28,6 @@ class DefaultConfig(BaseConfig):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # SQLITE for dev
-    TMP_FOLDER = os.path.join(os.environ.get('HOME'), 'flask_resources')
     SQLALCHEMY_DATABASE_URI = 'sqlite:///' + TMP_FOLDER + '/db.sqlite'
 
 

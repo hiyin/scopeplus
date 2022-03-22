@@ -42,8 +42,12 @@
 
 
     </form>
-
-    <button class="btn btn-primary">Run Analysis</button>
+    <form method="POST" action="{{ url_for('tasks.run_scClassify')}}" enctype="multipart/form-data">
+        <button class="btn btn-primary">Run Analysis</button>
+    </form>
+    <form method="POST" action="{{ url_for('tasks.download_scClassify')}}" enctype="multipart/form-data">
+        <button class="btn btn-primary">Download Analysis Results</button>
+    </form>
 
 
   </div>

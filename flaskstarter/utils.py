@@ -6,8 +6,8 @@
 import os
 
 import datetime
-
-
+# TMP path, this stores all flask required files
+TMP_FOLDER = os.environ.get('HOME') + '/flask_resources'
 
 
 # Form validation

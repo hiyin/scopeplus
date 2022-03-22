@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify
+from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify, session
 from flask_login import login_required, current_user
 
-from ..extensions import db
+from ..extensions import db, mongo
 
-from .forms import MyTaskForm
-from .models import MyTaskModel
 from flaskstarter.covid2k_meta import covid2k_metaModel
 import csv
 
@@ -15,40 +13,85 @@ import numpy as np
 import plotly
 import plotly.express as px
 import json
-
-from pymongo import MongoClient
-client = MongoClient('mongodb://localhost:27017/')
-db = client.cov19atlas
-
-tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
-
+from ..utils import TMP_FOLDER
 import os
-
+import shortuuid
+import subprocess
+import pandas as pd
+import time
+from datetime import datetime
+tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 # New view
 @tasks.route('/contribute')
 def contribute():
     return render_template('tasks/contribute.html')
 
+
+user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
+user_tmp = [TMP_FOLDER + "/" + user_timestamp]
+print(user_tmp)
+os.makedirs(user_tmp[-1])
+
+scClassify_input = []
+
+
 @tasks.route('/uploader', methods = ['POST'])
 def upload_file():
     uploaded_file = request.files['file']
     if uploaded_file.filename != '':
-        uploaded_file.save(os.path.join('/tmp/flaskstarter-instance/', uploaded_file.filename))
-        flash('Document uploaded successfully.')
+        uploaded_file.save(os.path.join(user_tmp[-1], uploaded_file.filename))
+        scClassify_input.extend([uploaded_file.filename])
+        flash('scClassify user file uploaded successfully.')
+
     return redirect(url_for('tasks.contribute'))
 
 
 @tasks.route('/show_plot', methods=['GET', 'POST'])
 def show_plot():
     graphJSON = plot_tse()
-    print(graphJSON)
+    #print(graphJSON)
     return render_template('tasks/show_plot.html', graphJSON=graphJSON)
 
-import subprocess
-@tasks.route('/run_scclassify', methods=['GET', 'POST'])
-def run_scclassify():
-    subprocess.call("/usr/local/bin/Rscript ~/Downloads/scClassify_codes/scClassify_example_codes.r ", shell=True)
 
+def plot_tse():
+    df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)
+    l = []
+    for i in df.index:
+        print(df.loc[i].values)
+        l.append(df.loc[i].values)
+    sln = np.stack(l)
+    projections = sln
+    fig = px.scatter(
+        projections, x=0, y=1)
+    fig.update_layout(
+        autosize=False, width=900, height=600
+    )
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    return graphJSON
+
+
+@tasks.route('/run_scclassify', methods=['GET', 'POST'])
+def run_scClassify():
+    print("running scClassify...")
+    scClassify_folder = TMP_FOLDER + "/scClassify"
+    scClassify_code_path = scClassify_folder + "/scClassify_example_codes.r"
+    scClassify_model_path = scClassify_folder + "/scClassify_trainObj_trainWillks_20201018.rds"
+    scClassify_input_path = user_tmp[-1] + "/" + scClassify_input[-1]
+    scClassify_output_path = user_tmp[-1] + "/scClassify_predicted_results.csv"
+    ret = subprocess.call("Rscript %s %s %s %s" % (scClassify_code_path, scClassify_input_path, scClassify_model_path, scClassify_output_path), shell=True)
+    if ret != 0:
+        if ret < 0:
+            print("Killed by signal")
+        else:
+            print("Command failed with return code %s" % ret)
+    else:
+        print("SUCCESS!!")
+        flash("SUCCESS!!")
+        return redirect(url_for('tasks.contribute'))
+
+@tasks.route('/download_scClassify',methods=['POST'])
+def download_scClassify():
+    return send_file(user_tmp[-1] + "/scClassify_predicted_results.csv", as_attachment=True)
 
 @tasks.route('/table_view')
 def table_view():
@@ -56,33 +99,27 @@ def table_view():
     return render_template('tasks/table_view.html', col_values=col_values)
 
 
-
-import pandas as pd
-from itertools import chain
-import time
 start_time = time.time()
-
 print("--- %s seconds ---" % (time.time() - start_time))
-
-
-# New code for pagination
-print('regetting ids...')
-
 #ids = [x["_id"] for x in list(db.single_cell_meta.find({}, {"_id": 1}))]
-print('default ids')
+
 
 @tasks.route('/filter_by_age',methods=['POST'])
 def filter_by_age():
     query = {'age': { '$in': [52] }}
-    ids = [x["_id"] for x in list(db.single_cell_meta.find(query, {"_id": 1}))]
+    ids = [x["_id"] for x in list(mongo.single_cell_meta.find(query, {"_id": 1}))]
     print('return new ids')
     return api_db()
 
+
 data = []
+
+
 # Write big file
 def write_file_byid(path, towrite):
-    print('writing data' + path)
-    file = open(path + 'ids.csv', 'w+', newline='\n')
+    fn = path + '/ids.csv'
+    print('writing ids to' + fn)
+    file = open(fn, 'w+', newline='\n')
     #print(towrite[0])
     data = [[r['id']] for r in towrite]
     #print(data)
@@ -90,11 +127,13 @@ def write_file_byid(path, towrite):
         write = csv.writer(file)
         write.writerows(data)
 
+
 def write_umap(path, towrite):
-    print('writing data' + path)
-    file = open(path + 'umap.csv', 'w+', newline='\n')
+    fn = path + '/umap.csv'
+    print('writing umap to' + fn)
+    file = open(fn, 'w+', newline='\n')
     #print(towrite[0])
-    data = [[r['id'],r['UMAP1'], r['UMAP2']] for r in towrite]
+    data = [[r['id'], r['UMAP1'], r['UMAP2']] for r in towrite]
     #print(data)
     with file:
         write = csv.writer(file)
@@ -102,103 +141,100 @@ def write_umap(path, towrite):
 
 
 def write_mtx(path, towrite):
-    print('writing data' + path)
-    file = open(path + 'mtx.csv', 'w+', newline='\n')
+    fn = path + '/mtx.csv'
+    file = open(fn, 'w+', newline='\n')
+    print('writing mtx to' + fn)
     #print(towrite[0])
-    data = [[r['id'],r['UMAP1'], r['UMAP2']] for r in towrite]
+    data = [[r['gene_name'], r['barcode'], r['expression']] for r in towrite]
     #print(data)
     with file:
         write = csv.writer(file)
         write.writerows(data)
 
+
 # Download big file
 @tasks.route('/download_file',methods=['POST'])
 def download_file():
-    return send_file('/tmp/flaskstarter-instance/' + 'ids.csv', as_attachment=True)
+    meta = list(mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}))
+    print('writing ids to csv file only once, firstly load the data')
+    write_file_byid(user_tmp[-1], meta)
+    return send_file(user_tmp[-1] + '/ids.csv', as_attachment=True)
+
 
 @tasks.route('/download_umap',methods=['POST'])
 def download_umap():
-    _byid = pd.read_csv('/tmp/flaskstarter-instance/ids.csv').values.tolist()
+    fn = user_tmp[-1] + "/ids.csv"
+    print(fn)
+    _byid = pd.read_csv(fn).values.tolist()
     lookups = list(np.squeeze(_byid))
-    umap = list(db.umap.find({'id': {'$in': lookups}}))
-    write_umap('/tmp/flaskstarter-instance/', umap)
-    return send_file('/tmp/flaskstarter-instance/' + 'umap.csv', as_attachment=True)
+    umap = list(mongo.umap.find({'id': {'$in': lookups}}))
+    write_umap(user_tmp[-1], umap)
+    return send_file(user_tmp[-1] + '/umap.csv', as_attachment=True)
+
 
 @tasks.route('/download_matrix',methods=['POST'])
 def download_matrix():
-    _byid = pd.read_csv('/tmp/flaskstarter-instance/ids.csv').values.tolist()
+    _byid = pd.read_csv(user_tmp[-1] + "/ids.csv").values.tolist()
     lookups = list(np.squeeze(_byid))
     start_time2 = time.time()
-    umap = list(db.umap.find({'id': {'$in': lookups}}))
+    mtx = list(mongo.matrix.find({'id': {'$in': lookups}}))
     print("--- %s seconds ---" % (time.time() - start_time2))
-    write_mtx('/tmp/flaskstarter-instance/', umap)
+    write_mtx(user_tmp[-1], mtx)
 
-    return send_file('/tmp/flaskstarter-instance/' + 'umap.csv', as_attachment=True)
+    return send_file(user_tmp[-1] + '/mtx.csv', as_attachment=True)
+
 
 # set in-memory storage for collection of ids for meta data table display
 collection = []
-collection_s = []
+collection_searched = []
+
 @tasks.route('/api_db', methods=['GET', 'POST'])
 @login_required
 def api_db():
-    print('testing db')
-
     data = []
     if request.method == 'POST':
-
-        print('testing 1')
-        #print(request)
-
         draw = request.form['draw']
         row = int(request.form['start'])
         rowperpage = int(request.form['length'])
         page_no = int(row/rowperpage + 1)
-        searchValue = request.form["search[value]"]
-        print(request.form)
+        search_value = request.form["search[value]"]
         print(draw)
         print(row)
         print(rowperpage)
         print(page_no)
         print("print searchValue")
-        print(searchValue)
+        print(search_value)
         start = (page_no - 1)*rowperpage
         end = start + rowperpage
 
-        if searchValue == '':
+        if search_value == '':
             if len(collection) == 0:
-                ids = [x["_id"] for x in list(db.single_cell_meta.find({}, {"_id": 1}))]
+                ids = [x["_id"] for x in list(mongo.single_cell_meta.find({}, {"_id": 1}))]
                 collection.extend(ids)
-                tmp = db.single_cell_meta.find({'_id': {'$in': collection[start:end]}})
-                totalRecords = len(collection)
+                tmp = mongo.single_cell_meta.find({'_id': {'$in': collection[start:end]}})
+                total_records = len(collection)
 
             else:
                 # refresh searchValue's stored ids when clicked "clear"
-                collection_s.clear()
-                tmp = db.single_cell_meta.find({'_id': {'$in': collection[start:end]}})
-                totalRecords = len(collection)
+                collection_searched.clear()
+                tmp = mongo.single_cell_meta.find({'_id': {'$in': collection[start:end]}})
+                total_records = len(collection)
 
         else:
-            if len(collection_s) == 0:
-                ids = [x["_id"] for x in list(db.single_cell_meta.find(json.loads(searchValue), {"_id": 1}))]
-                collection_s.extend(ids)
-                tmp = list(db.single_cell_meta.find({'_id': {'$in': collection_s[start:end]}}))
-                totalRecords = len(collection_s)
-                meta = list(db.single_cell_meta.find({'_id': {'$in': collection_s}}))
-                print('writing ids to csv file only once first load the data')
-                write_file_byid('/tmp/flaskstarter-instance/', meta)
+            if len(collection_searched) == 0:
+                ids = [x["_id"] for x in list(mongo.single_cell_meta.find(json.loads(search_value), {"_id": 1}))]
+                collection_searched.extend(ids)
+                tmp = list(mongo.single_cell_meta.find({'_id': {'$in': collection_searched[start:end]}}))
+                total_records = len(collection_searched)
+
 
             else:
-                tmp = db.single_cell_meta.find({'_id': {'$in': collection_s[start:end]}})
-                totalRecords = len(collection_s)
+                tmp = mongo.single_cell_meta.find({'_id': {'$in': collection_searched[start:end]}})
+                total_records = len(collection_searched)
 
+        total_records_filter = total_records
 
-        totalRecordwithFilter = totalRecords
-
-
-        print('testing 2')
         for r in tmp:
-
-            #print(r)
             data.append({
                     'id': r['id'],
                     'sample_id': r['sample_id'],
@@ -208,15 +244,13 @@ def api_db():
                     'dataset': r['dataset'],
                     'status': r['Status_on_day_collection_summary']
                 })
-            #print(data)
+
             response = {
                 'draw': draw,
-                'iTotalRecords': totalRecords,
-                'iTotalDisplayRecords': totalRecordwithFilter,
+                'iTotalRecords': total_records,
+                'iTotalDisplayRecords': total_records_filter,
                 'aaData': data,
             }
-            #print(response)
-
 
         return jsonify(response)
 
@@ -306,7 +340,7 @@ def get_multiselect():
      print(request.form)
      print(selected_vals)
      query = { 'donor': {'$in': selected_vals}}
-     ids = [x["_id"] for x in list(db.single_cell_meta.find(query, {"_id": 1}))]
+     ids = [x["_id"] for x in list(mongo.single_cell_meta.find(query, {"_id": 1}))]
      #my_tasks(selected_vals)
      return table_view()
 
@@ -331,98 +365,3 @@ def plot():
     )
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     return graphJSON
-
-def plot_tse():
-    path = '/tmp/flaskstarter-instance/'
-    df = pd.read_csv(path + 'umap.csv', index_col=0)
-    l = []
-    for i in df.index:
-        print(df.loc[i].values)
-        l.append(df.loc[i].values)
-    sln = np.stack(l)
-    projections = sln
-    fig = px.scatter(
-        projections, x=0, y=1)
-    fig.update_layout(
-        autosize=False, width=900, height=600
-    )
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    return graphJSON
-
-
-@tasks.route('/view_task/<id>', methods=['GET', 'POST'])
-@login_required
-def view_task(id):
-    _task = MyTaskModel.query.filter_by(id=id, users_id=current_user.id).first()
-
-    if not _task:
-        flash('Oops! Something went wrong!.', 'danger')
-        return redirect(url_for("tasks.my_tasks"))
-
-    return render_template('tasks/view_task.html',
-                           task=_task)
-
-
-@tasks.route('/add_task', methods=['GET', 'POST'])
-@login_required
-def add_task():
-
-    _task = MyTaskModel()
-
-    _form = MyTaskForm()
-
-    if _form.validate_on_submit():
-
-        _task.users_id = current_user.id
-
-        _form.populate_obj(_task)
-
-        db.session.add(_task)
-        db.session.commit()
-
-        db.session.refresh(_task)
-        flash('Your task is added successfully!', 'success')
-        return redirect(url_for("tasks.my_tasks"))
-
-    return render_template('tasks/add_task.html', form=_form, _active_tasks=True)
-
-
-@tasks.route('/delete_task/<id>', methods=['GET', 'POST'])
-@login_required
-def delete_task(id):
-    _task = MyTaskModel.query.filter_by(id=id, users_id=current_user.id).first()
-
-    if not _task:
-        flash('Oops! Something went wrong!.', 'danger')
-        return redirect(url_for("tasks.my_tasks"))
-
-    db.session.delete(_task)
-    db.session.commit()
-
-    flash('Your task is deleted successfully!', 'success')
-    return redirect(url_for('tasks.my_tasks'))
-
-
-@tasks.route('/edit_task/<id>', methods=['GET', 'POST'])
-@login_required
-def edit_task(id):
-    _task = MyTaskModel.query.filter_by(id=id, users_id=current_user.id).first()
-
-    if not _task:
-        flash('Oops! Something went wrong!.', 'danger')
-        return redirect(url_for("tasks.my_tasks"))
-
-    _form = MyTaskForm(obj=_task)
-
-    if _form.validate_on_submit():
-
-        _task.users_id = current_user.id
-        _form.populate_obj(_task)
-
-        db.session.add(_task)
-        db.session.commit()
-
-        flash('Your task updated successfully!', 'success')
-        return redirect(url_for("tasks.my_tasks"))
-
-    return render_template('tasks/edit_task.html', form=_form, task=_task, _active_tasks=True)
