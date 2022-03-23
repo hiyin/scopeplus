@@ -48,13 +48,14 @@ def upload_file():
 
 @tasks.route('/show_plot', methods=['GET', 'POST'])
 def show_plot():
-    graphJSON = plot_tse()
+    graphJSON = plot_umap()
     #print(graphJSON)
     return render_template('tasks/show_plot.html', graphJSON=graphJSON)
 
 
 def plot_tse():
     df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)
+
     l = []
     for i in df.index:
         print(df.loc[i].values)
@@ -63,6 +64,21 @@ def plot_tse():
     projections = sln
     fig = px.scatter(
         projections, x=0, y=1)
+    fig.update_layout(
+        autosize=False, width=900, height=600
+    )
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    return graphJSON
+
+## Create by junyi
+def plot_umap():
+    df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)
+    df.columns = ["umap_0","umap_1"]
+    df_meta = pd.read_csv(user_tmp[-1] + '/meta.tsv', index_col=1,sep="\t")
+    df_plot = df.merge(df_meta, left_index=True, right_index=True)
+
+    fig = px.scatter(
+        df_plot, x="umap_0", y="umap_1",color="scClassify_prediction")
     fig.update_layout(
         autosize=False, width=900, height=600
     )
@@ -127,6 +143,19 @@ def write_file_byid(path, towrite):
         write = csv.writer(file)
         write.writerows(data)
 
+# Write file
+def write_file_meta(path, towrite):
+    fn = path + '/meta.tsv'
+    print('writing meta to' + fn)
+
+    ##text=List of strings to be written to file
+    with open(fn,'w') as file:
+        file.write("\t".join([str(e) for e in towrite[0].keys()]))
+        file.write('\n')
+
+        for line in towrite:
+            file.write("\t".join([str(e) for e in line.values()]))
+            file.write('\n')
 
 def write_umap(path, towrite):
     fn = path + '/umap.csv'
@@ -158,7 +187,9 @@ def download_file():
     meta = list(mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}))
     print('writing ids to csv file only once, firstly load the data')
     write_file_byid(user_tmp[-1], meta)
-    return send_file(user_tmp[-1] + '/ids.csv', as_attachment=True)
+    write_file_meta(user_tmp[-1], meta)
+    #return send_file(user_tmp[-1] + '/ids.csv', as_attachment=True)
+    return send_file(user_tmp[-1] + '/meta.tsv', as_attachment=True)
 
 
 @tasks.route('/download_umap',methods=['POST'])
