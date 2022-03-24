@@ -8,17 +8,83 @@
 {% include 'layouts/banner.html' %}
 
 <div class="container">
-  <div class="row justify-content-center">
-    <h2>Explore Data</h2>
-  </div>
-  <div class="row mt-5">
-    <form action="{{ url_for('tasks.showall')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary active" name="showall" type="submit"> Show All</button>
-    </form>
+   <div class="row justify-content-center">
+        <h2>Explore Data</h2>
+   </div>
 
-    <form action="{{ url_for('tasks.filter_by_age')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary" name="age52" type="submit"> Age = 52</button>
-    </form>
+   <div style="background-color:#f5f5f5; padding:20px">
+        <h3>Search Panel</h3>
+        <table>
+            <tbody>
+                <tr>
+                    <td>Id</td>
+                    <td><input type="text" id="txt_id" /></td>
+                </tr>
+                <tr>
+                    <td>Sample id</td>
+                    <td>
+                    <select id="opt_sampleid">
+                            <option label=" "></option>
+                            {% for val in fsampleid %}
+                            <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                    </select>
+                    </td>
+                    <td>Age</td>
+                    <td>
+                    <select id="opt_age">
+                            <option label=" "></option>
+                            {% for val in fage %}
+                            <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                    </select>
+                    </td>
+                    <td>Cell type</td>
+                     <td>
+                    <select id="opt_prediction">
+                            <option label=" "></option>
+                            {% for val in fprediction %}
+                            <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                    </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Donor</td>
+                    <td>
+                        <select id="opt_donor">
+                            <option label=" "></option>
+                            {% for val in fdonor %}
+                            <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>Status</td>
+                     <td>
+                        <select id="opt_status">
+                            <option label=" "></option>
+                            {% for val in fstatus %}
+                            <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>Dataset</td>
+                    <td>
+                        <select id="opt_dataset">
+                            <option label=" "></option>
+                            {% for val in fdataset %}
+                            <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="button" value="Search" id="btnSearch" />
+                        <input type="button" value="Clear" id="btnClear" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 
     <table id="empTable" class="table table-hover table-striped table-responsive">
         <thead>
@@ -34,8 +100,7 @@
         </thead>
     </table>
 
-
-    <form action="{{ url_for('tasks.download_file')}}" method="post" style="display:inline-block">
+    <form action="{{ url_for('tasks.download_id')}}" method="post" style="display:inline-block">
       <button class="btn btn-primary" name="download" type="submit"> Download BarcodeIds </button>
     </form>
     <form action="{{ url_for('tasks.download_umap')}}" method="post" style="display:inline-block">
@@ -45,8 +110,6 @@
     <form action="{{ url_for('tasks.show_plot')}}" method="get" style="display:inline-block">
       <button class="btn btn-primary" name="show_plot" type="submit"> Show Plot </button>
     </form>
-
-
 
     <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
       <button class="btn btn-primary" name="download_matrix" type="submit"> Download Matrix </button>
@@ -62,11 +125,7 @@
       <button class="btn btn-primary" id="select" name="select" type="submit"> Select </button>
     </form>
 
-
-
   </div>
-
-    <div id="chart" class="chart"></div>
 {% endblock %}
 
 {% block scripts %}
@@ -113,6 +172,34 @@ $(document).ready(function() {
 
             });
 
+            oTable = $('#empTable').DataTable();
+            $('#btnSearch').click(function () {
+                //Apply search for Employee Name // DataTable column index 0
+                oTable.columns(0).search($('#txt_id').val().trim());
+                //Apply search for Country // DataTable column index 3
+                oTable.columns(1).search($('#opt_sampleid').val().trim());
+                oTable.columns(2).search($('#opt_age').val().trim());
+                oTable.columns(3).search($('#opt_prediction').val().trim());
+                oTable.columns(4).search($('#opt_donor').val().trim());
+                oTable.columns(5).search($('#opt_dataset').val().trim());
+                oTable.columns(6).search($('#opt_status').val().trim());
+                //hit search on server
+                oTable.draw();
+            });
+            $('#btnClear').click(function () {
+
+                oTable.columns().search('').draw();
+                document.getElementById("txt_id").value = "";
+                $('#opt_sampleid').val('').trigger('change');
+                $('#opt_age').val('').trigger('change');
+                $('#opt_prediction').val('').trigger('change');
+                $('#opt_donor').val('').trigger('change');
+                $('#opt_dataset').val('').trigger('change');
+                $('#opt_status').val('').trigger('change');
+
+
+            });
+
 });
 
 
@@ -128,6 +215,11 @@ $('select').selectpicker();
     alert("Successfully selected the following donors for filtering" + selected);
 
   }
+
+</script>
+
+<script>
+
 
 </script>
 

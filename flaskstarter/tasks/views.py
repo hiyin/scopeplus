@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify, session
+from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify
 from flask_login import login_required, current_user
 
 from ..extensions import db, mongo
@@ -21,16 +21,19 @@ import pandas as pd
 import time
 from datetime import datetime
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
+
+# sub folders to manage different flask instances: not a good place to put, should be in API endpoint?
+user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
+user_tmp = [TMP_FOLDER + "/" + user_timestamp]
+print(user_tmp)
+os.makedirs(user_tmp[-1])
+
+
 # New view
 @tasks.route('/contribute')
 def contribute():
     return render_template('tasks/contribute.html')
 
-
-user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
-user_tmp = [TMP_FOLDER + "/" + user_timestamp]
-print(user_tmp)
-os.makedirs(user_tmp[-1])
 
 scClassify_input = []
 
@@ -57,7 +60,7 @@ def plot_tse():
     df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)
     l = []
     for i in df.index:
-        print(df.loc[i].values)
+        # print(df.loc[i].values)
         l.append(df.loc[i].values)
     sln = np.stack(l)
     projections = sln
@@ -89,20 +92,30 @@ def run_scClassify():
         flash("SUCCESS!!")
         return redirect(url_for('tasks.contribute'))
 
+
 @tasks.route('/download_scClassify',methods=['POST'])
 def download_scClassify():
     return send_file(user_tmp[-1] + "/scClassify_predicted_results.csv", as_attachment=True)
 
+
 @tasks.route('/table_view')
 def table_view():
-    col_values = get_col_values()
-    return render_template('tasks/table_view.html', col_values=col_values)
+    fsampleid = get_field("sample_id")
+    fage = get_field("age")
+    fdonor = get_field("donor")
+    fprediction = get_field("scClassify_prediction")
+    fstatus = get_field("Status_on_day_collection_summary")
+    fdataset = get_field("dataset")
+    return render_template('tasks/table_view.html',
+                           fdonor=fdonor,
+                           fage=fage,
+                           fsampleid=fsampleid,
+                           fprediction=fprediction,
+                           fstatus=fstatus,
+                           fdataset=fdataset)
 
 
-start_time = time.time()
-print("--- %s seconds ---" % (time.time() - start_time))
 #ids = [x["_id"] for x in list(db.single_cell_meta.find({}, {"_id": 1}))]
-
 
 @tasks.route('/filter_by_age',methods=['POST'])
 def filter_by_age():
@@ -115,79 +128,56 @@ def filter_by_age():
 data = []
 
 
-# Write big file
-def write_file_byid(path, towrite):
-    fn = path + '/ids.csv'
-    print('writing ids to' + fn)
-    file = open(fn, 'w+', newline='\n')
-    #print(towrite[0])
-    data = [[r['id']] for r in towrite]
-    #print(data)
+def write_file_bytype(folder, content, filetype):
+    filename = folder + "/" + filetype + ".csv"
+    if filetype == "id":
+        towrite = [[r['id']] for r in content]
+    elif filetype == "umap":
+        towrite = [[r['id'], r['UMAP1'], r['UMAP2']] for r in content]
+    elif filetype == "mtx":
+        towrite = [[r['gene_name'], r['barcode'], r['expression']] for r in content]
+    file = open(filename, 'w+', newline='\n')
     with file:
+        print("Writing file %s" % filename)
         write = csv.writer(file)
-        write.writerows(data)
-
-
-def write_umap(path, towrite):
-    fn = path + '/umap.csv'
-    print('writing umap to' + fn)
-    file = open(fn, 'w+', newline='\n')
-    #print(towrite[0])
-    data = [[r['id'], r['UMAP1'], r['UMAP2']] for r in towrite]
-    #print(data)
-    with file:
-        write = csv.writer(file)
-        write.writerows(data)
-
-
-def write_mtx(path, towrite):
-    fn = path + '/mtx.csv'
-    file = open(fn, 'w+', newline='\n')
-    print('writing mtx to' + fn)
-    #print(towrite[0])
-    data = [[r['gene_name'], r['barcode'], r['expression']] for r in towrite]
-    #print(data)
-    with file:
-        write = csv.writer(file)
-        write.writerows(data)
+        write.writerows(towrite)
+    return filename
 
 
 # Download big file
-@tasks.route('/download_file',methods=['POST'])
-def download_file():
-    meta = list(mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}))
-    print('writing ids to csv file only once, firstly load the data')
-    write_file_byid(user_tmp[-1], meta)
-    return send_file(user_tmp[-1] + '/ids.csv', as_attachment=True)
+@tasks.route('/download_id',methods=['POST'])
+def download_id():
+    id = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
+    filepath = write_file_bytype(user_tmp[-1], id, "id")
+    return send_file(filepath, as_attachment=True)
 
 
-@tasks.route('/download_umap',methods=['POST'])
+@tasks.route('/download_umap', methods=['POST'])
 def download_umap():
-    fn = user_tmp[-1] + "/ids.csv"
-    print(fn)
+    fn = user_tmp[-1] + "/id.csv"
     _byid = pd.read_csv(fn).values.tolist()
     lookups = list(np.squeeze(_byid))
-    umap = list(mongo.umap.find({'id': {'$in': lookups}}))
-    write_umap(user_tmp[-1], umap)
-    return send_file(user_tmp[-1] + '/umap.csv', as_attachment=True)
+    umap = mongo.umap.find({'id': {'$in': lookups}})
+    filepath = write_file_bytype(user_tmp[-1], umap, "umap")
+    return send_file(filepath, as_attachment=True)
 
 
 @tasks.route('/download_matrix',methods=['POST'])
 def download_matrix():
-    _byid = pd.read_csv(user_tmp[-1] + "/ids.csv").values.tolist()
+    _byid = pd.read_csv(user_tmp[-1] + "/id.csv").values.tolist()
     lookups = list(np.squeeze(_byid))
     start_time2 = time.time()
-    mtx = list(mongo.matrix.find({'id': {'$in': lookups}}))
+    mtx = mongo.matrix.find({'id': {'$in': lookups}})
     print("--- %s seconds ---" % (time.time() - start_time2))
-    write_mtx(user_tmp[-1], mtx)
-
-    return send_file(user_tmp[-1] + '/mtx.csv', as_attachment=True)
+    filepath = write_file_bytype(user_tmp[-1], mtx, "mtx")
+    return send_file(filepath, as_attachment=True)
 
 
 # set in-memory storage for collection of ids for meta data table display
 collection = []
 collection_searched = []
 
+# http://www.dotnetawesome.com/2015/12/implement-custom-server-side-filtering-jquery-datatables.html
 @tasks.route('/api_db', methods=['GET', 'POST'])
 @login_required
 def api_db():
@@ -198,18 +188,38 @@ def api_db():
         rowperpage = int(request.form['length'])
         page_no = int(row/rowperpage + 1)
         search_value = request.form["search[value]"]
-        print(draw)
-        print(row)
-        print(rowperpage)
-        print(page_no)
-        print("print searchValue")
-        print(search_value)
+        print("draw: %s | row: %s | global search value: %s" % (draw, row, search_value))
         start = (page_no - 1)*rowperpage
         end = start + rowperpage
-
+        map = {}
+        for i in request.form:
+            if ("[search][value]" in i) and (len(request.form[i]) != 0):
+                column_value = request.form[i]
+                if "0" in i:
+                    search_column = "id"
+                    map[search_column] = column_value
+                elif "1" in i:
+                    search_column = "sample_id"
+                    map[search_column] = column_value
+                elif "2" in i:
+                    search_column = "age"
+                    map[search_column] = column_value
+                elif "3" in i:
+                    search_column = "scClassify_prediction"
+                    map[search_column] = column_value
+                elif "4" in i:
+                    search_column = "donor"
+                    map[search_column] = column_value
+                elif "5" in i:
+                    search_column = "dataset"
+                    map[search_column] = column_value
+                else:
+                    search_column = "Status_on_day_collection_summary"
+                    map[search_column] = column_value
+        print(map)
         if search_value == '':
             if len(collection) == 0:
-                ids = [x["_id"] for x in list(mongo.single_cell_meta.find({}, {"_id": 1}))]
+                ids = [x["_id"] for x in mongo.single_cell_meta.find({}, {"_id": 1})]
                 collection.extend(ids)
                 tmp = mongo.single_cell_meta.find({'_id': {'$in': collection[start:end]}})
                 total_records = len(collection)
@@ -222,38 +232,74 @@ def api_db():
 
         else:
             if len(collection_searched) == 0:
-                ids = [x["_id"] for x in list(mongo.single_cell_meta.find(json.loads(search_value), {"_id": 1}))]
+                ids = [x["_id"] for x in mongo.single_cell_meta.find(json.loads(search_value), {"_id": 1})]
                 collection_searched.extend(ids)
-                tmp = list(mongo.single_cell_meta.find({'_id': {'$in': collection_searched[start:end]}}))
+                tmp = mongo.single_cell_meta.find({'_id': {'$in': collection_searched[start:end]}})
                 total_records = len(collection_searched)
-
 
             else:
                 tmp = mongo.single_cell_meta.find({'_id': {'$in': collection_searched[start:end]}})
                 total_records = len(collection_searched)
 
+        if map:
+            if len(collection_searched) == 0:
+                print("using search id")
+                construct = []
+                for k in map:
+                    if (k in ["age", "sample_id"]) and map[k].isdigit():
+                        # if string only contains numbers, we need to convert it to integer to search
+                        # age contains strings and integers, but the front-end will always process them to strings
+                        q = {k: {"$in": [int(map[k])]}}
+                        construct.append(q)
+                    else:
+                        q = {k: {"$in": [map[k]]}}
+                        print(q)
+                        construct.append(q)
+                print(construct)
+                ids = [x["_id"] for x in mongo.single_cell_meta.find({"$and": construct}, {"_id": 1})]
+                collection_searched.extend(ids)
+                tmp = mongo.single_cell_meta.find({'_id': {'$in': collection_searched[start:end]}})
+                total_records = len(collection_searched)
+
+            else:
+                tmp = mongo.single_cell_meta.find({'_id': {'$in': collection_searched[start:end]}})
+                total_records = len(collection_searched)
+                # clear search result once new search input is clicked.
+                collection_searched.clear()
+
         total_records_filter = total_records
-
-        for r in tmp:
+        if total_records_filter == 0:
+            print("return nothing")
             data.append({
-                    'id': r['id'],
-                    'sample_id': r['sample_id'],
-                    'age': r['age'],
-                    'prediction': r['scClassify_prediction'],
-                    'donor': r['donor'],
-                    'dataset': r['dataset'],
-                    'status': r['Status_on_day_collection_summary']
-                })
+                'id': "",
+                'sample_id': "",
+                'age': "",
+                'prediction': "",
+                'donor': "",
+                'dataset': "",
+                'status': ""
+            })
 
-            response = {
+        else:
+            for r in tmp:
+                data.append({
+                        'id': r['id'],
+                        'sample_id': r['sample_id'],
+                        'age': r['age'],
+                        'prediction': r['scClassify_prediction'],
+                        'donor': r['donor'],
+                        'dataset': r['dataset'],
+                        'status': r['Status_on_day_collection_summary']
+                    })
+
+        response = {
                 'draw': draw,
                 'iTotalRecords': total_records,
                 'iTotalDisplayRecords': total_records_filter,
                 'aaData': data,
-            }
+        }
 
         return jsonify(response)
-
 
 
 # Old code for small sample dataset before server-side processing is introduced 2022.2.27
@@ -294,12 +340,11 @@ def my_tasks(condition=''):
 
     print("reload...")
     print(condition)
-    col_values = get_col_values()
+
 
 
     return render_template('tasks/my_tasks.html',
                            all_tasks=_all_tasks,
-                           col_values=col_values,
                            graphJSON=graphJSON,
                            _active_tasks=True)
 
@@ -327,11 +372,13 @@ def download():
     return send_file('/tmp/flaskstarter-instance/result.csv', as_attachment=True)
 
 
-def get_col_values():
-    #_col_values = covid2k_metaModel.query.with_entities(covid2k_metaModel.donor)
-    donors = [c.donor for c in covid2k_metaModel.query.with_entities(covid2k_metaModel.donor).distinct()]
-    print(len(donors))
-    return donors
+def get_field(field_name):
+    key = mongo.single_cell_meta.distinct(field_name)
+    #uniq_field = mongo.single_cell_meta.aggregate([{"$group": {"_id": '$%s' % field_name}}]);
+    #key = [r['_id'] for r in uniq_field]
+    print("%s has %d uniq fields" % (field_name, len(key)))
+    return key
+
 
 @tasks.route('/get_multiselect', methods=['POST'])
 # uses list to store returned condition for my_tasks
