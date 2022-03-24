@@ -2,10 +2,11 @@
 
 from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify, session
 from flask_login import login_required, current_user
-
 from ..extensions import db, mongo
 
 from flaskstarter.covid2k_meta import covid2k_metaModel
+from flaskstarter.tasks.forms import UmapForm
+
 import csv
 
 import pandas as pd
@@ -47,10 +48,14 @@ def upload_file():
 
 
 @tasks.route('/show_plot', methods=['GET', 'POST'])
-def show_plot():
-    graphJSON = plot_umap()
-    #print(graphJSON)
-    return render_template('tasks/show_plot.html', graphJSON=graphJSON)
+def show_plot():     
+    cell_color = request.form.get('name_opt_col')
+    if(cell_color is None):
+        cell_color="scClassify_prediction"
+
+    graphJSON,df_plot = plot_umap(cell_color)
+    colors = df_plot.columns.values
+    return render_template('tasks/show_plot.html', graphJSON=graphJSON,colors=colors)
 
 
 def plot_tse():
@@ -71,19 +76,19 @@ def plot_tse():
     return graphJSON
 
 ## Create by junyi
-def plot_umap():
+def plot_umap(cell_color='scClassify_prediction'):
     df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)
     df.columns = ["umap_0","umap_1"]
     df_meta = pd.read_csv(user_tmp[-1] + '/meta.tsv', index_col=1,sep="\t")
     df_plot = df.merge(df_meta, left_index=True, right_index=True)
 
     fig = px.scatter(
-        df_plot, x="umap_0", y="umap_1",color="scClassify_prediction")
+        df_plot, x="umap_0", y="umap_1",color=cell_color)
     fig.update_layout(
         autosize=False, width=900, height=600
     )
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    return graphJSON
+    return graphJSON,df_plot
 
 
 @tasks.route('/run_scclassify', methods=['GET', 'POST'])
