@@ -8,6 +8,9 @@ from flaskstarter.covid2k_meta import covid2k_metaModel
 from flaskstarter.tasks.forms import UmapForm
 
 import csv
+import gzip
+import zipfile
+
 
 import pandas as pd
 import numpy as np
@@ -21,6 +24,7 @@ import subprocess
 import pandas as pd
 import time
 from datetime import datetime
+from os.path import exists
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 # New view
 @tasks.route('/contribute')
@@ -173,18 +177,35 @@ def write_umap(path, towrite):
         write = csv.writer(file)
         write.writerows(data)
 
+# Write mtx is not okay, mem usage is too large and it will crash the server.
+# def write_mtx(path, towrite):
+#     fn = path + '/mtx.csv'
+#     file = open(fn, 'w+', newline='\n')
+#     print('writing mtx to' + fn)
+#     #print(towrite[0])
+#     data = [[r['gene_name'], r['barcode'], r['expression']] for r in towrite]
+#     #print(data)
+#     with file:
+#         write = csv.writer(file)
+#         write.writerows(data)
+def write_10x_mtx(path,gene_dict,barcode_dict,counts, towrite):
 
-def write_mtx(path, towrite):
-    fn = path + '/mtx.csv'
-    file = open(fn, 'w+', newline='\n')
-    print('writing mtx to' + fn)
-    #print(towrite[0])
-    data = [[r['gene_name'], r['barcode'], r['expression']] for r in towrite]
-    #print(data)
-    with file:
-        write = csv.writer(file)
-        write.writerows(data)
+    fn = path + '/matrix.mtx.gz'
+    print('writing matrix.mtx.gz to' + fn)
 
+    ##text=List of strings to be written to file
+    with gzip.open(fn,'wb') as file:
+        file.write("%%MatrixMarket matrix coordinate real general".encode())
+        file.write('\n'.encode())
+        file.write(" ".join([str(len(gene_dict)),str(len(barcode_dict)),str(counts)]).encode())
+        file.write('\n'.encode())
+        for line in towrite:
+            file.write(" ".join([
+                str(gene_dict[line['gene_name']]),
+                str(barcode_dict[line['barcode']]),
+                str(line['expression']),
+            ]).encode())
+            file.write('\n'.encode())
 
 # Download big file
 @tasks.route('/download_file',methods=['POST'])
@@ -210,14 +231,48 @@ def download_umap():
 
 @tasks.route('/download_matrix',methods=['POST'])
 def download_matrix():
-    _byid = pd.read_csv(user_tmp[-1] + "/ids.csv").values.tolist()
-    lookups = list(np.squeeze(_byid))
-    start_time2 = time.time()
-    mtx = list(mongo.matrix.find({'id': {'$in': lookups}}))
-    print("--- %s seconds ---" % (time.time() - start_time2))
-    write_mtx(user_tmp[-1], mtx)
+    # Down load 10x matrix if not exist
+    if(not (exists(user_tmp[-1] + '/matrix.mtx.gz'))):
+        _byid = pd.read_csv(user_tmp[-1] + "/ids.csv").values.tolist()
+        lookups = list(np.squeeze(_byid))
+        start_time2 = time.time()
+        mtx = mongo.matrix.find({'barcode': {'$in': lookups}})
+        #query_counts = mtx.count()
+        mtx = list(mtx)
 
-    return send_file(user_tmp[-1] + '/mtx.csv', as_attachment=True)
+        print("query finished --- %s seconds ---" % (time.time() - start_time2))
+
+        ## Parse the barcode and gene based on name 
+        def get_dict(path,sep="\t",header=None,save_path=None):
+            # Transfrom the gene/barcode name to the corresponding number
+            df_read = pd.read_csv(path,sep=sep,header=header)
+            row_num = [i for i in range(1,len(df_read)+1)]
+            row_name = list(df_read.iloc[:,0].values)
+            result_dict = dict(zip(row_name, row_num))
+            if(not(save_path is None)):
+                df_read.to_csv(save_path,sep="\t",header=False,index=False,compression='gzip')
+            return result_dict
+
+        # Save gene name
+        if(not (exists(user_tmp[-1] + '/genes.tsv.gz'))):
+            dict_gene = get_dict(TMP_FOLDER + "/genes.tsv",save_path=user_tmp[-1] + "/genes.tsv.gz")
+        # Save barcodes
+        if(not (exists(user_tmp[-1] + '/barcodes.tsv.gz'))):
+            dict_barcode = get_dict(user_tmp[-1] + "/ids.csv",sep=",",save_path=user_tmp[-1] + "/barcodes.tsv.gz")
+        write_10x_mtx(user_tmp[-1],dict_gene,dict_barcode,len(mtx), mtx)
+
+    if(not (exists(user_tmp[-1] + '/matrix.zip'))):
+        list_files = [
+            user_tmp[-1] + '/matrix.mtx.gz',
+            user_tmp[-1] + '/genes.tsv.gz',
+            user_tmp[-1] + '/barcodes.tsv.gz',
+            user_tmp[-1] + '/meta.tsv'
+        ]
+        with zipfile.ZipFile(user_tmp[-1] + '/matrix.zip', 'w') as zipMe:        
+            for file in list_files:
+                zipMe.write(file, compress_type=zipfile.ZIP_DEFLATED)
+
+    return send_file(user_tmp[-1] + '/matrix.zip', as_attachment=True)
 
 
 # set in-memory storage for collection of ids for meta data table display
