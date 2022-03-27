@@ -5,11 +5,58 @@
 {% extends 'layouts/base.html' %}
 
 {% block body %}
-  <div class="container">
-    <div class="row mt-5">
-      <div class="col-4 offset-4">
-        {{ render_form(url_for('frontend.contact_us'), form)}}
+<div class="d-flex flex-column justify-content-center" id="banner">
+  <div id="projectAim0" class="d-flex justify-content-center">
+    <h1>CONTACT US</h1>
+  </div>
+  <div id="projectDisp" class="d-flex justify-content-center">
+    <h5 class="text-center">For enquiries, comments or collaboration opportunities, <br>
+      please feel free to contact us through the following ways.</h5>
+  </div>
+</div>
+<div id="contact" class="d-flex justify-content-center">
+  <div class="contactboard">
+    <div class="contact-row">
+      <div class="contact-item">
+        <h2>TEL</h2>
+        <hr>
+        <p>+852 3910 3800</p>
+      </div>
+      <div class="contact-item">
+        <h2>FAX</h2>
+        <hr>
+        <p>+852 2793 3233</p>
+      </div>
+      <div class="contact-item">
+        <h2>EMAIL</h2>
+        <hr>
+        <p>info@d24h.hk</p>
       </div>
     </div>
+    <div class="contact-row">
+      <div class="contact-item">
+        <h2>ADDRESS</h2>
+        <hr>
+        <p>Units 1201-1206, 1223 & 1225, 12/F, Building 19W, 19 Science Park West Avenue, <br>Hong Kong Science Park,
+          Pak Shek Kok, New Territories, Hong Kong.</p>
+      </div>
+    </div>
+    <div class="contact-row"><iframe
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3688.041067853891!2d114.20601421494844!3d22.427480043933667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3404090e338ac047%3A0x38c13308a5ff95c4!2sLaboratory%20of%20Data%20Discovery%20for%20Health%20Limited!5e0!3m2!1szh-TW!2shk!4v1647903842096!5m2!1szh-TW!2shk"
+        width="750" height="560" style="border:0;" allowfullscreen="" loading="lazy"></iframe></div>
   </div>
-{% endblock %}c
+
+
+
+</div>
+</div>
+
+<!--<div class="container data">
+  <div class="row mt-5">
+    <div class="col-4 offset-4">
+      {{ render_form(url_for('frontend.contact_us'), form)}}
+    </div>
+  </div>
+</div>-->
+{% include 'layouts/footer.html' %}
+{% endblock %}

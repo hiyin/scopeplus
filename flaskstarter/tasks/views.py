@@ -345,10 +345,6 @@ def api_db():
 
         return jsonify(response)
 
-
-
-# Old code for small sample dataset before server-side processing is introduced 2022.2.27
-# Old logic
 @tasks.route('/my_tasks', methods=['GET', 'POST'])
 @login_required
 def my_tasks(condition=''):
@@ -394,6 +390,47 @@ def my_tasks(condition=''):
                            graphJSON=graphJSON,
                            _active_tasks=True)
 
+
+@tasks.route('/home', methods=['GET', 'POST'])
+def home(condition=''):
+    print('debug...')
+    print('change condition...')
+    print(condition)
+    graphJSON = {}
+
+    if not condition:
+        _all_tasks = covid2k_metaModel.query.all()
+        print('show default')
+
+    else:
+        if isinstance(condition, str):
+            if condition == 'all':
+                _all_tasks = covid2k_metaModel.query.all()
+                writefile('/tmp/flaskstarter-instance/', _all_tasks)
+                print('show all')
+            else:
+                print('show' + condition)
+                # _all_tasks = db.session.execute('SELECT * FROM covid2k_meta WHERE age LIKE 52')
+                _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.age.contains(condition)).all()
+                writefile('/tmp/flaskstarter-instance/', _all_tasks)
+                graphJSON = plot()
+        elif isinstance(condition, list):
+            _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.donor.in_(condition)).all()
+            writefile('/tmp/flaskstarter-instance/', _all_tasks)
+            graphJSON = plot()
+            print('show donors')
+
+
+    print("reload...")
+    print(condition)
+    col_values = get_col_values()
+
+    return render_template('tasks/landing.html',
+                           all_tasks=_all_tasks,
+                           col_values=col_values,
+                           graphJSON=graphJSON,
+                           _active_tasks=True)
+
 def writefile(path, towrite):
     print('writing data' + path)
     file = open(path + 'result.csv', 'w+', newline='\n')
@@ -410,7 +447,7 @@ def showall():
 
 @tasks.route('/age52',methods=['POST'])
 def age_filter():
-    return my_tasks('52')
+    return my_tasks('20')
 
 @tasks.route('/download',methods=['POST'])
 def download():
@@ -430,10 +467,8 @@ def get_multiselect():
      selected_vals = request.form.getlist('multiselect')
      print(request.form)
      print(selected_vals)
-     query = { 'donor': {'$in': selected_vals}}
-     ids = [x["_id"] for x in list(mongo.single_cell_meta.find(query, {"_id": 1}))]
-     #my_tasks(selected_vals)
-     return table_view()
+     return home(selected_vals)
+
 
 # to move outside of web app
 def plot():

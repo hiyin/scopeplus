@@ -5,11 +5,11 @@
 {% extends 'layouts/base.html' %}
 
 {% block body %}
-  <div class="container">
-    <div class="row mt-5">
-      <div class="col-lg-4 offset-4">
-        {{ render_form(url_for('frontend.signup'), form)}}
-      </div>
-    </div>
+<div class="sign-up">
+  <div class="log-container flex-column">
+    <h3>Sign Up</h3>
+    {{ render_form(url_for('frontend.signup'), form)}}
   </div>
+</div>
+{% include 'layouts/footer.html' %}
 {% endblock %}
