@@ -6,13 +6,22 @@
 
 {% block body %}
 {% include 'layouts/banner.html' %}
-
+<script src="https://use.fontawesome.com/bbc48b41d3.js"></script>
 <div class="container">
    <div class="row justify-content-center">
         <h2>Explore Data</h2>
    </div>
+   <div class="jumbotron">
+    <h4>
+       Global Search
+    </h4>
+    <input class="form-control" id="customSearchBox"/>
+    <input type="button" value="Search all" id="btnGSearch" />
+    <input type="button" value="Clear all" id="btnGClear" />
+   </div>
 
-   <div style="background-color:#f5f5f5; padding:20px">
+
+   <div  class="jumbotron" style="padding:20px">
         <h3>Search Panel</h3>
         <table>
             <tbody>
@@ -86,6 +95,7 @@
         </table>
     </div>
 
+
     <table id="empTable" class="table table-hover table-striped table-responsive">
         <thead>
         <tr>
@@ -99,7 +109,10 @@
         </tr>
         </thead>
     </table>
-
+        <div class="jumbotron">
+                <h4>
+       Please choose any of the option below for data manipulation.
+    </h4>
     <form action="{{ url_for('tasks.download_id')}}" method="post" style="display:inline-block">
       <button class="btn btn-primary" name="download" type="submit"> Download BarcodeIds </button>
     </form>
@@ -114,28 +127,24 @@
     <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
       <button class="btn btn-primary" name="download_matrix" type="submit"> Download Matrix </button>
     </form>
-
-    <form action="{{ url_for('tasks.get_multiselect')}}" method="post" style="display:inline-block">
-      <select multiple id="multiselect" name="multiselect" data-live-search="true" class="selectpicker"
-        data-actions-box="true">
-        {% for val in col_values %}
-        <option value="{{val}}">{{val}}</option>
-        {% endfor %}
-      </select>
-      <button class="btn btn-primary" id="select" name="select" type="submit"> Select </button>
-    </form>
+    </div>
 
   </div>
 {% endblock %}
 
 {% block scripts %}
 
+<style>
+    .dataTables_filter { display: none;}
+</style>
 <script>
 $(document).ready(function() {
 
-
     $('#empTable').DataTable({
                 'processing':true,
+                'language': {
+                    'processing': '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>'
+                 },
                 'serverSide': true,
                 'serverMethod': 'post',
                 'ajax': {
@@ -154,20 +163,19 @@ $(document).ready(function() {
                     { data: 'status'}
                 ],
                 initComplete : function() {
-                    var input = $('.dataTables_filter input').unbind(),
+                    var input = $('#customSearchBox').unbind(),
                         self = this.api(),
-                        $searchButton = $('<button>')
+                        $searchButton = $('#btnGSearch')
                                    .text('search')
                                    .click(function() {
                                       self.search(input.val()).draw();
                                    }),
-                        $clearButton = $('<button>')
+                        $clearButton = $('#btnGClear')
                                    .text('clear')
                                    .click(function() {
                                       input.val('');
                                       $searchButton.click();
                                    })
-                    $('.dataTables_filter').append($searchButton, $clearButton);
                 }
 
             });

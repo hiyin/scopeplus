@@ -117,14 +117,6 @@ def table_view():
 
 #ids = [x["_id"] for x in list(db.single_cell_meta.find({}, {"_id": 1}))]
 
-@tasks.route('/filter_by_age',methods=['POST'])
-def filter_by_age():
-    query = {'age': { '$in': [52] }}
-    ids = [x["_id"] for x in list(mongo.single_cell_meta.find(query, {"_id": 1}))]
-    print('return new ids')
-    return api_db()
-
-
 data = []
 
 
@@ -154,8 +146,13 @@ def download_id():
 
 @tasks.route('/download_umap', methods=['POST'])
 def download_umap():
-    fn = user_tmp[-1] + "/id.csv"
-    _byid = pd.read_csv(fn).values.tolist()
+    f = user_tmp[-1] + "/id.csv"
+    if not os.path.isfile(f):
+        id = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
+        f = write_file_bytype(user_tmp[-1], id, "id")
+        print(f)
+
+    _byid = pd.read_csv(f).values.tolist()
     lookups = list(np.squeeze(_byid))
     umap = mongo.umap.find({'id': {'$in': lookups}})
     filepath = write_file_bytype(user_tmp[-1], umap, "umap")
@@ -164,7 +161,12 @@ def download_umap():
 
 @tasks.route('/download_matrix',methods=['POST'])
 def download_matrix():
-    _byid = pd.read_csv(user_tmp[-1] + "/id.csv").values.tolist()
+    f = user_tmp[-1] + "/id.csv"
+    if not os.path.isfile(f):
+        id = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
+        f = write_file_bytype(user_tmp[-1], id, "id")
+        print(f)
+    _byid = pd.read_csv(f).values.tolist()
     lookups = list(np.squeeze(_byid))
     start_time2 = time.time()
     mtx = mongo.matrix.find({'id': {'$in': lookups}})
@@ -189,6 +191,7 @@ def api_db():
         page_no = int(row/rowperpage + 1)
         search_value = request.form["search[value]"]
         print("draw: %s | row: %s | global search value: %s" % (draw, row, search_value))
+        print(request.form)
         start = (page_no - 1)*rowperpage
         end = start + rowperpage
         map = {}
@@ -306,78 +309,11 @@ def api_db():
 # Old logic
 @tasks.route('/my_tasks', methods=['GET', 'POST'])
 @login_required
-def my_tasks(condition=''):
-    print('debug...')
-    print('change condition...')
+def search_builder(condition=''):
+    if request.method == "POST":
+        print(request.form)
     print(condition)
-    graphJSON = {}
-
-    if not condition:
-        #_all_tasks = covid2k_metaModel.query.limit(10).all()
-        _all_tasks = db.single_cell_meta.find({}).limit(10)
-        #print(list(meta))
-        #print(len(list(_all_tasks)))
-        print('show default')
-
-    else:
-        if isinstance(condition, str):
-            if condition == 'all':
-                _all_tasks = covid2k_metaModel.query.all()
-                writefile('/tmp/flaskstarter-instance/', _all_tasks)
-                print('show all')
-            else:
-                print('show' + condition)
-                # _all_tasks = db.session.execute('SELECT * FROM covid2k_meta WHERE age LIKE 52')
-                _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.age.contains(condition)).all()
-                writefile('/tmp/flaskstarter-instance/', _all_tasks)
-                graphJSON = plot()
-        elif isinstance(condition, list):
-            _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.donor.in_(condition)).all()
-            writefile('/tmp/flaskstarter-instance/', _all_tasks)
-            graphJSON = plot()
-            print('show donors')
-
-
-    print("reload...")
-    print(condition)
-
-
-
-    return render_template('tasks/my_tasks.html',
-                           all_tasks=_all_tasks,
-                           graphJSON=graphJSON,
-                           _active_tasks=True)
-
-def writefile(path, towrite):
-    print('writing data' + path)
-    file = open(path + 'result.csv', 'w+', newline='\n')
-    data = [[task.X] for task in towrite]
-    with file:
-        write = csv.writer(file)
-        write.writerows(data)
-
-
-@tasks.route('/showall',methods=['POST'])
-def showall():
-    return my_tasks('all')
-
-
-@tasks.route('/age52',methods=['POST'])
-def age_filter():
-    return my_tasks('52')
-
-@tasks.route('/download',methods=['POST'])
-def download():
-    plot()
-    return send_file('/tmp/flaskstarter-instance/result.csv', as_attachment=True)
-
-
-def get_field(field_name):
-    key = mongo.single_cell_meta.distinct(field_name)
-    #uniq_field = mongo.single_cell_meta.aggregate([{"$group": {"_id": '$%s' % field_name}}]);
-    #key = [r['_id'] for r in uniq_field]
-    print("%s has %d uniq fields" % (field_name, len(key)))
-    return key
+    return render_template('tasks/my_tasks.html', builder=condition)
 
 
 @tasks.route('/get_multiselect', methods=['POST'])
@@ -386,29 +322,14 @@ def get_multiselect():
      selected_vals = request.form.getlist('multiselect')
      print(request.form)
      print(selected_vals)
-     query = { 'donor': {'$in': selected_vals}}
-     ids = [x["_id"] for x in list(mongo.single_cell_meta.find(query, {"_id": 1}))]
-     #my_tasks(selected_vals)
-     return table_view()
+     #query = { 'donor': {'$in': selected_vals}}
+     #ids = [x["_id"] for x in list(mongo.single_cell_meta.find(query, {"_id": 1}))]
+     return search_builder(selected_vals)
 
-# to move outside of web app
-def plot():
-    path = '/tmp/flaskstarter-instance/'
-    result = pd.read_csv(path + 'result.csv', header=None)
-    df = pd.read_csv(path + 'cov192kaxis.csv', index_col=0)
-    l = []
-    for i in df.index:
-        for j in result.values:
-            if i == j:
-                print(i)
-                print(df.loc[i].values)
-                l.append(df.loc[i].values)
-    sln = np.stack(l)
-    projections = sln
-    fig = px.scatter(
-        projections, x=0, y=1)
-    fig.update_layout(
-        autosize=False, width=900, height=600
-    )
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    return graphJSON
+
+def get_field(field_name):
+    key = mongo.single_cell_meta.distinct(field_name)
+    #uniq_field = mongo.single_cell_meta.aggregate([{"$group": {"_id": '$%s' % field_name}}]);
+    #key = [r['_id'] for r in uniq_field]
+    print("%s has %d uniq fields" % (field_name, len(key)))
+    return key

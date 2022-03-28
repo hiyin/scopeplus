@@ -11,54 +11,35 @@
     <h2>Explore Data</h2>
   </div>
   <div class="row mt-5">
-    <form action="{{ url_for('tasks.showall')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary active" name="showall" type="submit"> Show All</button>
-    </form>
+    <h4>
+       Global Search Builder
+    </h4>
+    <div><span class="count">3.1</span>
+    <input class="form-control" id="customSearchBox" value="{{builder}}"/>
 
-    <form action="{{ url_for('tasks.age_filter')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary" name="age52" type="submit"> Age = 52</button>
-    </form>
-
-    <table id="data" class="table table-hover">
-      <thead>
-        <tr>
-          <th>sample_id</th>
-          <th>donor</th>
-          <th>X</th>
-          <th>age</th>
-          <th>status</th>
-          <th>dataset</th>
-        </tr>
-      </thead>
-      <tbody>
-
-        {% for task in all_tasks %}
-        <tr>
-          <td>{{ task['sample_id'] }}</td>
-          <td>{{ task['donor'] }}</td>
-          <td>{{ task['id'] }}</td>
-          <td>{{ task['age'] }}</td>
-          <td>{{ task['Status_on_day_collection_summary'] }}</td>
-          <td>{{ task['dataset'] }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-
-
-    <form action="{{ url_for('tasks.download')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary" name="download" type="submit"> Download Data </button>
-    </form>
-
+   </div>
     <form action="{{ url_for('tasks.get_multiselect')}}" method="post" style="display:inline-block">
+         <td>Choose1</td>
       <select multiple id="multiselect" name="multiselect" data-live-search="true" class="selectpicker"
         data-actions-box="true">
-        {% for val in col_values %}
-        <option value="{{val}}">{{val}}</option>
-        {% endfor %}
+
+        <option value="A">A</option>
+        <option value="B">B</option>
+        <option value="C">C</option>
+
+      </select>
+        <td>Choose2</td>
+        <select multiple id="multiselect2" name="multiselect" data-live-search="true" class="selectpicker"
+        data-actions-box="true">
+
+        <option value="Haha">Haha</option>
+        <option value="Yeah">Yeah</option>
+        <option value="Oh">Oh</option>
+
       </select>
       <button class="btn btn-primary" id="select" name="select" type="submit"> Select </button>
     </form>
+
 
 
 
@@ -71,29 +52,29 @@
 
 {% block scripts %}
 <script>
-  $(document).ready(function () {
-    $('#data').DataTable();
-  });
-
   $('select').selectpicker();
 
   document.getElementById('select').onclick = function () {
     var selected = [];
-    for (var option of document.getElementById('multiselect').options) {
+    for (var option of document.getElementByName('multiselect').options) {
       if (option.selected) {
         selected.push(option.value);
       }
     }
-    alert("Successfully selected the following donors for filtering" + selected);
+    alert("Successfully selected");
 
   }
+
+  $('.count').each(function () {
+    $(this).prop('Counter',0).animate({
+        Counter: $(this).text()
+    }, {
+        duration: 4000,
+        easing: 'swing',
+        step: function (now) {
+            $(this).text(Math.ceil(now));
+        }
+    });
+});
 </script>
-
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script type="text/javascript">
-  var graphs = {{ graphJSON | safe }};
-  Plotly.plot('chart', graphs, {});
-</script>
-
-
 {% endblock %}
