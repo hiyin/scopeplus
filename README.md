@@ -71,6 +71,14 @@ $ python3 -m venv /path/to/your/virtual/environment
 $ source <path/to/venv>/bin/activate
 ```
 
+For MAC
+```bash
+$ cd ../../
+$ virtualenv venv
+$ source venv/bin/activate
+$ cd covid19_cell_atlas_portal
+```
+
 install dependencies in virtualenv
 
 ```bash

@@ -1,0 +1,49 @@
+{% from "macros/_form.html" import render_form %}
+
+{% set page_title = 'Home' %}
+
+{% extends 'layouts/base.html' %}
+
+{% block body %}
+{% include 'layouts/banner.html' %}
+<div class="container home">
+  <div class="row justify-content-center">
+    <h2>Mission</h2>
+  </div>
+</div>
+
+<div class="intro">
+  <div class="container flex-column">
+  <div class="intro-h">
+    What is the D²4H PBMC single-cell Data Share?
+  </div>
+  <div class="intro-c">
+    The D²4H PBMC single-cell Data Share stores and provides over 3.2 million PBMC single-cell data by 21 published single-cell sequencing datasets. Anyone can contribute data and explore data here.
+  </div>
+  <div class="d-flex justify-content-center">
+  <table class="intro-tb">
+    <tr>
+      <td><img src="{{url_for('static', filename='microscope.png')}}" width="140" height="140"/></td>
+      <td><img src="{{url_for('static', filename='Pointer.png')}}" width="95" height="95"/></td>
+      <td><img src="{{url_for('static', filename='explore.png')}}" width="140" height="140"/></td>
+      <td><img src="{{url_for('static', filename='Pointer.png')}}" width="95" height="95"/></td>
+      <td><img src="{{url_for('static', filename='folder.png')}}" width="140" height="140"/></td>
+    </tr>
+    <tr>
+      <td>
+        <p>Users contribute single-cell data</p>
+      </td>
+      <td></td>
+      <td>
+        <p>D²4H processes the data</p>
+      </td>
+      <td></td>
+      <td>
+        <p>Users can find suitable data to download </p>
+      </td>
+    </tr>
+  </table>
+</div>
+</div>
+</div>
+{% endblock %}

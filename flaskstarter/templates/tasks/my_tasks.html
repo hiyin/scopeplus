@@ -1,99 +1,374 @@
 {% from "macros/_form.html" import render_form %}
 
-{% set page_title = 'My Tasks' %}
+{% set page_title = 'Explore' %}
 
 {% extends 'layouts/base.html' %}
 
 {% block body %}
 {% include 'layouts/banner.html' %}
-<div class="container">
+<div class="container data">
   <div class="row justify-content-center">
-    <h2>Explore Data</h2>
+    <h1>Explore Data</h1>
   </div>
   <div class="row mt-5">
+
+    <p>Fliter&nbsp&nbsp&nbsp&nbsp</p>
+
     <form action="{{ url_for('tasks.showall')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary active" name="showall" type="submit"> Show All</button>
+      <button class="btn btn-primary" name="showall" type="submit">Show All</button>
     </form>
 
-    <form action="{{ url_for('tasks.age_filter')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary" name="age52" type="submit"> Age = 52</button>
-    </form>
+    <button class="btn btn-primary" onclick="openForm()">Donor<img
+        src="{{url_for('static', filename='chevron-down.png')}}" width="10" height="16" /></button>
 
-    <table id="data" class="table table-hover">
-      <thead>
-        <tr>
-          <th>sample_id</th>
-          <th>donor</th>
-          <th>X</th>
-          <th>age</th>
-          <th>status</th>
-          <th>dataset</th>
-        </tr>
-      </thead>
-      <tbody>
+    <button class="btn btn-primary" onclick="openForm2()">Cell Type<img
+        src="{{url_for('static', filename='chevron-down.png')}}" width="10" height="16" /></button>
 
-        {% for task in all_tasks %}
-        <tr>
-          <td>{{ task.sample_id }}</td>
-          <td>{{ task.donor }}</td>
-          <td>{{ task.X }}</td>
-          <td>{{ task.age }}</td>
-          <td>{{ task.Status_on_day_collection_summary }}</td>
-          <td>{{ task.dataset }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <button class="btn btn-primary" onclick="openForm3()">File<img
+        src="{{url_for('static', filename='chevron-down.png')}}" width="10" height="16" /></button>
+
+    <div class="popup-container">
+      <div class="form-popup" id="myForm">
+        <form action="{{ url_for('tasks.age_filter')}}" class="form-container" method="post">
+          <div class="form-columns">
+            <div class="form-column">
+              <h5>Simple ID</h5><br>
+
+              <label for="sampleID"><b>Search</b></label>
+              <input type="text" placeholder="e.g. 2773BW" name="age52">
+              <br><br><br><br><br><br>
+              <button type="submit" class="btn btn-outline-success">Apply</button>
+              <button type="button" class="btn btn-outline-success" onclick="closeForm()">Close</button>
+            </div>
+
+            <div class="form-column">
+              <h5>Age Range</h5><br>
+
+              <label for="AgeMin"><b>Min Age</b></label>
+              <input type="text" placeholder="e.g. 20" name="age52">
+
+              <label for="AgeMax"><b>Max Age</b></label>
+              <input type="text" placeholder="e.g. 60" name="age52">
+            </div>
+            <div class="form-column">
+              <h5>Status</h5><br>
+
+              <label for="status">
+                <input type="checkbox" name="age52">
+                <b>Healthy</b>
+              </label><br>
+              <label for="status">
+                <input type="checkbox" name="age52">
+                <b>Mild</b>
+              </label><br>
+              <label for="status">
+                <input type="checkbox" name="age52">
+                <b>Severe</b>
+              </label>
+            </div>
+          </div>
+        </form>
+
+      </div>
+
+      <div class="popup-container">
+        <div class="form-popup" id="myForm2">
+          <form action="{{ url_for('tasks.age_filter')}}" class="form-container" method="post">
+            <div class="form-columns">
+              <div class="form-column">
+                <h5>Cell Type</h5><br>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Hematopoietic stem cell</b>
+                </label><br>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Lymphoid progenitor cell</b>
+                </label><br>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Myeloid progenitor</b>
+                </label>
+                <br><br><br><br><br><br>
+                <button type="submit" class="btn btn-outline-success">Apply</button>
+                <button type="button" class="btn btn-outline-success" onclick="closeForm2()">Close</button>
+              </div>
+              <div class="form-column">
+                <h5 style="color:white">Cell Type</h5><br>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>B cell</b>
+                </label><br>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Natural killer cell</b>
+                </label><br>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>T cell progenitor</b>
+                </label>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Neutrophil</b>
+                </label>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Eosinophll</b>
+                </label>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Monocyte</b>
+                </label>
+              </div>
+              <div class="form-column">
+                <h5 style="color:white">Cell Type</h5><br>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Memory B cell</b>
+                </label><br>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Plasma cell</b>
+                </label><br>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Memory T cell</b>
+                </label>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Cytotoxic T cell</b>
+                </label>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Mast cell</b>
+                </label>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Basophil</b>
+                </label>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Dendritic cell</b>
+                </label>
+                <label for="cell">
+                  <input type="checkbox" name="age52">
+                  <b>Macrophage</b>
+                </label>
+              </div>
+            </div>
+          </form>
+        </div>
 
 
-    <form action="{{ url_for('tasks.download')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary" name="download" type="submit"> Download Data </button>
-    </form>
+        <div class="popup-container">
+          <div class="form-popup" id="myForm3">
+            <form action="{{ url_for('tasks.age_filter')}}" class="form-container" method="post">
+              <div class="form-columns">
+                <div class="form-column">
+                  <h5>File Source</h5><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Merged Atlas</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Arunachalam</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Bacher</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Bost</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Chua</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Combes</b>
+                  </label>
+                  <br><br>
+                  <button type="submit" class="btn btn-outline-success">Apply</button>
+                  <button type="button" class="btn btn-outline-success" onclick="closeForm3()">Close</button>
+                </div>
+                <div class="form-column">
+                  <h5 style="color:white">File</h5><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Grant</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Heming</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Kusnadi</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Lee</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Liao</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Meckiff</b>
+                  </label><br>
+                </div>
+                <div class="form-column">
+                  <h5 style="color:white">File</h5><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Silvin</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Schultenson</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Su</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Trump</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Wen</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Wilk</b>
+                  </label><br>
+                </div>
+                <div class="form-column">
+                  <h5 style="color:white">File</h5><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Yao</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Yu</b>
+                  </label><br>
+                  <label for="fileSource">
+                    <input type="checkbox" name="age52">
+                    <b>Zhu</b>
+                  </label><br>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
 
-    <form action="{{ url_for('tasks.get_multiselect')}}" method="post" style="display:inline-block">
-      <select multiple id="multiselect" name="multiselect" data-live-search="true" class="selectpicker"
-        data-actions-box="true">
-        {% for val in col_values %}
-        <option value="{{val}}">{{val}}</option>
-        {% endfor %}
-      </select>
-      <button class="btn btn-primary" id="select" name="select" type="submit"> Select </button>
-    </form>
+        <br>
 
+        <table id="data" class="table table-hover">
+          <thead>
+            <tr>
+              <th>Sample ID</th>
+              <th>Donor</th>
+              <th>Predicted Cell Type</th>
+              <th>Age</th>
+              <th>Status</th>
+              <th>Dataset</th>
+            </tr>
+          </thead>
+          <tbody>
 
+            {% for task in all_tasks %}
+            <tr>
+              <td>{{ task.sample_id }}</td>
+              <td>{{ task.donor }}</td>
+              <td>{{ task.X }}</td>
+              <td>{{ task.age }}</td>
+              <td>{{ task.Status_on_day_collection_summary }}</td>
+              <td>{{ task.dataset }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="button d-flex justify-content-center">
+      <form action="{{ url_for('tasks.download')}}" method="post" style="display:inline-block">
+        <button class="btn btn-outline-success" name="download" type="submit"> Download Full-set / Sub-set Data
+        </button>
+      </form>
+    </div>
 
   </div>
+  {% endblock %}
 
-  <div id="chart" class="chart"></div>
 
-</div>
-{% endblock %}
+  {% block scripts %}
+  <script>
+    $(document).ready(function () {
+      $('#data').DataTable();
+    });
 
-{% block scripts %}
-<script>
-  $(document).ready(function () {
-    $('#data').DataTable();
-  });
+    $('select').selectpicker();
 
-  $('select').selectpicker();
-
-  document.getElementById('select').onclick = function () {
-    var selected = [];
-    for (var option of document.getElementById('multiselect').options) {
-      if (option.selected) {
-        selected.push(option.value);
+    document.getElementById('select').onclick = function () {
+      var selected = [];
+      for (var option of document.getElementById('multiselect').options) {
+        if (option.selected) {
+          selected.push(option.value);
+        }
       }
+      alert("Successfully selected the following donors for filtering" + selected);
+
     }
-    alert("Successfully selected the following donors for filtering" + selected);
 
-  }
-</script>
+  </script>
+  <script>
+    function copy() {
+      var $temp = $("<input>");
+      $("body").append($temp);
+      $temp.val(
+          "2.5 million Single Cell (2022, February 23). The Laboratory of Data Discovery for Health. https://www.d24.hk/"
+        )
+        .select();
+      document.execCommand("copy");
+      $temp.remove();
+      alert("copied")
 
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script type="text/javascript">
-  var graphs = {{ graphJSON | safe }};
-  Plotly.plot('chart', graphs, {});
-</script>
+    }
+  </script>
+  <script>
+    function openForm() {
+      document.getElementById("myForm").style.display = "block";
+    }
 
+    function closeForm() {
+      document.getElementById("myForm").style.display = "none";
+    }
+  </script>
+  <script>
+    function openForm2() {
+      document.getElementById("myForm2").style.display = "block";
+    }
 
-{% endblock %}
+    function closeForm2() {
+      document.getElementById("myForm2").style.display = "none";
+    }
+  </script>
+  <script>
+    function openForm3() {
+      document.getElementById("myForm3").style.display = "block";
+    }
+
+    function closeForm3() {
+      document.getElementById("myForm3").style.display = "none";
+    }
+  </script>
+  {% endblock %}

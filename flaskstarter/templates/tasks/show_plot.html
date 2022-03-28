@@ -1,0 +1,40 @@
+{% from "macros/_form.html" import render_form %}
+
+{% set page_title = 'My Tasks' %}
+
+{% extends 'layouts/base.html' %}
+
+{% block body %}
+{% include 'layouts/banner.html' %}
+
+<div class="container">
+  <div class="row justify-content-center">
+    <h2>UMAP Plot</h2>
+  </div>
+
+  <td>Color Option</td>
+  <td>
+    <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
+      <select id="opt_col" name="name_opt_col">
+          <option label=" "></option>
+          {% for val in colors %}
+          <option value="{{val}}">{{val}}</option>
+          {% endfor %}
+      </select>
+      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Select </button>
+    </form>  
+  </td>
+   <div id="chart" class="chart"></div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+  var graphs = {{ graphJSON | safe }};
+  Plotly.plot('chart', graphs, {});
+</script>
+
+{% endblock %}

@@ -1,10 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import os
-
-from .utils import INSTANCE_FOLDER_PATH
-
-
+from .utils import TMP_FOLDER
 class BaseConfig(object):
     # Change these settings as per your needs
 
@@ -19,20 +16,23 @@ class BaseConfig(object):
     TESTING = False
 
     SECRET_KEY = 'always-change-this-secret-key-with-random-alpha-nums'
+    HOST = '0.0.0.0'
 
 
 class DefaultConfig(BaseConfig):
-
+    FLASK_ENV = 'development'
     DEBUG = True
 
     # Flask-Sqlalchemy
     SQLALCHEMY_ECHO = False
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
-    # SQLITE for production
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + INSTANCE_FOLDER_PATH + '/db.sqlite'
+    # SQLITE for dev
+    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + TMP_FOLDER + '/db.sqlite'
 
-    # POSTGRESQL for production
+
+
+    # POSTGRESQL for dev
     # SQLALCHEMY_DATABASE_URI = 'postgresql+psycopg2://postgres:pass@ip/dbname'
 
     # Flask-cache
@@ -49,3 +49,6 @@ class DefaultConfig(BaseConfig):
     MAIL_USERNAME = "admin-mail@yourdomain-flaskstarter.domain"
     MAIL_PASSWORD = ""
     MAIL_DEFAULT_SENDER = MAIL_USERNAME
+
+
+

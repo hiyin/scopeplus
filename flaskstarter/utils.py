@@ -6,10 +6,8 @@
 import os
 
 import datetime
-
-
-# Instance folder path, to keep stuff aware from flask app.
-INSTANCE_FOLDER_PATH = os.path.join('/tmp', 'flaskstarter-instance')
+# TMP path, this stores all flask required files
+TMP_FOLDER = os.environ.get('HOME') + '/flask_resources'
 
 
 # Form validation

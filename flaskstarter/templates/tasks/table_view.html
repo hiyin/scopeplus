@@ -1,0 +1,236 @@
+{% from "macros/_form.html" import render_form %}
+
+{% set page_title = 'My Tasks' %}
+
+{% extends 'layouts/base.html' %}
+
+{% block body %}
+{% include 'layouts/banner.html' %}
+<script src="https://use.fontawesome.com/bbc48b41d3.js"></script>
+<div class="container">
+   <div class="row justify-content-center">
+        <h2>Explore Data</h2>
+   </div>
+   <div class="jumbotron">
+    <h4>
+       Global Search
+    </h4>
+    <input class="form-control" id="customSearchBox"/>
+    <input type="button" value="Search all" id="btnGSearch" />
+    <input type="button" value="Clear all" id="btnGClear" />
+   </div>
+
+
+   <div  class="jumbotron" style="padding:20px">
+        <h3>Search Panel</h3>
+        <table>
+            <tbody>
+                <tr>
+                    <td>Id</td>
+                    <td><input type="text" id="txt_id" /></td>
+                </tr>
+                <tr>
+                    <td>Sample id</td>
+                    <td>
+                    <select id="opt_sampleid">
+                            <option label=" "></option>
+                            {% for val in fsampleid %}
+                            <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                    </select>
+                    </td>
+                    <td>Age</td>
+                    <td>
+                    <select id="opt_age">
+                            <option label=" "></option>
+                            {% for val in fage %}
+                            <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                    </select>
+                    </td>
+                    <td>Cell type</td>
+                    <td>
+                    <select id="opt_prediction">
+                            <option label=" "></option>
+                            {% for val in fprediction %}
+                            <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                    </select>
+                    </td>
+                </tr>
+                <tr>
+                    <td>Donor</td>
+                    <td>
+                        <select id="opt_donor">
+                            <option label=" "></option>
+                            {% for val in fdonor %}
+                            <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>Status</td>
+                     <td>
+                        <select id="opt_status">
+                            <option label=" "></option>
+                            {% for val in fstatus %}
+                            <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>Dataset</td>
+                    <td>
+                        <select id="opt_dataset">
+                            <option label=" "></option>
+                            {% for val in fdataset %}
+                            <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                        </select>
+                    </td>
+                    <td>
+                        <input type="button" value="Search" id="btnSearch" />
+                        <input type="button" value="Clear" id="btnClear" />
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+
+    <table id="empTable" class="table table-hover table-striped table-responsive">
+        <thead>
+        <tr>
+            <th>id</th>
+            <th>sampleId</th>
+            <th>age</th>
+            <th>prediction</th>
+            <th>donor</th>
+            <th>dataset</th>
+            <th>status</th>
+        </tr>
+        </thead>
+    </table>
+        <div class="jumbotron">
+                <h4>
+       Please choose any of the option below for data manipulation.
+    </h4>
+    <form action="{{ url_for('tasks.download_meta')}}" method="post" style="display:inline-block">
+      <button class="btn btn-primary" name="download" type="submit"> Download metadata </button>
+    </form>
+
+    <form action="{{ url_for('tasks.download_umap')}}" method="post" style="display:inline-block">
+      <button class="btn btn-primary" name="download_umap" type="submit"> Download UMAP </button>
+    </form>
+
+    <form action="{{ url_for('tasks.show_plot')}}" method="get" style="display:inline-block">
+      <button class="btn btn-primary" name="show_plot" type="submit"> Show tSNE plot </button>
+    </form>
+
+    <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
+      <button class="btn btn-primary" name="download_matrix" type="submit"> Download matrix </button>
+    </form>
+    </div>
+
+  </div>
+{% endblock %}
+
+{% block scripts %}
+
+<style>
+    .dataTables_filter { display: none;}
+</style>
+<script>
+$(document).ready(function() {
+
+    $('#empTable').DataTable({
+                'processing':true,
+                'language': {
+                    'processing': '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>'
+                 },
+                'serverSide': true,
+                'serverMethod': 'post',
+                'ajax': {
+                    'url':'{{ url_for('tasks.api_db')}}'
+                },
+                'lengthMenu': [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
+                searching: true,
+                sort: false,
+                'columns': [
+                    { data: 'id' },
+                    { data: 'sample_id' },
+                    { data: 'age' },
+                    { data: 'prediction' },
+                    { data: 'donor' },
+                    { data: 'dataset' },
+                    { data: 'status'}
+                ],
+                initComplete : function() {
+                    var input = $('#customSearchBox').unbind(),
+                        self = this.api(),
+                        $searchButton = $('#btnGSearch')
+                                   .text('search')
+                                   .click(function() {
+                                      self.search(input.val()).draw();
+                                   }),
+                        $clearButton = $('#btnGClear')
+                                   .text('clear')
+                                   .click(function() {
+                                      input.val('');
+                                      $searchButton.click();
+                                   })
+                }
+
+            });
+
+            oTable = $('#empTable').DataTable();
+            $('#btnSearch').click(function () {
+                //Apply search for Employee Name // DataTable column index 0
+                oTable.columns(0).search($('#txt_id').val().trim());
+                //Apply search for Country // DataTable column index 3
+                oTable.columns(1).search($('#opt_sampleid').val().trim());
+                oTable.columns(2).search($('#opt_age').val().trim());
+                oTable.columns(3).search($('#opt_prediction').val().trim());
+                oTable.columns(4).search($('#opt_donor').val().trim());
+                oTable.columns(5).search($('#opt_dataset').val().trim());
+                oTable.columns(6).search($('#opt_status').val().trim());
+                //hit search on server
+                oTable.draw();
+            });
+            $('#btnClear').click(function () {
+
+                oTable.columns().search('').draw();
+                document.getElementById("txt_id").value = "";
+                $('#opt_sampleid').val('').trigger('change');
+                $('#opt_age').val('').trigger('change');
+                $('#opt_prediction').val('').trigger('change');
+                $('#opt_donor').val('').trigger('change');
+                $('#opt_dataset').val('').trigger('change');
+                $('#opt_status').val('').trigger('change');
+
+
+            });
+
+});
+
+
+$('select').selectpicker();
+
+  document.getElementById('select').onclick = function () {
+    var selected = [];
+    for (var option of document.getElementById('multiselect').options) {
+      if (option.selected) {
+        selected.push(option.value);
+      }
+    }
+    alert("Successfully selected the following donors for filtering" + selected);
+
+  }
+
+</script>
+
+<script>
+
+
+</script>
+
+
+{% endblock %}

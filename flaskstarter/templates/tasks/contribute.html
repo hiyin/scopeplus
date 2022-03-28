@@ -1,0 +1,50 @@
+{% from "macros/_form.html" import render_form %}
+
+{% set page_title = 'My Tasks' %}
+
+{% extends 'layouts/base.html' %}
+
+{% block body %}
+{% include 'layouts/banner.html' %}
+
+<div class="container">
+  <div class="row justify-content-center">
+    <h2>Upload your data</h2>
+  </div>
+
+  <div class="jumbotron">
+    <form method="POST" action="{{ url_for('tasks.upload_file')}}" enctype="multipart/form-data">
+
+      <div class="input-group">
+        <div class="custom-file">
+          <input type="file" class="custom-file-input" id="inputGroupFile01"
+            aria-describedby="inputGroupFileAddon01" name="file">
+          <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+        </div>
+        <button class="btn btn-primary">Upload file</button>
+      </div>
+
+
+
+
+    </form>
+    </div>
+    <div class="jumbotron">
+    <form method="POST" action="{{ url_for('tasks.run_scClassify')}}" enctype="multipart/form-data" style="display:inline-block">
+        <button class="btn btn-primary">Run scClassify</button>
+    </form>
+    <form method="POST" action="{{ url_for('tasks.download_scClassify')}}" enctype="multipart/form-data" style="display:inline-block">
+        <button class="btn btn-primary">Download results</button>
+    </form>
+    </div>
+
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+    $(document).on('change', '.custom-file-input', function (event) {
+        $(this).next('.custom-file-label').html(event.target.files[0].name);
+    })
+</script>
+{% endblock %}

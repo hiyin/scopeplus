@@ -5,11 +5,11 @@
 {% extends 'layouts/base.html' %}
 
 {% block body %}
-  <div class="container">
-    <div class="row mt-5">
-      <div class="col-lg-4 offset-4">
-        {{ render_form(url_for('settings.profile'), form)}}
-      </div>
-    </div>
+<div class="log-in">
+  <div class="log-container flex-column">
+    <h3>Profile</h3>
+    {{ render_form(url_for('settings.profile'), form)}}
   </div>
+</div>
+{% include 'layouts/footer.html' %}
 {% endblock %}

@@ -12,3 +12,6 @@ pytest
 pandas
 plotly
 numpy
+pymongo
+shortuuid
+gunicorn

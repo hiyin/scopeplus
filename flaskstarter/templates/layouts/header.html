@@ -2,13 +2,16 @@
 <div class="collapse navbar-collapse" id="navbarResponsive">
   <ul class="navbar-nav ml-auto">
     <li class="nav-item">
-      <a class="nav-link" href="#">Home</a>
+      <a class="nav-link" href="{{ url_for('tasks.table_view') }}">Home</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="{{ url_for('tasks.my_tasks') }}">Explore Data</a>
+      <a class="nav-link" href="{{ url_for('tasks.table_view') }}">Explore Data</a>
     </li>
     <li class="nav-item">
-      <a class="nav-link" href="{{ url_for('tasks.add_task') }}">Contribute</a>
+      <a class="nav-link" href="{{ url_for('tasks.contribute') }}">Contribute</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('frontend.contact_us') }}">Contact Us</a>
     </li>
     <li class="nav-item dropdown">
       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{current_user.name}}</a>
@@ -30,14 +33,21 @@
 <div class="collapse navbar-collapse" id="navbarResponsive">
   <ul class="navbar-nav ml-auto">
     <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('tasks.table_view') }}">Home</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('tasks.table_view') }}">Explore Data</a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('frontend.contact_us') }}">Contact Us</a>
+    </li>
+    <li class="nav-item">
       <a class="nav-link" href="{{ url_for('frontend.signup') }}">Sign Up</a>
     </li>
     <li class="nav-item">
       <a class="nav-link" href="{{ url_for('frontend.login') }}">Login</a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{{ url_for('frontend.contact_us') }}">Contact</a>
-    </li>
+
   </ul>
 </div>
 {% endif %}

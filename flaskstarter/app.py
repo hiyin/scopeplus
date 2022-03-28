@@ -10,10 +10,13 @@ from .frontend import frontend, ContactUsAdmin
 from .sample_meta_all import SampleMetaAllModel, SampleMetaAllAdmin
 from .covid2k_meta import covid2k_metaModel, covid2k_metaAdmin
 from .covid2k_dense import covid2k_denseModel, covid2k_denseAdmin
-from .covid2k_dense_2k import covid2k_dense2kModel, covid2k_dense2kAdmin
-from .extensions import db, mail, cache, login_manager, admin
-from .utils import INSTANCE_FOLDER_PATH, pretty_date
-
+from .extensions import db, mail, cache, login_manager, admin, mongo
+from .utils import pretty_date
+import logging
+import os
+from pymongo import MongoClient
+from .model.umap import UmapView
+from .model.meta import MetaView
 
 # For import *
 __all__ = ['create_app']
@@ -23,6 +26,13 @@ DEFAULT_BLUEPRINTS = (
     settings,
     tasks
 )
+
+logging.basicConfig(level=logging.DEBUG,
+                   format='[%(asctime)s]: {} %(levelname)s %(message)s'.format(os.getpid()),
+                   datefmt='%Y-%m-%d %H:%M:%S',
+                   handlers=[logging.StreamHandler()])
+
+logger = logging.getLogger()
 
 
 def create_app(config=None, app_name=None, blueprints=None):
@@ -34,8 +44,10 @@ def create_app(config=None, app_name=None, blueprints=None):
         blueprints = DEFAULT_BLUEPRINTS
 
     app = Flask(app_name,
-                instance_path=INSTANCE_FOLDER_PATH,
                 instance_relative_config=True)
+
+    # add db
+
 
     configure_app(app, config)
     configure_hook(app)
@@ -50,11 +62,14 @@ def create_app(config=None, app_name=None, blueprints=None):
 
 def configure_app(app, config=None):
     # Different ways of configurations i.e local or production
-
-    app.config.from_object(DefaultConfig)
-
-    app.config.from_pyfile('production.cfg', silent=True)
-
+    logger.info(f"Starting app in %s environment" % os.getenv('FLASK_ENV'))
+    flask_env = os.environ.get('FLASK_ENV')
+    if 'development' in flask_env:
+        print('configuring for development')
+        app.config.from_object(DefaultConfig)
+    # if exists under root ./instance/X.cfg
+    # app.config.from_pyfile('secret_config.cfg')
+    # print(app.instance_path)
     if config:
         app.config.from_object(config)
 
@@ -71,13 +86,17 @@ def configure_extensions(app):
     cache.init_app(app)
 
     # flask-admin
+    # sqlite db data
     admin.add_view(ContactUsAdmin(db.session))
     admin.add_view(UsersAdmin(db.session))
     admin.add_view(MyTaskModelAdmin(db.session))
     admin.add_view(SampleMetaAllAdmin(db.session))
     admin.add_view(covid2k_metaAdmin(db.session))
     admin.add_view(covid2k_denseAdmin(db.session))
-    admin.add_view(covid2k_dense2kAdmin(db.session))
+    # mongo db data
+    admin.add_view(UmapView(mongo['umap']))
+    admin.add_view(MetaView(mongo['single_cell_meta']))
+
     admin.init_app(app)
 
     @login_manager.user_loader
@@ -133,3 +152,4 @@ def configure_error_handlers(app):
     @app.errorhandler(500)
     def server_error_page(error):
         return "Oops! Internal server error. Please try after sometime.", 500
+

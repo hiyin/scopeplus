@@ -16,12 +16,13 @@ from ..extensions import db, login_manager
 from .forms import (SignupForm, LoginForm, RecoverPasswordForm,
                     ChangePasswordForm, ContactUsForm)
 from .models import ContactUs
-
+from ..utils import TMP_FOLDER
 from ..emails import send_async_email
 import sqlite3
+from datetime import datetime
+import os
 
 frontend = Blueprint('frontend', __name__)
-
 
 @frontend.route('/dashboard')
 @login_required
@@ -35,12 +36,15 @@ def dashboard():
 @frontend.route('/')
 def index():
     # current_app.logger.debug('debug')
-
     if current_user.is_authenticated:
-        return redirect(url_for('frontend.dashboard'))
+        return redirect(url_for('tasks.table_view'))
 
-    return render_template('frontend/landing.html', _active_home=True)
+    return render_template('tasks/landing.html', _active_home=True)
 
+#@frontend.route('/home')
+#def home():
+
+#   return render_template('frontend/landing.html', _active_home=True)
 
 @frontend.route('/contact-us', methods=['GET', 'POST'])
 def contact_us():
