@@ -11,30 +11,11 @@
     <h2>Home</h2>
   </div>
 
-  <div id="chart" class="chart"></div>
-
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script>
-  $(document).ready(function () {
-    $('#data').DataTable();
-  });
 
-  $('select').selectpicker();
-
-  document.getElementById('select').onclick = function () {
-    var selected = [];
-    for (var option of document.getElementById('multiselect').options) {
-      if (option.selected) {
-        selected.push(option.value);
-      }
-    }
-    alert("Successfully selected the following donors for filtering" + selected);
-
-  }
-</script>
 
 
 

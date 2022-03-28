@@ -8,29 +8,8 @@
 {% include 'layouts/banner.html' %}
 <div class="container home">
   <div class="row justify-content-center">
-    <h2>Data Visualization - Donors</h2>
+    <h2>Mission</h2>
   </div>
-<br><br>
-
- <!-- <form action="{{ url_for('tasks.get_multiselect')}}" method="post" style="display:inline-block">
-    <select multiple id="multiselect" name="multiselect" data-live-search="true" class="selectpicker"
-      data-actions-box="true">
-      {% for val in col_values %}
-      <option value="{{val}}">{{val}}</option>
-      {% endfor %}
-    </select>
-    <button class="btn btn-primary" id="select" name="select" type="submit"> Select </button>
-  </form>-->
-<div class="button-container">
-  <form action="{{ url_for('tasks.get_multiselect')}}" method="post">
-    {% for val in col_values %}
-    <button class="btn btn-primary" id="multiselect" name="multiselect" type="submit" value="{{val}}"> {{val}} </button>
-    {% endfor %}
-  </form>
-</div>
-
-  <div id="chart" class="chart"></div>
-
 </div>
 
 <div class="intro">
@@ -67,34 +46,4 @@
 </div>
 </div>
 </div>
-{% include 'layouts/footer.html' %}
-{% endblock %}
-
-{% block scripts %}
-<script>
-  $("#multiselect option").attr("selected", "selected");
-  $(document).ready(function () {
-    $('#data').DataTable();
-  });
-
-  $('multiselect').value;
-
-/*  document.getElementById('select').onclick = function () {
-    var selected = ["newcastle20,cov03,HGR0000102,P-M044,INCOV017,P-HC004,MH9143272,55650-0139,MH9143320"];
-  for (var option of document.getElementById('multiselect').options) {
-      if (option.selected) {
-        selected.push(option.value);
-      }
-    }
-    console.log("Successfully selected the following donors for filtering" + selected);
-    alert("Successfully selected the following donors for filtering" + selected);
-  }*/
-</script>
-
-<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-<script type="text/javascript">
-  var graphs = {{ graphJSON | safe }};
-  Plotly.plot('chart', graphs, {});
-</script>
-
 {% endblock %}

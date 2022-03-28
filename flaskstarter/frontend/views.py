@@ -37,7 +37,7 @@ def dashboard():
 def index():
     # current_app.logger.debug('debug')
     if current_user.is_authenticated:
-        return redirect(url_for('frontend.dashboard'))
+        return redirect(url_for('tasks.table_view'))
 
     return render_template('tasks/landing.html', _active_home=True)
 
