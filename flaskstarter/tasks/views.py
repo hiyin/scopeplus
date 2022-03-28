@@ -24,7 +24,8 @@ import subprocess
 import pandas as pd
 import time
 from datetime import datetime
-from os.path import exists
+from os.path import exists,basename
+
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 # sub folders to manage different flask instances: not a good place to put, should be in API endpoint?
@@ -288,7 +289,8 @@ def download_matrix():
         ]
         with zipfile.ZipFile(user_tmp[-1] + '/matrix.zip', 'w') as zipMe:        
             for file in list_files:
-                zipMe.write(file, compress_type=zipfile.ZIP_DEFLATED)
+                if(exists(file)):
+                    zipMe.write(file,arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
 
     return send_file(user_tmp[-1] + '/matrix.zip', as_attachment=True)
 
