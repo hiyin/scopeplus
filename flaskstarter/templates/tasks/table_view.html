@@ -87,8 +87,8 @@
                         </select>
                     </td>
                     <td>
-                        <input type="button" value="Search" id="btnSearch" />
-                        <input type="button" value="Clear" id="btnClear" />
+                        <input type="button" class="btn btn-primary" style="display:inline-block" value="Search" id="btnSearch" />
+                        <input type="button" class="btn btn-primary" style="display:inline-block" value="Clear" id="btnClear" />
                     </td>
                 </tr>
             </tbody>
@@ -137,6 +137,13 @@
 
 <style>
     .dataTables_filter { display: none;}
+    .page-item.active .page-link {
+    background-color: #04AA6D !important;
+    border: 1px solid #ffffff;
+    }
+    .page-link {
+    color: black !important;
+    }
 </style>
 <script>
 $(document).ready(function() {
