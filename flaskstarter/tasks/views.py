@@ -58,12 +58,39 @@ def upload_file():
 @tasks.route('/show_plot', methods=['GET', 'POST'])
 def show_plot():     
     cell_color = request.form.get('name_opt_col')
+    cell_gene = request.form.get('name_opt_gene')
+    df_genes = pd.read_csv(TMP_FOLDER+"/genes.tsv", sep="\t", header=None)
+
+
     if(cell_color is None):
         cell_color="scClassify_prediction"
+    if(cell_gene is None):
+        print("----No gene selected")
+    else:
+        print("----Gene is selected")
+        if(cell_gene in df_genes.values):
+            _byid = pd.read_csv(user_tmp[-1] + "/ids.csv").values.tolist()
+            lookups = list(np.squeeze(_byid))
+            print("debugging")
+            print(lookups)
+            checkpoint_time = time.time()
+            query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
+            print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
-    graphJSON,df_plot = plot_umap(cell_color)
-    colors = df_plot.columns.values
-    return render_template('tasks/show_plot.html', graphJSON=graphJSON,colors=colors)
+            ##text=List of strings to be written to file
+            with open(user_tmp[-1] + '/'+cell_gene+'.tsv', 'w') as file:
+                file.write("\t".join(["_id","gene","barcode",cell_gene]))
+                file.write('\n')
+                for line in query:
+                    file.write("\t".join([str(e) for e in line.values()]))
+                    file.write('\n')
+        else:
+            print("Gene not found")
+    
+    graphJSON,df_plot = plot_umap(cell_color,cell_gene)
+    colors = list(df_plot.columns.values.ravel())
+    genes = df_genes.values.ravel()
+    return render_template('tasks/show_plot.html', graphJSON=graphJSON,colors=colors,genes=genes)
 
 
 def plot_tse():
@@ -84,11 +111,17 @@ def plot_tse():
     return graphJSON
 
 ## Create by junyi
-def plot_umap(cell_color='scClassify_prediction'):
+def plot_umap(cell_color='scClassify_prediction',gene_color=None):
     df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)
     df.columns = ["umap_0","umap_1"]
     df_meta = pd.read_csv(user_tmp[-1] + '/meta.tsv', index_col=1,sep="\t")
     df_plot = df.merge(df_meta, left_index=True, right_index=True)
+
+    if(not(gene_color is None)):
+        df_gene = pd.read_csv(user_tmp[-1] + '/'+gene_color+'.tsv',sep="\t", index_col=2)
+        df_plot = df_plot.merge(df_gene, left_index=True, right_index=True,how="left")
+        cell_color = gene_color
+        df_plot = df_plot.fillna(0)
 
     fig = px.scatter(
         df_plot, x="umap_0", y="umap_1",color=cell_color)
@@ -256,10 +289,14 @@ def download_matrix():
         print(lookups)
         start_time2 = time.time()
         mtx = mongo.matrix.find({'barcode': {'$in': lookups}})
-        #query_counts = mtx.count()
+        print("query finished --- %s seconds ---" % (time.time() - start_time2))
+
+        start_time2 = time.time()
+
+        #query_counts = mtx.size()
         mtx = list(mtx)
 
-        print("query finished --- %s seconds ---" % (time.time() - start_time2))
+        print("list finished --- %s seconds ---" % (time.time() - start_time2))
 
         ## Parse the barcode and gene based on name 
         def get_dict(path, sep="\t", header=None,save_path=None):

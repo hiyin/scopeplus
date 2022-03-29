@@ -11,6 +11,18 @@
   <div class="row justify-content-center">
     <h2>UMAP Plot</h2>
   </div>
+  <td>Gene Option</td>
+  <td>
+    <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
+      <input list="opt_gene" name="name_opt_gene">
+        <datalist id="opt_gene">
+          {% for val in genes %}
+          <option value="{{val}}">{{val}}</option>
+          {% endfor %}
+      </datalist>
+      <button id="idbtnSelectgene" name="btnSelectgene" type="submit"> Search </button>
+    </form>  
+  </td>
 
   <td>Color Option</td>
   <td>
