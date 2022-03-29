@@ -11,7 +11,7 @@
    <div class="row justify-content-center">
         <h2>Explore Data</h2>
    </div>
-   <div class="jumbotron">
+   <div class="jumbotron" style="display:none">
     <h4>
        Global Search
     </h4>
@@ -32,7 +32,7 @@
                 <tr>
                     <td>Sample id</td>
                     <td>
-                    <select id="opt_sampleid">
+                    <select id="opt_sampleid" multiple="multiple">
                             <option label=" "></option>
                             {% for val in fsampleid %}
                             <option value="{{val}}">{{val}}</option>
@@ -41,7 +41,7 @@
                     </td>
                     <td>Age</td>
                     <td>
-                    <select id="opt_age">
+                    <select id="opt_age" multiple="multiple">
                             <option label=" "></option>
                             {% for val in fage %}
                             <option value="{{val}}">{{val}}</option>
@@ -50,7 +50,7 @@
                     </td>
                     <td>Cell type</td>
                     <td>
-                    <select id="opt_prediction">
+                    <select id="opt_prediction" multiple="multiple">
                             <option label=" "></option>
                             {% for val in fprediction %}
                             <option value="{{val}}">{{val}}</option>
@@ -61,7 +61,7 @@
                 <tr>
                     <td>Donor</td>
                     <td>
-                        <select id="opt_donor">
+                        <select id="opt_donor" multiple="multiple">
                             <option label=" "></option>
                             {% for val in fdonor %}
                             <option value="{{val}}">{{val}}</option>
@@ -70,7 +70,7 @@
                     </td>
                     <td>Status</td>
                      <td>
-                        <select id="opt_status">
+                        <select id="opt_status" multiple="multiple">
                             <option label=" "></option>
                             {% for val in fstatus %}
                             <option value="{{val}}">{{val}}</option>
@@ -79,7 +79,7 @@
                     </td>
                     <td>Dataset</td>
                     <td>
-                        <select id="opt_dataset">
+                        <select id="opt_dataset" multiple="multiple">
                             <option label=" "></option>
                             {% for val in fdataset %}
                             <option value="{{val}}">{{val}}</option>
@@ -122,7 +122,7 @@
     </form>
 
     <form action="{{ url_for('tasks.show_plot')}}" method="get" style="display:inline-block">
-      <button class="btn btn-primary" name="show_plot" type="submit"> Show tSNE plot </button>
+      <button class="btn btn-primary" name="show_plot" type="submit"> Show UMAP plot </button>
     </form>
 
     <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
@@ -140,6 +140,42 @@
 </style>
 <script>
 $(document).ready(function() {
+    $('#opt_sampleid').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...'
+        });
+    $('#opt_age').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...'
+        });
+    $('#opt_donor').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...'
+        });
+    $('#opt_prediction').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...'
+        });
+    $('#opt_dataset').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...'
+        });
+    $('#opt_status').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...'
+        });
 
     $('#empTable').DataTable({
                 'processing':true,
@@ -186,12 +222,12 @@ $(document).ready(function() {
                 //Apply search for Employee Name // DataTable column index 0
                 oTable.columns(0).search($('#txt_id').val().trim());
                 //Apply search for Country // DataTable column index 3
-                oTable.columns(1).search($('#opt_sampleid').val().trim());
-                oTable.columns(2).search($('#opt_age').val().trim());
-                oTable.columns(3).search($('#opt_prediction').val().trim());
-                oTable.columns(4).search($('#opt_donor').val().trim());
-                oTable.columns(5).search($('#opt_dataset').val().trim());
-                oTable.columns(6).search($('#opt_status').val().trim());
+                oTable.columns(1).search($('#opt_sampleid').val().join("|"));
+                oTable.columns(2).search($('#opt_age').val().join("|"));
+                oTable.columns(3).search($('#opt_prediction').val().join("|"));
+                oTable.columns(4).search($('#opt_donor').val().join("|"));
+                oTable.columns(5).search($('#opt_dataset').val().join("|"));
+                oTable.columns(6).search($('#opt_status').val().join("|"));
                 //hit search on server
                 oTable.draw();
             });
@@ -199,12 +235,12 @@ $(document).ready(function() {
 
                 oTable.columns().search('').draw();
                 document.getElementById("txt_id").value = "";
-                $('#opt_sampleid').val('').trigger('change');
-                $('#opt_age').val('').trigger('change');
-                $('#opt_prediction').val('').trigger('change');
-                $('#opt_donor').val('').trigger('change');
-                $('#opt_dataset').val('').trigger('change');
-                $('#opt_status').val('').trigger('change');
+                $("#opt_sampleid").multiselect('clearSelection');
+                $('#opt_age').multiselect('clearSelection');
+                $('#opt_prediction').multiselect('clearSelection');
+                $('#opt_donor').multiselect('clearSelection');
+                $('#opt_dataset').multiselect('clearSelection');
+                $('#opt_status').multiselect('clearSelection');
 
 
             });
@@ -224,7 +260,6 @@ $('select').selectpicker();
     alert("Successfully selected the following donors for filtering" + selected);
 
   }
-
 </script>
 
 <script>
