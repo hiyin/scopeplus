@@ -32,7 +32,7 @@
                 <tr>
                     <td>Sample id</td>
                     <td>
-                    <select id="opt_sampleid" multiple="multiple">
+                    <select id="opt_sampleid" class="multibox" multiple="multiple">
                             <option label=" "></option>
                             {% for val in fsampleid %}
                             <option value="{{val}}">{{val}}</option>
@@ -41,7 +41,7 @@
                     </td>
                     <td>Age</td>
                     <td>
-                    <select id="opt_age" multiple="multiple">
+                    <select id="opt_age" class="multibox" multiple="multiple">
                             <option label=" "></option>
                             {% for val in fage %}
                             <option value="{{val}}">{{val}}</option>
@@ -50,7 +50,7 @@
                     </td>
                     <td>Cell type</td>
                     <td>
-                    <select id="opt_prediction" multiple="multiple">
+                    <select id="opt_prediction" class="multibox" multiple="multiple">
                             <option label=" "></option>
                             {% for val in fprediction %}
                             <option value="{{val}}">{{val}}</option>
@@ -61,7 +61,7 @@
                 <tr>
                     <td>Donor</td>
                     <td>
-                        <select id="opt_donor" multiple="multiple">
+                        <select id="opt_donor" class="multibox" multiple="multiple">
                             <option label=" "></option>
                             {% for val in fdonor %}
                             <option value="{{val}}">{{val}}</option>
@@ -70,7 +70,7 @@
                     </td>
                     <td>Status</td>
                      <td>
-                        <select id="opt_status" multiple="multiple">
+                        <select id="opt_status" class="multibox" multiple="multiple">
                             <option label=" "></option>
                             {% for val in fstatus %}
                             <option value="{{val}}">{{val}}</option>
@@ -79,7 +79,7 @@
                     </td>
                     <td>Dataset</td>
                     <td>
-                        <select id="opt_dataset" multiple="multiple">
+                        <select id="opt_dataset" class="multibox" multiple="multiple">
                             <option label=" "></option>
                             {% for val in fdataset %}
                             <option value="{{val}}">{{val}}</option>
@@ -140,42 +140,14 @@
 </style>
 <script>
 $(document).ready(function() {
-    $('#opt_sampleid').multiselect({
+    $('.multibox').multiselect({
             includeSelectAllOption: true,
             enableFiltering: true,
             enableCaseInsensitiveFiltering: true,
             filterPlaceholder: 'Search for something...'
         });
-    $('#opt_age').multiselect({
-            includeSelectAllOption: true,
-            enableFiltering: true,
-            enableCaseInsensitiveFiltering: true,
-            filterPlaceholder: 'Search for something...'
-        });
-    $('#opt_donor').multiselect({
-            includeSelectAllOption: true,
-            enableFiltering: true,
-            enableCaseInsensitiveFiltering: true,
-            filterPlaceholder: 'Search for something...'
-        });
-    $('#opt_prediction').multiselect({
-            includeSelectAllOption: true,
-            enableFiltering: true,
-            enableCaseInsensitiveFiltering: true,
-            filterPlaceholder: 'Search for something...'
-        });
-    $('#opt_dataset').multiselect({
-            includeSelectAllOption: true,
-            enableFiltering: true,
-            enableCaseInsensitiveFiltering: true,
-            filterPlaceholder: 'Search for something...'
-        });
-    $('#opt_status').multiselect({
-            includeSelectAllOption: true,
-            enableFiltering: true,
-            enableCaseInsensitiveFiltering: true,
-            filterPlaceholder: 'Search for something...'
-        });
+
+
 
     $('#empTable').DataTable({
                 'processing':true,
