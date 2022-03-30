@@ -1,32 +1,45 @@
+
+<script src="https://cdn.jsdelivr.net/npm/typed.js@2.0.12"></script>
+
 <div class="d-flex flex-column justify-content-center" id="banner">
     <div id="projectName" class="d-flex justify-content-center">
         <h4>2.5 MILLION <span>SINGLE CELL</span></h4>
     </div>
     <div id="projectAim0" class="d-flex justify-content-center">
-        <h1>Explore Single-Cell Immunology</h1>
+        <div class="typed-strings">
+            <h1>Explore Single-Cell Immunology</h1>
+        </div>
+        <span class="typed"></span>
     </div>
     <div id="projectAim1" class="d-flex justify-content-center projectAim">
-        <h1>of SARS-CoV-2 Infection</h1>
+        <div class="typed-strings2">
+            <h1>of SARS-CoV-2 Infection</h1>
+        </div>
+        <span class="typed2"></span>
     </div>
     <div id="projectDisp" class="d-flex justify-content-center">
-        <h5 class="text-center">Continuously Updated  |  Standardized  |  Download-ready  |  Open Datasets</h5>
+        <div class="typed-strings">
+            <h5><strong>Continuously Updated  |  Standardized  |  Download-ready  |  Open Datasets</strong></h5>
+        </div>
+        <span class="typed"></span>
     </div>
 </div>
+
 <div id="dashrow" class="d-flex justify-content-center">
     <div id="dashboard" class="d-flex justify-content-between container-fluid">
         <div class="dash-item">
             <div class="item1"><img src="{{url_for('static', filename='Group.png')}}" width="64" height="64"/></div>
-            <div class="item2"><h2>3.1M</h2></div>
+            <div class="item2"><h2 id="animatedCellCount">25000000</h2></div>
             <div class="item3">Cells</div>
         </div>
         <div class="dash-item">
             <div class="item1"><img src="{{url_for('static', filename='Group 38.png')}}" width="76" height="53"/></div>
-            <div class="item2"><h2>12k</h2></div>
+            <div class="item2"><h2 id="animatedDonorCount">542</h2></div>
             <div class="item3">Donors</div>
         </div>
         <div class="dash-item">
             <div class="item1"><img src="{{url_for('static', filename='Group 36.png')}}" width="64" height="64"/></div>
-            <div class="item2"><h2>21</h2></div>
+            <div class="item2"><h2 id="animatedDatasetCount">19</h2></div>
             <div class="item3">Datasets</div>
         </div>
         <div class="dash-item">
@@ -37,3 +50,39 @@
     </div>
 
 </div>
+
+
+<script>
+        function animateValue(obj, start, end, duration) {
+          let startTimestamp = null;
+          const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start);
+            if (progress < 1) {
+              window.requestAnimationFrame(step);
+            }
+          };
+          window.requestAnimationFrame(step);
+        }
+
+        const obj = document.getElementById("animatedCellCount");
+        animateValue(obj, 0, 2500000, 5000);
+
+        const obj2 = document.getElementById("animatedDonorCount");
+        animateValue(obj2, 0, 542, 5000);
+
+        const obj3 = document.getElementById("animatedDatasetCount");
+        animateValue(obj3, 0, 19, 5000);
+
+     var typed = new Typed('.typed', {
+       typeSpeed: 50,
+       stringsElement: '.typed-strings'
+     });
+
+     var typed2 = new Typed('.typed2', {
+       typeSpeed: 50,
+       startDelay: 3000,
+       stringsElement: '.typed-strings2'
+     });
+</script>
