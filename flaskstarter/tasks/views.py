@@ -71,8 +71,7 @@ def show_plot():
         if(cell_gene in df_genes.values):
             _byid = pd.read_csv(user_tmp[-1] + "/ids.csv").values.tolist()
             lookups = list(np.squeeze(_byid))
-            print("debugging")
-            print(lookups)
+            print("Query ing")
             checkpoint_time = time.time()
             query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
             print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
@@ -84,10 +83,18 @@ def show_plot():
                 for line in query:
                     file.write("\t".join([str(e) for e in line.values()]))
                     file.write('\n')
+
+            checkpoint_time = time.time()
+            print("write finished --- %s seconds ---" % (time.time() - checkpoint_time))
+
         else:
             print("Gene not found")
     
+
+    checkpoint_time = time.time()
     graphJSON,df_plot = plot_umap(cell_color,cell_gene)
+    print("Plot finished --- %s seconds ---" % (time.time() - checkpoint_time))
+
     colors = list(df_plot.columns.values.ravel())
     genes = df_genes.values.ravel()
     return render_template('tasks/show_plot.html', graphJSON=graphJSON,colors=colors,genes=genes)

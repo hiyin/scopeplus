@@ -7,6 +7,10 @@
 {% block body %}
 {% include 'layouts/banner.html' %}
 
+
+<div id="loading",style="display:none;"></div>
+<div id="loadingbox",style="display:none;">Loading</div>
+
 <div class="container">
   <div class="row justify-content-center">
     <h2>UMAP Plot</h2>
@@ -20,7 +24,7 @@
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
       </datalist>
-      <button id="idbtnSelectgene" name="btnSelectgene" type="submit"> Search </button>
+      <button id="idbtnSelectgene" name="btnSelectgene" type="submit" onclick="loading();"> Search </button>
     </form>  
   </td>
 
@@ -48,5 +52,13 @@
   var graphs = {{ graphJSON | safe }};
   Plotly.plot('chart', graphs, {});
 </script>
+
+<!-- Show loading box -->
+<script type="text/javascript">// <![CDATA[
+  function loading(){
+      $("#loading").show();
+      $("#loadingbox").show();       
+  }
+// ]]></script>
 
 {% endblock %}
