@@ -10,7 +10,7 @@ from flaskstarter.tasks.forms import UmapForm
 import csv
 import gzip
 import zipfile
-
+import shutil
 
 import pandas as pd
 import numpy as np
@@ -61,7 +61,41 @@ def show_plot():
     cell_gene = request.form.get('name_opt_gene')
     df_genes = pd.read_csv(TMP_FOLDER+"/genes.tsv", sep="\t", header=None)
 
+    flag_idmissing = 0
 
+    # No ids.csv file is presented:
+    if(not (exists(user_tmp[-1] + '/ids.csv'))):
+        # Search box is also empty
+        if(len(collection_searched)==0):
+            shutil.copy2(TMP_FOLDER+'/default/umap.csv', user_tmp[-1] + '/umap.csv') # complete target filename given
+            shutil.copy2(TMP_FOLDER+'/default/meta.tsv', user_tmp[-1] + '/meta.tsv') # complete target filename given
+            # Change to show default case
+            flag_idmissing = 1
+        # If not empty, write id meta umap
+        else:
+            #id = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
+            meta = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}})
+            ids = write_id_meta(user_tmp[-1], meta)
+            umap = mongo.umap.find({'id': {'$in': ids}})
+            write_umap(user_tmp[-1], umap)
+
+    # ID is presented, no meta data:
+    elif(not (exists(user_tmp[-1] + '/meta.tsv'))):
+        f = user_tmp[-1] + "/ids.csv"
+        _byid = pd.read_csv(f).values.tolist()
+        lookups = list(np.squeeze(_byid))
+        meta = mongo.single_cell_meta.find({'id': {'$in': lookups}})
+        write_file_meta(user_tmp[-1],meta)
+    
+    # If ID is presented, no umap:
+    elif(not (exists(user_tmp[-1] + '/umap.tsv'))):
+        f = user_tmp[-1] + "/ids.csv"
+        _byid = pd.read_csv(f).values.tolist()
+        lookups = list(np.squeeze(_byid))
+        umap = mongo.umap.find({'id': {'$in': lookups}})
+        write_umap(user_tmp[-1], umap)
+
+    # IF all files are provided
     if(cell_color is None):
         cell_color="scClassify_prediction"
     if(cell_gene is None):
@@ -69,7 +103,12 @@ def show_plot():
     else:
         print("----Gene is selected")
         if(cell_gene in df_genes.values):
-            _byid = pd.read_csv(user_tmp[-1] + "/ids.csv").values.tolist()
+            # Lookup gene in default dir or user dir based on condition
+            if(flag_idmissing==0):
+                _byid = pd.read_csv(user_tmp[-1]  + "/ids.csv").values.tolist()
+            else:
+                _byid = pd.read_csv(TMP_FOLDER+'/default/ids.csv').values.tolist()
+                
             lookups = list(np.squeeze(_byid))
             print("Query ing")
             checkpoint_time = time.time()
@@ -77,6 +116,7 @@ def show_plot():
             print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
             ##text=List of strings to be written to file
+            # Force to write to the user folder
             with open(user_tmp[-1] + '/'+cell_gene+'.tsv', 'w') as file:
                 file.write("\t".join(["_id","gene","barcode",cell_gene]))
                 file.write('\n')
@@ -88,9 +128,9 @@ def show_plot():
             print("write finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
         else:
+            cell_gene = None
             print("Gene not found")
     
-
     checkpoint_time = time.time()
     graphJSON,df_plot = plot_umap(cell_color,cell_gene)
     print("Plot finished --- %s seconds ---" % (time.time() - checkpoint_time))
@@ -198,6 +238,27 @@ def write_file_byid(path, towrite):
         write = csv.writer(file)
         write.writerows(data)
 
+# Write id meta file
+def write_id_meta(path, towrite):
+    fid = path + '/ids.csv'
+    fmeta = path + '/meta.tsv'
+
+    print('writing ids and meta')
+    ids = []
+    with open(fid, 'w') as file_id,open(fmeta, 'w') as file_meta:
+        file_meta.write("\t".join([str(e) for e in towrite[0].keys()]))
+        file_meta.write('\n')
+
+        for r in towrite:
+            # Writ id
+            row = str(r['id'])
+            file_id.write(row)
+            file_id.write('\n')
+            ids.append(row)
+            # Writ meta
+            file_meta.write("\t".join([str(e) for e in r.values()]))
+            file_meta.write('\n')
+    return ids
 
 # Write file
 def write_file_meta(path, towrite):
@@ -285,23 +346,30 @@ def download_umap():
     write_umap(user_tmp[-1], umap)
     return send_file(user_tmp[-1] + '/umap.csv', as_attachment=True)
 
-
 @tasks.route('/download_matrix',methods=['POST'])
 def download_matrix():
+    # No query is search, then we use default use case:
+    if(not (exists(user_tmp[-1] + '/ids.csv'))):
+        if(len(collection_searched)==0):
+            return send_file(TMP_FOLDER+'/default/matrix.zip', as_attachment=True)
+        else:
+            #id = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
+            meta = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}})
+            ids = write_id_meta(user_tmp[-1], meta)
+
     # Down load 10x matrix if not exist
     if(not (exists(user_tmp[-1] + '/matrix.mtx.gz'))):
         _byid = pd.read_csv(user_tmp[-1] + "/ids.csv").values.tolist()
         lookups = list(np.squeeze(_byid))
         print("debugging")
-        print(lookups)
         start_time2 = time.time()
         mtx = mongo.matrix.find({'barcode': {'$in': lookups}})
         print("query finished --- %s seconds ---" % (time.time() - start_time2))
 
         start_time2 = time.time()
-
         #query_counts = mtx.size()
-        mtx = list(mtx)
+        #mtx = list(mtx)
+        doc_count = mongo.matrix.count_documents({'barcode': {'$in': lookups}})
 
         print("list finished --- %s seconds ---" % (time.time() - start_time2))
 
@@ -322,7 +390,7 @@ def download_matrix():
         # Save barcodes
         if(not (exists(user_tmp[-1] + '/barcodes.tsv.gz'))):
             dict_barcode = get_dict(user_tmp[-1] + "/ids.csv", sep=",", save_path=user_tmp[-1] + "/barcodes.tsv.gz")
-        write_10x_mtx(user_tmp[-1], dict_gene, dict_barcode, len(mtx), mtx)
+        write_10x_mtx(user_tmp[-1], dict_gene, dict_barcode, doc_count, mtx)
 
     if(not (exists(user_tmp[-1] + '/matrix.zip'))):
         list_files = [
