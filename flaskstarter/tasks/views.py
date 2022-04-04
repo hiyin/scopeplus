@@ -11,6 +11,7 @@ import csv
 import gzip
 import zipfile
 import shutil
+import re
 
 import pandas as pd
 import numpy as np
@@ -208,6 +209,7 @@ def download_scClassify():
 def table_view():
     fsampleid = get_field("sample_id")
     fage = get_field("age")
+    print(fage)
     fdonor = get_field("donor")
     fprediction = get_field("scClassify_prediction")
     fstatus = get_field("Status_on_day_collection_summary")
@@ -374,7 +376,7 @@ def download_matrix():
         print("list finished --- %s seconds ---" % (time.time() - start_time2))
 
         ## Parse the barcode and gene based on name 
-        def get_dict(path, sep="\t", header=None,save_path=None):
+        def get_dict(path, sep="\t", header=None, save_path=None):
             # Transfrom the gene/barcode name to the corresponding number
             df_read = pd.read_csv(path, sep=sep, header=header)
             row_num = [i for i in range(1, len(df_read)+1)]
@@ -429,7 +431,7 @@ def api_db():
         map = {}
         for i in request.form:
             if ("[search][value]" in i) and (len(request.form[i]) != 0):
-                column_value = request.form[i]
+                column_value = request.form[i].split("|")
                 if "0" in i:
                     search_column = "id"
                     map[search_column] = column_value
@@ -480,14 +482,21 @@ def api_db():
             if len(collection_searched) == 0:
                 print("using search id")
                 construct = []
+                re_match = re.compile(r'^\d{1,10}\.?\d{0,10}$')
                 for k in map:
-                    if (k in ["age", "sample_id"]) and map[k].isdigit():
-                        # if string only contains numbers, we need to convert it to integer to search
-                        # age contains strings and integers, but the front-end will always process them to strings
-                        q = {k: {"$in": [int(map[k])]}}
-                        construct.append(q)
-                    else:
-                        q = {k: {"$in": [map[k]]}}
+                    if (k in ["age", "sample_id"]):
+                        l = []
+                        for ki in map[k]:
+                            if re_match.findall(ki):
+                                # if string only contains numbers, we need to convert it to integer to search
+                                # age contains strings and integers, but the front-end will always process them to strings
+                                if ki.isdigit():
+                                    l.append(int(ki))
+                                else:
+                                    l.append(int(float(ki)))
+                            else:
+                                l.append(ki)
+                        q = {k: {"$in": l}}
                         print(q)
                         construct.append(q)
                 print(construct)
