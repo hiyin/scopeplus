@@ -64,36 +64,37 @@ def show_plot():
 
     flag_idmissing = 0
 
-    # No ids.csv file is presented:
-    if(not (exists(user_tmp[-1] + '/ids.csv'))):
-        # Search box is also empty
-        if(len(collection_searched)==0):
+    # Search is empty
+    if(len(collection_searched)==0):
+        # No ids.csv file is presented:
+        if(not (exists(user_tmp[-1] + '/ids.csv'))):
             shutil.copy2(TMP_FOLDER+'/default/umap.csv', user_tmp[-1] + '/umap.csv') # complete target filename given
             shutil.copy2(TMP_FOLDER+'/default/meta.tsv', user_tmp[-1] + '/meta.tsv') # complete target filename given
             # Change to show default case
             flag_idmissing = 1
-        # If not empty, write id meta umap
-        else:
-            #id = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
-            meta = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}})
-            ids = write_id_meta(user_tmp[-1], meta)
-            umap = mongo.umap.find({'id': {'$in': ids}})
+
+        # ID is presented, no meta data:
+        elif(not (exists(user_tmp[-1] + '/meta.tsv'))):
+            f = user_tmp[-1] + "/ids.csv"
+            _byid = pd.read_csv(f).values.tolist()
+            lookups = list(np.squeeze(_byid))
+            meta = mongo.single_cell_meta.find({'id': {'$in': lookups}})
+            write_file_meta(user_tmp[-1],meta)
+        
+        # If ID is presented, no umap:
+        elif(not (exists(user_tmp[-1] + '/umap.tsv'))):
+            f = user_tmp[-1] + "/ids.csv"
+            _byid = pd.read_csv(f).values.tolist()
+            lookups = list(np.squeeze(_byid))
+            umap = mongo.umap.find({'id': {'$in': lookups}})
             write_umap(user_tmp[-1], umap)
 
-    # ID is presented, no meta data:
-    elif(not (exists(user_tmp[-1] + '/meta.tsv'))):
-        f = user_tmp[-1] + "/ids.csv"
-        _byid = pd.read_csv(f).values.tolist()
-        lookups = list(np.squeeze(_byid))
-        meta = mongo.single_cell_meta.find({'id': {'$in': lookups}})
-        write_file_meta(user_tmp[-1],meta)
-    
-    # If ID is presented, no umap:
-    elif(not (exists(user_tmp[-1] + '/umap.tsv'))):
-        f = user_tmp[-1] + "/ids.csv"
-        _byid = pd.read_csv(f).values.tolist()
-        lookups = list(np.squeeze(_byid))
-        umap = mongo.umap.find({'id': {'$in': lookups}})
+    # If search box not empty, write id meta umap
+    else:
+        #id = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
+        meta = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}})
+        ids = write_id_meta(user_tmp[-1], meta)
+        umap = mongo.umap.find({'id': {'$in': ids}})
         write_umap(user_tmp[-1], umap)
 
     # IF all files are provided
@@ -281,14 +282,10 @@ def write_file_meta(path, towrite):
 def write_umap(path, towrite):
     fn = path + '/umap.csv'
     print('writing umap to' + fn)
-    file = open(fn, 'w+', newline='\n')
-    #print(towrite[0])
-    data = [[r['id'], r['UMAP1'], r['UMAP2']] for r in towrite]
-    #print(data)
-    with file:
-        print("Writing file %s" % fn)
-        write = csv.writer(file)
-        write.writerows(data)
+    with open(fn, 'w') as file:
+        for r in towrite:
+            file.write(",".join([str(r['id']), str(r['UMAP1']), str(r['UMAP2'])]))
+            file.write('\n')
     return fn
 
 
@@ -351,13 +348,44 @@ def download_umap():
 @tasks.route('/download_matrix',methods=['POST'])
 def download_matrix():
     # No query is search, then we use default use case:
-    if(not (exists(user_tmp[-1] + '/ids.csv'))):
-        if(len(collection_searched)==0):
+    if(len(collection_searched)==0):
+        if(not (exists(user_tmp[-1] + '/ids.csv'))):
             return send_file(TMP_FOLDER+'/default/matrix.zip', as_attachment=True)
+    else:
+        # If query is presented, remove the result old queries
+        def remove_files():
+            for f in [
+                user_tmp[-1] + '/ids.csv',
+                user_tmp[-1] + '/matrix.zip',
+                user_tmp[-1] + '/matrix.mtx.gz',
+                user_tmp[-1] + '/genes.tsv.gz',
+                user_tmp[-1] + '/barcodes.tsv.gz',
+                user_tmp[-1] + '/meta.tsv']:
+                if((exists(f))):
+                    shutil.os.remove(f)
+
+        # If query is presented, remove the result old queries
+        if((exists(user_tmp[-1] + '/meta.tsv'))):
+            df_meta = pd.read_csv(user_tmp[-1] + '/meta.tsv', index_col=1,sep="\t")
+            _ids = list(df_meta._id.values)
+            _ids.sort()
+            oid = [str(_id) for _id in collection_searched]
+            oid.sort()
+            print(_ids[:10])
+            print(collection_searched[:10])
+            # Different from the old query
+            if(_ids != oid):
+                print("Remove files because the old query is deprecared")
+                remove_files()
+            else:
+                print("Keep files because the old query is the same")
+
+        # No old queries
         else:
-            #id = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
-            meta = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}})
-            ids = write_id_meta(user_tmp[-1], meta)
+            remove_files()
+
+        meta = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}})
+        ids = write_id_meta(user_tmp[-1], meta)
 
     # Down load 10x matrix if not exist
     if(not (exists(user_tmp[-1] + '/matrix.mtx.gz'))):
