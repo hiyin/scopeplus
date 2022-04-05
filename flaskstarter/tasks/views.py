@@ -6,7 +6,7 @@ from ..extensions import db, mongo
 
 from flaskstarter.covid2k_meta import covid2k_metaModel
 from flaskstarter.tasks.forms import UmapForm
-
+from plotly.subplots import make_subplots
 import csv
 import gzip
 import zipfile
@@ -58,13 +58,15 @@ def upload_file():
 
 @tasks.route('/show_plot', methods=['GET', 'POST'])
 def show_plot():     
+
+    # Get params from html
     cell_color = request.form.get('name_opt_col')
     cell_gene = request.form.get('name_opt_gene')
     df_genes = pd.read_csv(TMP_FOLDER+"/genes.tsv", sep="\t", header=None)
 
+    # Add a flag to check if the local folder cached the ids
     flag_idmissing = 0
-
-    # Search is empty
+    # Search box is empty
     if(len(collection_searched)==0):
         # No ids.csv file is presented:
         if(not (exists(user_tmp[-1] + '/ids.csv'))):
@@ -91,55 +93,64 @@ def show_plot():
 
     # If search box not empty, write id meta umap
     else:
-        #id = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
         meta = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}})
         ids = write_id_meta(user_tmp[-1], meta)
         umap = mongo.umap.find({'id': {'$in': ids}})
         write_umap(user_tmp[-1], umap)
 
-    # IF all files are provided
+    # Assume ids,meta files are provided
+
+    # No cell color is provided
     if(cell_color is None):
         cell_color="scClassify_prediction"
     if(cell_gene is None):
         print("----No gene selected")
     else:
         print("----Gene is selected")
+
+        # The gene name selected is avaliable
         if(cell_gene in df_genes.values):
             # Lookup gene in default dir or user dir based on condition
-            if(flag_idmissing==0):
-                _byid = pd.read_csv(user_tmp[-1]  + "/ids.csv").values.tolist()
-            else:
-                _byid = pd.read_csv(TMP_FOLDER+'/default/ids.csv').values.tolist()
-                
-            lookups = list(np.squeeze(_byid))
-            print("Query ing")
-            checkpoint_time = time.time()
-            query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
-            print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
+            flag_same_query =  is_same_query(user_tmp[-1]+"/meta.tsv",collection_searched)
+            # Gene table is not cached or the query is differen from the previous
+            if((not exists(user_tmp[-1] + '/'+cell_gene+'.tsv')) or 
+             (flag_same_query == False)):
 
-            ##text=List of strings to be written to file
-            # Force to write to the user folder
-            with open(user_tmp[-1] + '/'+cell_gene+'.tsv', 'w') as file:
-                file.write("\t".join(["_id","gene","barcode",cell_gene]))
-                file.write('\n')
-                for line in query:
-                    file.write("\t".join([str(e) for e in line.values()]))
+                # Lookup from the database
+                if(flag_idmissing==0):
+                    _byid = pd.read_csv(user_tmp[-1]  + "/ids.csv").values.tolist()
+                else:
+                    _byid = pd.read_csv(TMP_FOLDER+'/default/ids.csv').values.tolist()
+                    
+                lookups = list(np.squeeze(_byid))
+                print("Query ing")
+                checkpoint_time = time.time()
+                query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
+                print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
+
+                ##text=List of strings to be written to file
+                # Force to write to the user folder
+                with open(user_tmp[-1] + '/'+cell_gene+'.tsv', 'w') as file:
+                    file.write("\t".join(["_id","gene","barcode",cell_gene]))
                     file.write('\n')
+                    for line in query:
+                        file.write("\t".join([str(e) for e in line.values()]))
+                        file.write('\n')
 
-            checkpoint_time = time.time()
-            print("write finished --- %s seconds ---" % (time.time() - checkpoint_time))
-
+                checkpoint_time = time.time()
+                print("write finished --- %s seconds ---" % (time.time() - checkpoint_time))
         else:
             cell_gene = None
             print("Gene not found")
-    
+    # Plot umap
     checkpoint_time = time.time()
-    graphJSON,df_plot = plot_umap(cell_color,cell_gene)
+    graphJSON,graphJSON2,df_plot = plot_umap(cell_color,cell_gene)
     print("Plot finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
+    # Pass color options to the html
     colors = list(df_plot.columns.values.ravel())
     genes = df_genes.values.ravel()
-    return render_template('tasks/show_plot.html', graphJSON=graphJSON,colors=colors,genes=genes)
+    return render_template('tasks/show_plot.html', graphJSON=graphJSON,graphJSON2=graphJSON2,colors=colors,genes=genes)
 
 
 def plot_tse():
@@ -166,19 +177,38 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None):
     df_meta = pd.read_csv(user_tmp[-1] + '/meta.tsv', index_col=1,sep="\t")
     df_plot = df.merge(df_meta, left_index=True, right_index=True)
 
+    fig2 = None
+    graphJSON2 = None
+
     if(not(gene_color is None)):
         df_gene = pd.read_csv(user_tmp[-1] + '/'+gene_color+'.tsv',sep="\t", index_col=2)
         df_plot = df_plot.merge(df_gene, left_index=True, right_index=True,how="left")
         cell_color = gene_color
         df_plot = df_plot.fillna(0)
 
+        fig2 = px.violin(df_plot, y=gene_color, color="scClassify_prediction", box=False, points="all",
+            hover_data=df_plot.columns)
+
+
+    #fig = make_subplots(rows=2, cols=1)
+
     fig = px.scatter(
-        df_plot, x="umap_0", y="umap_1",color=cell_color)
+        df_plot, x="umap_0", y="umap_1",color=cell_color,color_continuous_scale="Viridis")
+
+
+    if(not (fig2 is None)):
+        fig2.update_layout(
+        autosize=False, width=900, height=600)
+        graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
+
+    # fig.add_trace(fig1, row=1, col=1)
+    # fig.add_trace(fig1, row=2, col=1)
+
     fig.update_layout(
         autosize=False, width=900, height=600
     )
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    return graphJSON,df_plot
+    return graphJSON,graphJSON2,df_plot
 
 
 @tasks.route('/run_scclassify', methods=['GET', 'POST'])
@@ -278,7 +308,6 @@ def write_file_meta(path, towrite):
             file.write("\t".join([str(e) for e in line.values()]))
             file.write('\n')
 
-
 def write_umap(path, towrite):
     fn = path + '/umap.csv'
     print('writing umap to' + fn)
@@ -288,18 +317,6 @@ def write_umap(path, towrite):
             file.write('\n')
     return fn
 
-
-# Write mtx is not okay, mem usage is too large and it will crash the server.
-# def write_mtx(path, towrite):
-#     fn = path + '/mtx.csv'
-#     file = open(fn, 'w+', newline='\n')
-#     print('writing mtx to' + fn)
-#     #print(towrite[0])
-#     data = [[r['gene_name'], r['barcode'], r['expression']] for r in towrite]
-#     #print(data)
-#     with file:
-#         write = csv.writer(file)
-#         write.writerows(data)
 def write_10x_mtx(path,gene_dict,barcode_dict,counts, towrite):
 
     fn = path + '/matrix.mtx.gz'
@@ -319,6 +336,29 @@ def write_10x_mtx(path,gene_dict,barcode_dict,counts, towrite):
             ]).encode())
             file.write('\n'.encode())
 
+def is_same_query(meta_path,collection_searched):
+    try:
+        df_meta = pd.read_csv(meta_path, index_col=1,sep="\t")
+        _ids = list(df_meta._id.values)
+        _ids.sort()
+        oid = [str(_id) for _id in collection_searched]
+        oid.sort()
+    except:
+        print("Error when comparing query, return false")
+        return False    
+
+    return _ids == oid
+
+def remove_files(path):
+    for f in [
+        path + '/ids.csv',
+        path + '/matrix.zip',
+        path + '/matrix.mtx.gz',
+        path + '/genes.tsv.gz',
+        path + '/barcodes.tsv.gz',
+        path + '/meta.tsv']:
+        if((exists(f))):
+            shutil.os.remove(f)
 
 # Download big file
 @tasks.route('/download_meta',methods=['POST'])
@@ -353,36 +393,17 @@ def download_matrix():
             return send_file(TMP_FOLDER+'/default/matrix.zip', as_attachment=True)
     else:
         # If query is presented, remove the result old queries
-        def remove_files():
-            for f in [
-                user_tmp[-1] + '/ids.csv',
-                user_tmp[-1] + '/matrix.zip',
-                user_tmp[-1] + '/matrix.mtx.gz',
-                user_tmp[-1] + '/genes.tsv.gz',
-                user_tmp[-1] + '/barcodes.tsv.gz',
-                user_tmp[-1] + '/meta.tsv']:
-                if((exists(f))):
-                    shutil.os.remove(f)
-
-        # If query is presented, remove the result old queries
         if((exists(user_tmp[-1] + '/meta.tsv'))):
-            df_meta = pd.read_csv(user_tmp[-1] + '/meta.tsv', index_col=1,sep="\t")
-            _ids = list(df_meta._id.values)
-            _ids.sort()
-            oid = [str(_id) for _id in collection_searched]
-            oid.sort()
-            print(_ids[:10])
-            print(collection_searched[:10])
+            flag_same_query = is_same_query(user_tmp[-1] + '/meta.tsv',collection_searched=collection_searched)
             # Different from the old query
-            if(_ids != oid):
+            if(flag_same_query == False):
                 print("Remove files because the old query is deprecared")
-                remove_files()
+                remove_files(user_tmp[-1])
             else:
                 print("Keep files because the old query is the same")
-
         # No old queries
         else:
-            remove_files()
+            remove_files(user_tmp[-1])
 
         meta = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}})
         ids = write_id_meta(user_tmp[-1], meta)
