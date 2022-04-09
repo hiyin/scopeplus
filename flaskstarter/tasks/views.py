@@ -177,37 +177,33 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None):
     df_meta = pd.read_csv(user_tmp[-1] + '/meta.tsv', index_col=1,sep="\t")
     df_plot = df.merge(df_meta, left_index=True, right_index=True)
 
-    fig2 = None
-    graphJSON2 = None
 
     if(not(gene_color is None)):
         df_gene = pd.read_csv(user_tmp[-1] + '/'+gene_color+'.tsv',sep="\t", index_col=2)
         df_plot = df_plot.merge(df_gene, left_index=True, right_index=True,how="left")
-        cell_color = gene_color
         df_plot = df_plot.fillna(0)
 
-        fig2 = px.violin(df_plot, y=gene_color, color="scClassify_prediction", box=False, points="all",
-            hover_data=df_plot.columns)
+        fig2 = px.violin(df_plot, y=gene_color, x=cell_color, box=False, points=False)
 
-
-    #fig = make_subplots(rows=2, cols=1)
-
-    fig = px.scatter(
-        df_plot, x="umap_0", y="umap_1",color=cell_color,color_continuous_scale="Viridis")
-
-
-    if(not (fig2 is None)):
         fig2.update_layout(
         autosize=False, width=900, height=600)
         graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
+        fig = px.scatter(
+            df_plot, x="umap_0", y="umap_1",color=gene_color,color_continuous_scale="Viridis")
+        fig.update_layout(
+                autosize=False, width=900, height=600)
+        graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-    # fig.add_trace(fig1, row=1, col=1)
-    # fig.add_trace(fig1, row=2, col=1)
 
-    fig.update_layout(
-        autosize=False, width=900, height=600
-    )
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    else:
+        fig = px.scatter(
+            df_plot, x="umap_0", y="umap_1",color=cell_color,color_continuous_scale="Viridis")
+        fig.update_layout(
+                autosize=False, width=900, height=600)
+        graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        fig2 = None
+        graphJSON2 = None
+
     return graphJSON,graphJSON2,df_plot
 
 
