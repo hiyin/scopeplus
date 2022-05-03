@@ -182,6 +182,7 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None):
         df_gene = pd.read_csv(user_tmp[-1] + '/'+gene_color+'.tsv',sep="\t", index_col=2)
         df_plot = df_plot.merge(df_gene, left_index=True, right_index=True,how="left")
         print(df_plot.shape)
+        df_plot[gene_color] = df_plot[gene_color].fillna(value=0)
         #df_plot[gene_color] = df_plot[gene_color].fillna(value=0)
         #fig2 = px.violin(df_plot, y=gene_color, x=cell_color, box=False, points=False)
         #df_plot[gene_color] = np.clip(df_plot[gene_color],np.percentile(df_plot[gene_color], 5),np.percentile(df_plot[gene_color], 95))
@@ -190,7 +191,6 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None):
         fig2.update_layout(
         autosize=False, width=900, height=600)
         graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
-        df_plot[gene_color] = df_plot[gene_color].fillna(value=0)
         fig = px.scatter(
             df_plot, x="umap_0", y="umap_1",color=gene_color,color_continuous_scale="Viridis")
         fig.update_layout(
