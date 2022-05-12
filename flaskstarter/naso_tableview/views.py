@@ -25,7 +25,7 @@ import pandas as pd
 import time
 from datetime import datetime
 from os.path import exists
-tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
+naso = Blueprint('naso', __name__, url_prefix='/naso')
 
 # sub folders to manage different flask instances: not a good place to put, should be in API endpoint?
 # user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
@@ -34,59 +34,26 @@ user_tmp = [TMP_FOLDER + "/" + user_timestamp]
 print(user_tmp)
 #os.makedirs(user_tmp[-1])
 
-
-# New view
-@tasks.route('/contribute')
-def contribute():
-    return render_template('tasks/contribute.html')
-
-
 scClassify_input = []
 
 
-@tasks.route('/uploader', methods = ['POST'])
-def upload_file():
-    uploaded_file = request.files['file']
-    if uploaded_file.filename != '':
-        uploaded_file.save(os.path.join(user_tmp[-1], uploaded_file.filename))
-        scClassify_input.extend([uploaded_file.filename])
-        flash('scClassify user file uploaded successfully.')
-
-    return redirect(url_for('tasks.contribute'))
 
 
-@tasks.route('/show_plot', methods=['GET', 'POST'])
+@naso.route('/show_plot', methods=['GET', 'POST'])
 def show_plot():     
     cell_color = request.form.get('name_opt_col')
     if(cell_color is None):
-        cell_color="scClassify_prediction"
+        cell_color = "scClassify_prediction"
 
-    graphJSON,df_plot = plot_umap(cell_color)
+    graphJSON, df_plot = plot_umap(cell_color)
     colors = df_plot.columns.values
-    return render_template('tasks/show_plot.html', graphJSON=graphJSON,colors=colors)
+    return render_template('tasks/show_plot.html', graphJSON=graphJSON, colors=colors)
 
-
-def plot_tse():
-    df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)
-
-    l = []
-    for i in df.index:
-        # print(df.loc[i].values)
-        l.append(df.loc[i].values)
-    sln = np.stack(l)
-    projections = sln
-    fig = px.scatter(
-        projections, x=0, y=1)
-    fig.update_layout(
-        autosize=False, width=900, height=600
-    )
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    return graphJSON
 
 ## Create by junyi
 def plot_umap(cell_color='scClassify_prediction'):
     df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)
-    df.columns = ["umap_0","umap_1"]
+    df.columns = ["umap_0", "umap_1"]
     df_meta = pd.read_csv(user_tmp[-1] + '/meta.tsv', index_col=1,sep="\t")
     df_plot = df.merge(df_meta, left_index=True, right_index=True)
 
@@ -96,36 +63,11 @@ def plot_umap(cell_color='scClassify_prediction'):
         autosize=False, width=900, height=600
     )
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    return graphJSON,df_plot
+    return graphJSON, df_plot
 
 
-@tasks.route('/run_scclassify', methods=['GET', 'POST'])
-def run_scClassify():
-    print("running scClassify...")
-    scClassify_folder = TMP_FOLDER + "/scClassify"
-    scClassify_code_path = scClassify_folder + "/scClassify_example_codes.r"
-    scClassify_model_path = scClassify_folder + "/scClassify_trainObj_trainWillks_20201018.rds"
-    scClassify_input_path = user_tmp[-1] + "/" + scClassify_input[-1]
-    scClassify_output_path = user_tmp[-1] + "/scClassify_predicted_results.csv"
-    ret = subprocess.call("Rscript %s %s %s %s" % (scClassify_code_path, scClassify_input_path, scClassify_model_path, scClassify_output_path), shell=True)
-    if ret != 0:
-        if ret < 0:
-            print("Killed by signal")
-        else:
-            print("Command failed with return code %s" % ret)
-    else:
-        print("SUCCESS!!")
-        flash("SUCCESS!!")
-        return redirect(url_for('tasks.contribute'))
-
-
-@tasks.route('/download_scClassify',methods=['POST'])
-def download_scClassify():
-    return send_file(user_tmp[-1] + "/scClassify_predicted_results.csv", as_attachment=True)
-
-
-@tasks.route('/table_view')
-def table_view():
+@naso.route('/naso_tableview')
+def naso_tableview():
     fsampleid = get_field("sample_id")
     fage = get_field("age")
     print(fage)
@@ -133,7 +75,7 @@ def table_view():
     fprediction = get_field("scClassify_prediction")
     fstatus = get_field("Status_on_day_collection_summary")
     fdataset = get_field("dataset")
-    return render_template('tasks/table_view.html',
+    return render_template('tasks/naso_tableview.html',
                            fdonor=fdonor,
                            fage=fage,
                            fsampleid=fsampleid,
@@ -164,8 +106,6 @@ def write_file_byid(path, towrite):
 def write_file_meta(path, towrite):
     fn = path + '/meta.tsv'
     print('writing meta to' + fn)
-
-    ##text=List of strings to be written to file
     print(towrite[0])
     with open(fn, 'w') as file:
         file.write("\t".join([str(e) for e in towrite[0].keys()]))
@@ -222,7 +162,7 @@ def write_10x_mtx(path,gene_dict,barcode_dict,counts, towrite):
 
 
 # Download big file
-@tasks.route('/download_meta',methods=['POST'])
+@naso.route('/download_meta', methods=['POST'])
 def download_meta():
     meta = list(mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}))
     print('writing ids to csv file only once, firstly load the data')
@@ -232,7 +172,7 @@ def download_meta():
     return send_file(user_tmp[-1] + '/meta.tsv', as_attachment=True)
 
 
-@tasks.route('/download_umap', methods=['POST'])
+@naso.route('/download_umap', methods=['POST'])
 def download_umap():
     f = user_tmp[-1] + "/ids.csv"
     if not os.path.isfile(f):
@@ -247,7 +187,7 @@ def download_umap():
     return send_file(user_tmp[-1] + '/umap.csv', as_attachment=True)
 
 
-@tasks.route('/download_matrix', methods=['POST'])
+@naso.route('/download_matrix', methods=['POST'])
 def download_matrix():
     # Down load 10x matrix if not exist
     if(not (exists(user_tmp[-1] + '/matrix.mtx.gz'))):
@@ -298,7 +238,7 @@ collection = []
 collection_searched = []
 
 # http://www.dotnetawesome.com/2015/12/implement-custom-server-side-filtering-jquery-datatables.html
-@tasks.route('/api_db', methods=['GET', 'POST'])
+@naso.route('/api_db', methods=['GET', 'POST'])
 @login_required
 def api_db():
     data = []
@@ -384,6 +324,7 @@ def api_db():
                         print(q)
                         construct.append(q)
                 print(construct)
+                print("debugging")
                 ids = [x["_id"] for x in mongo.single_cell_meta.find({"$and": construct}, {"_id": 1})]
                 collection_searched.extend(ids)
                 tmp = mongo.single_cell_meta.find({'_id': {'$in': collection_searched[start:end]}})
@@ -428,117 +369,6 @@ def api_db():
         }
 
         return jsonify(response)
-
-
-@tasks.route('/home', methods=['GET', 'POST'])
-@login_required
-def home(condition=''):
-    print('debug...')
-    print('change condition...')
-    print(condition)
-    graphJSON = {}
-
-    if not condition:
-        _all_tasks = covid2k_metaModel.query.all()
-        print(_all_tasks)
-        print('show default')
-
-    else:
-        if isinstance(condition, str):
-            if condition == 'all':
-                _all_tasks = covid2k_metaModel.query.all()
-                print(_all_tasks)
-                writefile('/tmp/flaskstarter-instance/', _all_tasks)
-                print('show all')
-            else:
-                print('show' + condition)
-                # _all_tasks = db.session.execute('SELECT * FROM covid2k_meta WHERE age LIKE 52')
-                _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.age.contains(condition)).all()
-                writefile('/tmp/flaskstarter-instance/', _all_tasks)
-                graphJSON = plot()
-        elif isinstance(condition, list):
-            _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.donor.in_(condition)).all()
-            writefile('/tmp/flaskstarter-instance/', _all_tasks)
-            graphJSON = plot()
-            print('show donors')
-
-
-    print("reload...")
-    print(condition)
-    col_values = get_col_values()
-
-    return render_template('tasks/my_tasks.html',
-                           all_tasks=_all_tasks,
-                           graphJSON=graphJSON,
-                           _active_tasks=True)
-
-def writefile(path, towrite):
-    print('writing data' + path)
-    file = open(path + 'result.csv', 'w+', newline='\n')
-    data = [[task.X] for task in towrite]
-    with file:
-        write = csv.writer(file)
-        write.writerows(data)
-
-
-@tasks.route('/showall',methods=['POST'])
-def showall():
-    return home('all')
-
-
-@tasks.route('/age52',methods=['POST'])
-def age_filter():
-    return home('20')
-
-@tasks.route('/download',methods=['POST'])
-def download():
-    plot()
-    return send_file('/tmp/flaskstarter-instance/result.csv', as_attachment=True)
-
-
-def get_col_values():
-    #_col_values = covid2k_metaModel.query.with_entities(covid2k_metaModel.donor)
-    donors = [c.donor for c in covid2k_metaModel.query.with_entities(covid2k_metaModel.donor).distinct()]
-    print(len(donors))
-    return donors
-
-
-
-@tasks.route('/get_multiselect', methods=['POST'])
-# uses list to store returned condition for my_tasks
-def get_multiselect():
-    selected_vals = request.form.getlist('multiselect')
-    print(request.form)
-    print(selected_vals)
-
-    return home(selected_vals)
-
-
-# to move outside of web app
-def plot():
-    path = '/tmp/flaskstarter-instance/'
-    result = pd.read_csv(path + 'result.csv', header=None)
-    df = pd.read_csv(path + 'cov192kaxis.csv', index_col=0)
-    l = []
-    for i in df.index:
-        for j in result.values:
-            if i == j:
-                print(i)
-                print(df.loc[i].values)
-                l.append(df.loc[i].values)
-    sln = np.stack(l)
-    projections = sln
-    fig = px.scatter(
-        projections, x=0, y=1)
-    fig.update_layout(
-        autosize=False, width=900, height=600
-    )
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    return graphJSON
-
-    #query = { 'donor': {'$in': selected_vals}}
-    #ids = [x["_id"] for x in list(mongo.single_cell_meta.find(query, {"_id": 1}))]
-
 
 
 def get_field(field_name):

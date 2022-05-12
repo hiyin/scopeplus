@@ -4,8 +4,14 @@
     <li class="nav-item">
       <a class="nav-link" href="{{ url_for('tasks.table_view') }}">Home</a>
     </li>
-    <li class="nav-item">
-      <a class="nav-link" href="{{ url_for('tasks.table_view') }}">Explore Data</a>
+    <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Explore Data Types</a>
+          <!-- .dropdown-menu 下拉選單內容 -->
+          <div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+            <a class="dropdown-item" href="{{ url_for('tasks.table_view') }}">scRNA-seq</a>
+            <a class="dropdown-item" href="{{ url_for('naso.naso_tableview') }}">Naso</a>
+            <a class="dropdown-item" href="#">Balf</a>
+          </div>
     </li>
     <li class="nav-item">
       <a class="nav-link" href="{{ url_for('tasks.contribute') }}">Contribute</a>
