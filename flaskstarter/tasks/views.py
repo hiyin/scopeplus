@@ -102,7 +102,7 @@ def show_plot():
 
     # No cell color is provided
     if(cell_color is None):
-        cell_color="scClassify_prediction"
+        cell_color="level2"
     if(cell_gene is None):
         print("----No gene selected")
     else:
@@ -237,13 +237,13 @@ def download_scClassify():
 
 @tasks.route('/table_view')
 def table_view():
-    fsampleid = get_field("sample_id")
-    fage = get_field("age")
+    fsampleid = get_field("meta_sample_id2")
+    fage = get_field("meta_age")
     print(fage)
-    fdonor = get_field("donor")
-    fprediction = get_field("scClassify_prediction")
-    fstatus = get_field("Status_on_day_collection_summary")
-    fdataset = get_field("dataset")
+    fdonor = get_field("meta_patient_id")
+    fprediction = get_field("level2")
+    fstatus = get_field("meta_severity")
+    fdataset = get_field("meta_dataset")
     return render_template('tasks/table_view.html',
                            fdonor=fdonor,
                            fage=fage,
@@ -576,12 +576,12 @@ def api_db():
             for r in tmp:
                 data.append({
                         'id': r['id'],
-                        'sample_id': r['sample_id'],
-                        'age': r['age'],
-                        'prediction': r['scClassify_prediction'],
-                        'donor': r['donor'],
-                        'dataset': r['dataset'],
-                        'status': r['Status_on_day_collection_summary']
+                        'sample_id': r['meta_sample_id2'],
+                        'age': r['meta_age'],
+                        'prediction': r['level2'],
+                        'donor': r['meta_patient_id'],
+                        'dataset': r['meta_dataset'],
+                        'status': r['meta_severity']
                     })
 
         response = {
