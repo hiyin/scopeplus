@@ -484,22 +484,22 @@ def api_db():
                     search_column = "id"
                     map[search_column] = column_value
                 elif "1" in i:
-                    search_column = "sample_id"
+                    search_column = "meta_sample_id2"
                     map[search_column] = column_value
                 elif "2" in i:
-                    search_column = "age"
+                    search_column = "meta_age"
                     map[search_column] = column_value
                 elif "3" in i:
-                    search_column = "scClassify_prediction"
+                    search_column = "level2"
                     map[search_column] = column_value
                 elif "4" in i:
-                    search_column = "donor"
+                    search_column = "meta_patient_id"
                     map[search_column] = column_value
                 elif "5" in i:
-                    search_column = "dataset"
+                    search_column = "meta_dataset"
                     map[search_column] = column_value
                 else:
-                    search_column = "Status_on_day_collection_summary"
+                    search_column = "meta_severity"
                     map[search_column] = column_value
         print(map)
         if search_value == '':
@@ -532,7 +532,7 @@ def api_db():
                 construct = []
                 re_match = re.compile(r'^\d{1,10}\.?\d{0,10}$')
                 for k in map:
-                    if (k in ["age", "sample_id"]):
+                    if (k in ["meta_age", "meta_sample_id2","meta_dataset","level2","meta_severity","meta_patient_id"]):
                         l = []
                         for ki in map[k]:
                             if re_match.findall(ki):
