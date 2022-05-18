@@ -68,13 +68,13 @@ def plot_umap(cell_color='scClassify_prediction'):
 
 @naso.route('/naso_tableview')
 def naso_tableview():
-    fsampleid = get_field("sample_id")
-    fage = get_field("age")
+    fsampleid = get_field("meta_sample_id2")
+    fage = get_field("meta_age")
     print(fage)
-    fdonor = get_field("donor")
-    fprediction = get_field("scClassify_prediction")
-    fstatus = get_field("Status_on_day_collection_summary")
-    fdataset = get_field("dataset")
+    fdonor = get_field("meta_patient_id")
+    fprediction = get_field("level2")
+    fstatus = get_field("meta_severity")
+    fdataset = get_field("meta_dataset")
     return render_template('tasks/naso_tableview.html',
                            fdonor=fdonor,
                            fage=fage,
@@ -260,22 +260,22 @@ def api_db():
                     search_column = "id"
                     map[search_column] = column_value
                 elif "1" in i:
-                    search_column = "sample_id"
+                    search_column = "meta_sample_id"
                     map[search_column] = column_value
                 elif "2" in i:
-                    search_column = "age"
+                    search_column = "meta_age"
                     map[search_column] = column_value
                 elif "3" in i:
-                    search_column = "scClassify_prediction"
+                    search_column = "level2"
                     map[search_column] = column_value
                 elif "4" in i:
-                    search_column = "donor"
+                    search_column = "meta_patient_id"
                     map[search_column] = column_value
                 elif "5" in i:
-                    search_column = "dataset"
+                    search_column = "meta_dataset"
                     map[search_column] = column_value
                 else:
-                    search_column = "Status_on_day_collection_summary"
+                    search_column = "meta_severity"
                     map[search_column] = column_value
         print(map)
         if search_value == '':
@@ -308,7 +308,7 @@ def api_db():
                 construct = []
                 re_match = re.compile(r'^\d{1,10}\.?\d{0,10}$')
                 for k in map:
-                    if (k in ["age", "sample_id"]):
+                    #if (k in ["age", "sample_id"]):
                         l = []
                         for ki in map[k]:
                             if re_match.findall(ki):
@@ -353,12 +353,12 @@ def api_db():
             for r in tmp:
                 data.append({
                         'id': r['id'],
-                        'sample_id': r['sample_id'],
-                        'age': r['age'],
-                        'prediction': r['scClassify_prediction'],
-                        'donor': r['donor'],
-                        'dataset': r['dataset'],
-                        'status': r['Status_on_day_collection_summary']
+                        'sample_id': r['meta_sample_id2'],
+                        'age': r['meta_age'],
+                        'prediction': r['level2'],
+                        'donor': r['meta_patient_id'],
+                        'dataset': r['Arunachalam_2020'],
+                        'status': r['meta_severity']
                     })
 
         response = {

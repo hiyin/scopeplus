@@ -30,11 +30,11 @@ from os.path import exists,basename
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 # sub folders to manage different flask instances: not a good place to put, should be in API endpoint?
-# user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
-user_timestamp = "test"
+user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
+#user_timestamp = "test"
 user_tmp = [TMP_FOLDER + "/" + user_timestamp]
 print(user_tmp)
-#os.makedirs(user_tmp[-1])
+os.makedirs(user_tmp[-1])
 
 
 # New view
@@ -299,7 +299,7 @@ def write_file_meta(path, towrite):
     print('writing meta to' + fn)
 
     ##text=List of strings to be written to file
-    print(towrite[0])
+    #print(towrite[0])
     with open(fn, 'w') as file:
         file.write("\t".join([str(e) for e in towrite[0].keys()]))
         file.write('\n')
