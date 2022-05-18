@@ -6,6 +6,7 @@ from .config import DefaultConfig
 from .user import Users, UsersAdmin
 from .settings import settings
 from .tasks import tasks, MyTaskModelAdmin
+from .naso_tableview import naso
 from .frontend import frontend, ContactUsAdmin
 from .sample_meta_all import SampleMetaAllModel, SampleMetaAllAdmin
 from .covid2k_meta import covid2k_metaModel, covid2k_metaAdmin
@@ -24,7 +25,8 @@ __all__ = ['create_app']
 DEFAULT_BLUEPRINTS = (
     frontend,
     settings,
-    tasks
+    tasks,
+    naso
 )
 
 logging.basicConfig(level=logging.DEBUG,

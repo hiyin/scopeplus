@@ -9,7 +9,7 @@
 <script src="https://use.fontawesome.com/bbc48b41d3.js"></script>
 <div style="margin:20px;padding:20px;">
    <div class="row justify-content-center">
-        <h2>Explore scRNA-seq Data</h2>
+        <h2>Explore Naso Data</h2>
    </div>
    <div class="jumbotron" style="background:#fff;">
         <h3>Filter</h3>
@@ -105,19 +105,19 @@
 
     <div class="jumbotron">
        <h4>Please choose any of the option below for data manipulation.</h4>
-    <form action="{{ url_for('tasks.download_meta')}}" method="post" style="display:inline-block">
+    <form action="{{ url_for('naso.download_meta')}}" method="post" style="display:inline-block">
       <button class="btn btn-primary" name="download" type="submit"> Download metadata </button>
     </form>
 
-    <!-- <form action="{{ url_for('tasks.download_umap')}}" method="post" style="display:inline-block">
+    <form action="{{ url_for('naso.download_umap')}}" method="post" style="display:inline-block">
       <button class="btn btn-primary" name="download_umap" type="submit"> Download UMAP </button>
-    </form> -->
+    </form>
 
-    <form action="{{ url_for('tasks.show_plot')}}" method="get" style="display:inline-block">
+    <form action="{{ url_for('naso.show_plot')}}" method="get" style="display:inline-block">
       <button class="btn btn-primary" name="show_plot" type="submit"> Show UMAP plot </button>
     </form>
 
-    <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
+    <form action="{{ url_for('naso.download_matrix')}}" method="post" style="display:inline-block">
       <button class="btn btn-primary" name="download_matrix" type="submit"> Download matrix </button>
     </form>
     </div>
@@ -216,7 +216,7 @@ $(document).ready(function() {
                 'serverSide': true,
                 'serverMethod': 'post',
                 'ajax': {
-                    'url':'{{ url_for('tasks.api_db')}}'
+                    'url':'{{ url_for('naso.api_db')}}'
                 },
                 'lengthMenu': [[10, 25, 50, 100], [10, 25, 50, 100]],
                 searching: true,
