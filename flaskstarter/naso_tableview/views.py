@@ -28,11 +28,11 @@ from os.path import exists
 naso = Blueprint('naso', __name__, url_prefix='/naso')
 
 # sub folders to manage different flask instances: not a good place to put, should be in API endpoint?
-# user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
-user_timestamp = "test"
+user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
+#user_timestamp = "test"
 user_tmp = [TMP_FOLDER + "/" + user_timestamp]
 print(user_tmp)
-#os.makedirs(user_tmp[-1])
+os.makedirs(user_tmp[-1])
 
 scClassify_input = []
 
@@ -308,7 +308,7 @@ def api_db():
                 construct = []
                 re_match = re.compile(r'^\d{1,10}\.?\d{0,10}$')
                 for k in map:
-                    #if (k in ["age", "sample_id"]):
+                    if (k in ["meta_age", "meta_sample_id2","meta_dataset","level2","meta_severity","meta_patient_id"]):
                         l = []
                         for ki in map[k]:
                             if re_match.findall(ki):
