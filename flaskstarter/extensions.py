@@ -13,6 +13,7 @@ db = SQLAlchemy()
 # connect to mongo db
 client = MongoClient('mongodb://localhost:27017/')
 mongo = client.cov19atlas_new
+scfeature = client.scfeature
 
 mail = Mail()
 

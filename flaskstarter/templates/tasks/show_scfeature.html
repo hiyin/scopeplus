@@ -1,0 +1,76 @@
+{% from "macros/_form.html" import render_form %}
+
+{% set page_title = 'My Tasks' %}
+
+{% extends 'layouts/base.html' %}
+
+{% block body %}
+{% include 'layouts/banner.html' %}
+
+
+<div id="loading",style="display:none;"></div>
+<div id="loadingbox",style="display:none;">Loading</div>
+
+<div class="container">
+  <div class="row justify-content-center">
+    <h2>UMAP Plot</h2>
+  </div>
+  <td>Gene Option</td>
+  <td>
+    <form action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
+      <input list="opt_gene" name="name_opt_gene">
+        <datalist id="opt_gene">
+          {% for val in genes %}
+          <option value="{{val}}">{{val}}</option>
+          {% endfor %}
+      </datalist>
+      <button id="idbtnSelectgene" name="btnSelectgene" type="submit" onclick="loading();"> Search </button>
+    </form>  
+  </td>
+
+  <td>Color Option</td>
+  <td>
+    <form action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
+      <select id="opt_col" name="name_opt_col">
+          <option label=" "></option>
+          {% for val in colors %}
+          <option value="{{val}}">{{val}}</option>
+          {% endfor %}
+      </select>
+      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Select </button>
+    </form>  
+  </td>
+   <div id="chart" class="chart"></div>
+   <div id="chart2" class="chart"></div>
+
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+  var graphs = {{ graphJSON | safe }};
+
+  Plotly.plot('chart', graphs, {});
+
+</script>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+  var graph2 = {{ graphJSON2 | safe }};
+
+  Plotly.plot('chart2', graph2, {});
+
+</script>
+
+<!-- Show loading box -->
+<script type="text/javascript">// <![CDATA[
+  function loading(){
+      $("#loading").show();
+      $("#loadingbox").show();       
+  }
+// ]]></script>
+
+{% endblock %}
