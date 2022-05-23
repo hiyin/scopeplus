@@ -66,7 +66,7 @@ def show_plot():
     df_genes = pd.read_csv(TMP_FOLDER+"/genes.tsv", sep="\t", header=None)
 
     # Add a flag to check if the local folder cached the ids
-    flag_idmissing = 0
+    flag_idmissing = 0    
     # Search box is empty
     if(len(collection_searched)==0):
         # No ids.csv file is presented:
@@ -99,155 +99,102 @@ def show_plot():
         umap = mongo.umap.find({'id': {'$in': ids}})
         write_umap(user_tmp[-1], umap)
 
-    # Assume ids,meta files are provided
+        # Assume ids,meta files are provided
 
-    # No cell color is provided
-    if(cell_color is None):
-        cell_color="level2"
-    if(cell_gene is None):
-        print("----No gene selected")
-    else:
-        print("----Gene is selected")
-
-        # The gene name selected is avaliable
-        if(cell_gene in df_genes.values):
-            # Lookup gene in default dir or user dir based on condition
-            flag_same_query =  is_same_query(user_tmp[-1]+"/meta.tsv",collection_searched)
-            # Gene table is not cached or the query is differen from the previous
-            if((not exists(user_tmp[-1] + '/'+cell_gene+'.tsv')) or 
-             (flag_same_query == False)):
-
-                # Lookup from the database
-                if(flag_idmissing==0):
-                    _byid = pd.read_csv(user_tmp[-1]  + "/ids.csv").values.tolist()
-                else:
-                    _byid = pd.read_csv(TMP_FOLDER+'/default/ids.csv').values.tolist()
-                    
-                lookups = list(np.squeeze(_byid))
-                print("Query ing")
-                checkpoint_time = time.time()
-                query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
-                print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
-
-                ##text=List of strings to be written to file
-                # Force to write to the user folder
-                with open(user_tmp[-1] + '/'+cell_gene+'.tsv', 'w') as file:
-                    file.write("\t".join(["_id","gene","barcode",cell_gene]))
-                    file.write('\n')
-                    for line in query:
-                        file.write("\t".join([str(e) for e in line.values()]))
-                        file.write('\n')
-
-                checkpoint_time = time.time()
-                print("write finished --- %s seconds ---" % (time.time() - checkpoint_time))
+        # No cell color is provided
+        if(cell_color is None):
+            cell_color="level2"
+        if(cell_gene is None):
+            print("----No gene selected")
         else:
-            cell_gene = None
-            print("Gene not found")
-    # Plot umap
-    checkpoint_time = time.time()
-    graphJSON,graphJSON2,df_plot = plot_umap(cell_color,cell_gene)
-    print("Plot finished --- %s seconds ---" % (time.time() - checkpoint_time))
+            print("----Gene is selected")
 
-    # Pass color options to the html
-    colors = list(df_plot.columns.values.ravel())
-    genes = df_genes.values.ravel()
+            # The gene name selected is avaliable
+            if(cell_gene in df_genes.values):
+                # Lookup gene in default dir or user dir based on condition
+                flag_same_query =  is_same_query(user_tmp[-1]+"/meta.tsv",collection_searched)
+                # Gene table is not cached or the query is differen from the previous
+                if((not exists(user_tmp[-1] + '/'+cell_gene+'.tsv')) or 
+                (flag_same_query == False)):
+
+                    # Lookup from the database
+                    if(flag_idmissing==0):
+                        _byid = pd.read_csv(user_tmp[-1]  + "/ids.csv").values.tolist()
+                    else:
+                        _byid = pd.read_csv(TMP_FOLDER+'/default/ids.csv').values.tolist()
+                        
+                    lookups = list(np.squeeze(_byid))
+                    print("Query ing")
+                    checkpoint_time = time.time()
+                    query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
+                    print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
+
+                    ##text=List of strings to be written to file
+                    # Force to write to the user folder
+                    with open(user_tmp[-1] + '/'+cell_gene+'.tsv', 'w') as file:
+                        file.write("\t".join(["_id","gene","barcode",cell_gene]))
+                        file.write('\n')
+                        for line in query:
+                            file.write("\t".join([str(e) for e in line.values()]))
+                            file.write('\n')
+
+                    checkpoint_time = time.time()
+                    print("write finished --- %s seconds ---" % (time.time() - checkpoint_time))
+            else:
+                cell_gene = None
+                print("Gene not found")
+        # Plot umap
+        checkpoint_time = time.time()
+        graphJSON,graphJSON2,df_plot = plot_umap(cell_color,cell_gene)
+        print("Plot finished --- %s seconds ---" % (time.time() - checkpoint_time))
+
+        # Pass color options to the html
+        colors = list(df_plot.columns.values.ravel())
+        genes = df_genes.values.ravel()
     return render_template('tasks/show_plot.html', graphJSON=graphJSON,graphJSON2=graphJSON2,colors=colors,genes=genes)
 
 @tasks.route('/show_scfeature', methods=['GET', 'POST'])
 def show_scfeature():     
 
     # Get params from html
-    cell_color = request.form.get('name_opt_col')
+    cell_type = request.form.get('name_opt_col')
     cell_gene = request.form.get('name_opt_gene')
-    df_genes = pd.read_csv(TMP_FOLDER+"/genes.tsv", sep="\t", header=None)
+    #df_genes = pd.read_csv(TMP_FOLDER+"/genes.tsv", sep="\t", header=None)
 
+    fileds_dataset = mongo.single_cell_meta.distinct("meta_dataset")
+    fileds_dataset_2 = mongo.single_cell_meta.aggregate(
+            [
+                {"$match":{"meta_dataset":cell_type}},
+                {"$group": {"_id": {"meta_dataset": "$meta_dataset", "meta_sample_id2": "$meta_sample_id2"}}}
+            ]
+
+    )
+    mata_sample_id2 = [x["_id"]["meta_sample_id2"] for x in list(fileds_dataset_2)]
+    print("Sample id 2: ",mata_sample_id2)
+
+    propotion = scfeature.proportion_raw.find({'meta_dataset': {'$in': mata_sample_id2}})
+    df_propotion = pd.DataFrame(list(propotion))
+    df_propotion.to_csv(user_tmp[-1]+"/proportion.tsv", sep="\t")
+    #fileds_dataset = scfeature.proportion_raw.distinct("meta_dataset")
+    #fileds_dataset = scfeature.proportion_raw.distinct("meta_dataset")
+
+    print(df_propotion)
     # Add a flag to check if the local folder cached the ids
-    flag_idmissing = 0
-    # Search box is empty
-    if(len(collection_searched)==0):
-        # No ids.csv file is presented:
-        if(not (exists(user_tmp[-1] + '/ids.csv'))):
-            shutil.copy2(TMP_FOLDER+'/default/umap.csv', user_tmp[-1] + '/umap.csv') # complete target filename given
-            shutil.copy2(TMP_FOLDER+'/default/meta.tsv', user_tmp[-1] + '/meta.tsv') # complete target filename given
-            # Change to show default case
-            flag_idmissing = 1
-
-        # ID is presented, no meta data:
-        elif(not (exists(user_tmp[-1] + '/meta.tsv'))):
-            f = user_tmp[-1] + "/ids.csv"
-            _byid = pd.read_csv(f).values.tolist()
-            lookups = list(np.squeeze(_byid))
-            meta = mongo.single_cell_meta.find({'id': {'$in': lookups}})
-            write_file_meta(user_tmp[-1],meta)
-        
-        # If ID is presented, no umap:
-        elif(not (exists(user_tmp[-1] + '/umap.tsv'))):
-            f = user_tmp[-1] + "/ids.csv"
-            _byid = pd.read_csv(f).values.tolist()
-            lookups = list(np.squeeze(_byid))
-            umap = mongo.umap.find({'id': {'$in': lookups}})
-            write_umap(user_tmp[-1], umap)
-
-    # If search box not empty, write id meta umap
-    else:
-        meta = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}})
-        ids = write_id_meta(user_tmp[-1], meta)
-        umap = mongo.umap.find({'id': {'$in': ids}})
-        write_umap(user_tmp[-1], umap)
-
-    # Assume ids,meta files are provided
-
-    # No cell color is provided
-    if(cell_color is None):
-        cell_color="level2"
-    if(cell_gene is None):
-        print("----No gene selected")
-    else:
-        print("----Gene is selected")
-
-        # The gene name selected is avaliable
-        if(cell_gene in df_genes.values):
-            # Lookup gene in default dir or user dir based on condition
-            flag_same_query =  is_same_query(user_tmp[-1]+"/meta.tsv",collection_searched)
-            # Gene table is not cached or the query is differen from the previous
-            if((not exists(user_tmp[-1] + '/'+cell_gene+'.tsv')) or 
-             (flag_same_query == False)):
-
-                # Lookup from the database
-                if(flag_idmissing==0):
-                    _byid = pd.read_csv(user_tmp[-1]  + "/ids.csv").values.tolist()
-                else:
-                    _byid = pd.read_csv(TMP_FOLDER+'/default/ids.csv').values.tolist()
-                    
-                lookups = list(np.squeeze(_byid))
-                print("Query ing")
-                checkpoint_time = time.time()
-                query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
-                print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
-
-                ##text=List of strings to be written to file
-                # Force to write to the user folder
-                with open(user_tmp[-1] + '/'+cell_gene+'.tsv', 'w') as file:
-                    file.write("\t".join(["_id","gene","barcode",cell_gene]))
-                    file.write('\n')
-                    for line in query:
-                        file.write("\t".join([str(e) for e in line.values()]))
-                        file.write('\n')
-
-                checkpoint_time = time.time()
-                print("write finished --- %s seconds ---" % (time.time() - checkpoint_time))
-        else:
-            cell_gene = None
-            print("Gene not found")
-    # Plot umap
-    checkpoint_time = time.time()
-    graphJSON,graphJSON2,df_plot = plot_umap(cell_color,cell_gene)
-    print("Plot finished --- %s seconds ---" % (time.time() - checkpoint_time))
-
+    colors = fileds_dataset
+    genes = fileds_dataset
     # Pass color options to the html
-    colors = list(df_plot.columns.values.ravel())
-    genes = df_genes.values.ravel()
-    return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,colors=colors,genes=genes)
+    if(len(df_propotion)>0):
+        df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
+        df_melt=df_d.melt(id_vars=['meta_dataset','meta_severity'],value_name="propotion",var_name="cell_type")
+        df_melt.to_csv(user_tmp[-1]+"/proportion_melt.tsv", sep="\t")
+        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type", facet_col = "meta_severity",title="Wide-Form Input")
+        fig.update_layout(
+            autosize=True, width=1200, height=600
+        )
+        graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    else:
+        graphJSON = None
+    return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,colors=colors,genes=genes)
 
 
 def plot_tse():
@@ -264,6 +211,14 @@ def plot_tse():
     fig.update_layout(
         autosize=False, width=900, height=600
     )
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    return graphJSON
+
+def plot_stack_bar(df):
+    l = []
+    fig = px.histogram(df, x="sex", y="total_bill",
+                color='smoker', barmode='group',
+                height=400)
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     return graphJSON
 
