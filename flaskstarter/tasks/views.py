@@ -187,7 +187,13 @@ def show_scfeature():
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
         df_melt=df_d.melt(id_vars=['meta_dataset','meta_severity'],value_name="propotion",var_name="cell_type")
         df_melt.to_csv(user_tmp[-1]+"/proportion_melt.tsv", sep="\t")
-        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type", facet_col = "meta_severity",title="Wide-Form Input")
+        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",title=cell_type)
+        fig.update_layout(
+            autosize=True, width=1200, height=600
+        )
+        # import plotly.graph_objects as go
+
+        # fig = go.Figure(go.Bar(x=df_melt.loc[:,["meta_severity", "meta_dataset"]].T.values, y=df_melt["propotion"].values , marker_color="cell_type"))
         fig.update_layout(
             autosize=True, width=1200, height=600
         )
