@@ -26,6 +26,9 @@ import pandas as pd
 import time
 from datetime import datetime
 from os.path import exists,basename
+import dash_bio
+from sklearn import preprocessing
+
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
@@ -159,9 +162,10 @@ def show_scfeature():
     # Get params from html
     cell_type = request.form.get('name_opt_col')
     cell_gene = request.form.get('name_opt_gene')
-    #df_genes = pd.read_csv(TMP_FOLDER+"/genes.tsv", sep="\t", header=None)
 
     fileds_dataset = mongo.single_cell_meta.distinct("meta_dataset")
+    fileds_celltypes = get_field("level2")
+
     fileds_dataset_2 = mongo.single_cell_meta.aggregate(
             [
                 {"$match":{"meta_dataset":cell_type}},
@@ -175,13 +179,11 @@ def show_scfeature():
     propotion = scfeature.proportion_raw.find({'meta_dataset': {'$in': mata_sample_id2}})
     df_propotion = pd.DataFrame(list(propotion))
     df_propotion.to_csv(user_tmp[-1]+"/proportion.tsv", sep="\t")
-    #fileds_dataset = scfeature.proportion_raw.distinct("meta_dataset")
-    #fileds_dataset = scfeature.proportion_raw.distinct("meta_dataset")
 
     print(df_propotion)
-    # Add a flag to check if the local folder cached the ids
+
     colors = fileds_dataset
-    genes = fileds_dataset
+    genes = fileds_celltypes
     # Pass color options to the html
     if(len(df_propotion)>0):
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
@@ -194,14 +196,81 @@ def show_scfeature():
         # import plotly.graph_objects as go
 
         # fig = go.Figure(go.Bar(x=df_melt.loc[:,["meta_severity", "meta_dataset"]].T.values, y=df_melt["propotion"].values , marker_color="cell_type"))
-        fig.update_layout(
-            autosize=True, width=1200, height=600
-        )
+        # fig.update_layout(
+        #     autosize=True, width=1200, height=600
+        # )
         graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+
+        print("cell gene is:",cell_gene)
+        # Query dendrogram
+        gene_prop_celltype = scfeature.gene_prop_celltype.find({'meta_dataset': {'$in': mata_sample_id2}})
+        df_gene_prop_celltype = pd.DataFrame(list(gene_prop_celltype))
+        df_gene_prop_celltype.to_csv(user_tmp[-1]+"/df_gene_prop_celltype.csv")
+        df_gene_prop_celltype = df_gene_prop_celltype.drop(columns=["_id"])
+        df = process_dendrogram(df_gene_prop_celltype,"CD4 T")
+        #df = pd.read_csv('https://git.io/clustergram_brain_cancer.csv')
+
+        fig2 = dash_bio.Clustergram(
+            data=df,
+            column_labels=list(df.columns.values),
+            row_labels=list(df.index),
+            color_map= [
+            [0.0, '#0000ff'],
+            [0.5, '#ffffff'],
+            [1.0, '#ff0000']
+            ],
+            height=1000,
+            width=1200
+        )
+        graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
+
     else:
         graphJSON = None
-    return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,colors=colors,genes=genes)
+        graphJSON2 = None
 
+
+    return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,colors=colors,genes=genes)
+
+## Add by junyi
+def process_dendrogram(data,cell_type,plot_type="gene"):
+    data= data.set_index("meta_dataset")
+    celltype = data.columns.values
+    if(plot_type=="gene"):
+        celltype = np.array([x.split('--')[0] for x in celltype] )
+    else:
+        celltype = np.array([x.split('--')[1] for x in celltype] )
+    data_patient = data.index.values 
+    condition = data.meta_severity.values 
+    data = data.iloc[:, np.where(celltype == cell_type)[0]] 
+
+    condition_colour =['#f00314', '#ff8019',   
+                                '#3bb5ff', '#0500c7' , '#5c03fa', '#de00ed' , '#fae603']
+    remove =  np.where( np.array( data.sum(axis=0)  ) == 0)[0]
+    if remove.size > 0:
+        data.drop(data.columns[remove],axis=1,inplace=True) 
+    data_np = np.array( data )
+    top_feature = np.var(data_np, axis = 0) 
+    top_feature = np.argsort(top_feature)
+    top_feature = top_feature[::-1][0:50]
+
+    data = data.iloc[:,top_feature ]
+
+    data["condition"] = condition
+    my_palette = dict(zip( set(condition ) , condition_colour[0:len(set(condition))]))
+    col_colors = data.condition.map(my_palette)
+
+    data = data.drop('condition', 1)
+    data = data.transpose()
+
+    x = data.transpose().values 
+    min_max_scaler = preprocessing.MinMaxScaler()
+    x_scaled = min_max_scaler.fit_transform(x)
+    df = pd.DataFrame(x_scaled)
+    df = df.transpose()
+    df.columns = data.columns
+    df.index = data.index
+
+    return df 
 
 def plot_tse():
     df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)

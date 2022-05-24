@@ -13,22 +13,22 @@
 
 <div class="container">
   <div class="row justify-content-center">
-    <h2>UMAP Plot</h2>
+    <h2>scFeature Plots</h2>
   </div>
-  <td>Gene Option</td>
+  <td>Cell type</td>
   <td>
     <form action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
-      <input list="opt_gene" name="name_opt_gene">
-        <datalist id="opt_gene">
+      <select list="opt_gene" name="name_opt_gene">
+          <option label=" "></option>
           {% for val in genes %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
-      </datalist>
-      <button id="idbtnSelectgene" name="btnSelectgene" type="submit" onclick="loading();"> Search </button>
+      </select>
+      <button id="idbtnSelectgene" name="btnSelectgene" type="submit"> Select </button>
     </form>  
   </td>
 
-  <td>Color Option</td>
+  <td>Dataset</td>
   <td>
     <form action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
       <select id="opt_col" name="name_opt_col">
