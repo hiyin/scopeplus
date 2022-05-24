@@ -163,6 +163,11 @@ def show_scfeature():
     cell_type = request.form.get('name_opt_col')
     cell_gene = request.form.get('name_opt_gene')
 
+    if(cell_type == None):
+        cell_type = "Arunachalam_2020"
+    if(cell_gene == None):
+        cell_gene = "B"
+
     fileds_dataset = mongo.single_cell_meta.distinct("meta_dataset")
     fileds_celltypes = get_field("level2")
 
@@ -207,7 +212,7 @@ def show_scfeature():
         df_gene_prop_celltype = pd.DataFrame(list(gene_prop_celltype))
         df_gene_prop_celltype.to_csv(user_tmp[-1]+"/df_gene_prop_celltype.csv")
         df_gene_prop_celltype = df_gene_prop_celltype.drop(columns=["_id"])
-        df = process_dendrogram(df_gene_prop_celltype,"CD4 T")
+        df = process_dendrogram(df_gene_prop_celltype,cell_gene)
         #df = pd.read_csv('https://git.io/clustergram_brain_cancer.csv')
 
         fig2 = dash_bio.Clustergram(

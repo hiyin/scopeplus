@@ -15,18 +15,18 @@
   <div class="row justify-content-center">
     <h2>scFeature Plots</h2>
   </div>
-  <td>Cell type</td>
+  <!-- <td>Cell type</td>
   <td>
     <form action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
-      <select list="opt_gene" name="name_opt_gene">
-          <option label=" "></option>
+      <input list="opt_gene" name="name_opt_gene">
+        <datalist id="opt_gene">
           {% for val in genes %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
-      </select>
-      <button id="idbtnSelectgene" name="btnSelectgene" type="submit"> Select </button>
+      </datalist>
+      <button id="idbtnSelectgene" name="btnSelectgene" type="submit" > Search </button>
     </form>  
-  </td>
+  </td> -->
 
   <td>Dataset</td>
   <td>
@@ -36,6 +36,14 @@
           {% for val in colors %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
+      </select>
+
+      <td>Cell type</td>
+      <select id="opt_gene" name="name_opt_gene">
+        <option label=" "></option>
+        {% for val in genes %}
+        <option value="{{val}}">{{val}}</option>
+        {% endfor %}
       </select>
       <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Select </button>
     </form>  
