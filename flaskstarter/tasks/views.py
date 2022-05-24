@@ -28,6 +28,7 @@ from datetime import datetime
 from os.path import exists,basename
 import dash_bio
 from sklearn import preprocessing
+import seaborn as sns
 
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
@@ -194,16 +195,12 @@ def show_scfeature():
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
         df_melt=df_d.melt(id_vars=['meta_dataset','meta_severity'],value_name="propotion",var_name="cell_type")
         df_melt.to_csv(user_tmp[-1]+"/proportion_melt.tsv", sep="\t")
-        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",title=cell_type)
+        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",title=cell_type,
+        color_discrete_sequence=sns.color_palette("tab20").as_hex())
+        fig.update_xaxes(matches=None)
         fig.update_layout(
             autosize=True, width=1200, height=600
         )
-        # import plotly.graph_objects as go
-
-        # fig = go.Figure(go.Bar(x=df_melt.loc[:,["meta_severity", "meta_dataset"]].T.values, y=df_melt["propotion"].values , marker_color="cell_type"))
-        # fig.update_layout(
-        #     autosize=True, width=1200, height=600
-        # )
         graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
         print("cell gene is:",cell_gene)
@@ -212,21 +209,7 @@ def show_scfeature():
         df_gene_prop_celltype = pd.DataFrame(list(gene_prop_celltype))
         df_gene_prop_celltype.to_csv(user_tmp[-1]+"/df_gene_prop_celltype.csv")
         df_gene_prop_celltype = df_gene_prop_celltype.drop(columns=["_id"])
-        df = process_dendrogram(df_gene_prop_celltype,cell_gene)
-        #df = pd.read_csv('https://git.io/clustergram_brain_cancer.csv')
-
-        fig2 = dash_bio.Clustergram(
-            data=df,
-            column_labels=list(df.columns.values),
-            row_labels=list(df.index),
-            color_map= [
-            [0.0, '#0000ff'],
-            [0.5, '#ffffff'],
-            [1.0, '#ff0000']
-            ],
-            height=1000,
-            width=1200
-        )
+        fig2 = process_dendrogram(df_gene_prop_celltype,cell_gene)
         graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
 
     else:
@@ -275,7 +258,22 @@ def process_dendrogram(data,cell_type,plot_type="gene"):
     df.columns = data.columns
     df.index = data.index
 
-    return df 
+    fig2 = dash_bio.Clustergram(
+        data=df,
+        column_labels=list(df.columns.values),
+        row_labels=list(df.index),
+        column_colors= list(col_colors),
+        column_colors_label= "Condition",
+        color_map= [
+        [0.0, '#000080'],
+        [0.5, '#ffffff'],
+        [1.0, '#ff0000']
+        ],
+        height=1000,
+        width=1200
+    )
+
+    return fig2
 
 def plot_tse():
     df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)
