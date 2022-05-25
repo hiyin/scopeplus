@@ -3,7 +3,7 @@
 
 <div class="d-flex flex-column justify-content-center" id="banner">
     <div id="projectName" class="d-flex justify-content-center">
-        <h4>2.5 MILLION <span>SINGLE CELL</span></h4>
+        <h4>5.0 MILLION <span>SINGLE CELL</span></h4>
     </div>
     <div id="projectAim0" class="d-flex justify-content-center">
         <div class="typed-strings">
@@ -29,7 +29,7 @@
     <div id="dashboard" class="d-flex justify-content-between container-fluid">
         <div class="dash-item">
             <div class="item1"><img src="{{url_for('static', filename='Group.png')}}" width="64" height="64"/></div>
-            <div class="item2"><h2 id="animatedCellCount">25000000</h2></div>
+            <div class="item2"><h2 id="animatedCellCount">50000000</h2></div>
             <div class="item3">Cells</div>
         </div>
         <div class="dash-item">
@@ -67,7 +67,7 @@
         }
 
         const obj = document.getElementById("animatedCellCount");
-        animateValue(obj, 0, 2500000, 5000);
+        animateValue(obj, 0, 5000000, 5000);
 
         const obj2 = document.getElementById("animatedDonorCount");
         animateValue(obj2, 0, 542, 5000);
