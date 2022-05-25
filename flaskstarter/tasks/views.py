@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from ast import If
 from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify
 from flask_login import login_required, current_user
 from ..extensions import db, mongo,scfeature
@@ -212,12 +213,21 @@ def show_scfeature():
         fig2 = process_dendrogram(df_gene_prop_celltype,cell_gene)
         graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
 
+        # Query boxplot
+        pathway_mean = scfeature.pathway_mean.find({'meta_dataset': {'$in': mata_sample_id2}})
+        df_pathway_mean = pd.DataFrame(list(pathway_mean))
+        df_pathway_mean.to_csv(user_tmp[-1]+"/df_pathway_mean.csv")
+        df_pathway_mean = df_pathway_mean.drop(columns=["_id"])
+        fig3 = process_boxplot(df_pathway_mean,cell_gene,plot_type="pathway")
+        graphJSON3 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
+
     else:
         graphJSON = None
         graphJSON2 = None
+        graphJSON3 = None
 
 
-    return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,colors=colors,genes=genes)
+    return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,graphJSON3=graphJSON3,colors=colors,genes=genes)
 
 ## Add by junyi
 def process_dendrogram(data,cell_type,plot_type="gene"):
@@ -275,6 +285,37 @@ def process_dendrogram(data,cell_type,plot_type="gene"):
 
     return fig2
 
+def process_boxplot(data,cell_type,plot_type="gene",feature=None):
+
+    data.set_index("meta_scfeature_id",inplace=True)
+    data.drop(columns=['meta_dataset','meta_severity'],inplace=True)
+    celltype = data.columns.values
+    
+    if(plot_type=="gene"):
+        celltype = np.array([x.split('--')[0] for x in celltype] )
+        if(feature is None):
+            feature = "KLF6"
+    else:
+        celltype = np.array([x.split('--')[1] for x in celltype] )
+        if(feature is None):
+            feature = "HALLMARK-ADIPOGENESIS"
+
+    data = data.iloc[:, np.where(celltype == cell_type)[0]] 
+
+    data_patient = data.index.values 
+    data["patient"] = [x.split('_cond_')[0] for x in data_patient] 
+    data["condition"] = [x.split('_cond_')[1] for x in data_patient] 
+  
+    data=data.melt(id_vars=['patient','condition'])
+    data = data[data["variable"].str.contains(feature) ]
+
+    data.to_csv(user_tmp[-1]+"/df_data.csv")
+    fig = px.box(data, x="condition", y="value")
+    fig.update_layout(
+            autosize=False, width=900, height=600)
+
+    return fig
+
 def plot_tse():
     df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)
 
@@ -330,7 +371,10 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None):
 
     else:
         fig = px.scatter(
-            df_plot, x="umap_0", y="umap_1",color=cell_color,color_continuous_scale="Viridis")
+            df_plot, x="umap_0", y="umap_1",color=cell_color,color_discrete_sequence=
+            ["#F8A19F","#8E321C","#F6222E","#F1CE63","#B6992D","#59A14F","#499894","#4E79A7",
+            "#A6AAFE","#5930FB","#500EE2","#7427B9","#931ADD","#A04DB9","#C585AF","#B8418A","#AD0267","#7A325C","#cccccc","#b2b2b2"]
+            ,color_continuous_scale="Viridis")
         fig.update_layout(
                 autosize=False, width=900, height=600)
         graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)

@@ -50,6 +50,7 @@
   </td>
    <div id="chart" class="chart"></div>
    <div id="chart2" class="chart"></div>
+   <div id="chart3" class="chart"></div>
 
 </div>
 
@@ -70,6 +71,14 @@
   var graph2 = {{ graphJSON2 | safe }};
 
   Plotly.plot('chart2', graph2, {});
+
+</script>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+  var graph3 = {{ graphJSON3 | safe }};
+
+  Plotly.plot('chart3', graph3, {});
 
 </script>
 
