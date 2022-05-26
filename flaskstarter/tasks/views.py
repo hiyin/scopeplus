@@ -265,8 +265,9 @@ def show_scfeature():
 
 ## Add by junyi
 def process_dendrogram(data,cell_type,plot_type="gene"):
+    data= data.set_index("meta_dataset")
+
     if(plot_type=="gene"):
-        data= data.set_index("meta_dataset")
         celltype = data.columns.values
         celltype = np.array([x.split('--')[0] for x in celltype] )
     else:
@@ -309,11 +310,15 @@ def process_dendrogram(data,cell_type,plot_type="gene"):
     df.columns = data.columns
     df.index = data.index
 
+    if(plot_type!="gene"):
+        df = df.transpose()
+
+
     fig2 = dash_bio.Clustergram(
         data=df,
         column_labels=list(df.columns.values),
         row_labels=list(df.index),
-        column_colors= list(col_colors),
+        #column_colors= list(col_colors),
         row_colors_label= "Condition",
         color_map= [
         [0.0, '#000080'],
