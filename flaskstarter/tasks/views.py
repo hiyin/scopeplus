@@ -176,7 +176,6 @@ def show_scfeature():
 
     fileds_dataset = mongo.single_cell_meta.distinct("meta_dataset")
     fileds_celltypes = get_field("level2")
-
     fileds_dataset_2 = mongo.single_cell_meta.aggregate(
             [
                 {"$match":{"meta_dataset":dataset}},
@@ -187,16 +186,15 @@ def show_scfeature():
     mata_sample_id2 = [x["_id"]["meta_sample_id2"] for x in list(fileds_dataset_2)]
     print("Sample id 2: ",mata_sample_id2)
 
-    propotion = scfeature.proportion_raw.find({'meta_dataset': {'$in': mata_sample_id2}})
-    df_propotion = pd.DataFrame(list(propotion))
-    df_propotion.to_csv(user_tmp[-1]+"/proportion.tsv", sep="\t")
-
     datasets = fileds_dataset
-    celltypes = fileds_celltypes
+    celltypes = ["All"]
+    celltypes=celltypes+fileds_celltypes
     features = []
-    print(["All"].append(list(celltypes))," is the appended list")
-    # Pass color options to the html
-    if(len(df_propotion)>0):
+    
+    try:
+        propotion = scfeature.proportion_raw.find({'meta_dataset': {'$in': mata_sample_id2}})
+        df_propotion = pd.DataFrame(list(propotion))
+        df_propotion.to_csv(user_tmp[-1]+"/proportion.tsv", sep="\t")
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
         df_melt=df_d.melt(id_vars=['meta_dataset','meta_severity'],value_name="propotion",var_name="cell_type")
         df_melt.to_csv(user_tmp[-1]+"/proportion_melt.tsv", sep="\t")
@@ -207,7 +205,11 @@ def show_scfeature():
             autosize=True, width=1200, height=600
         )
         graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-
+    except Exception as e:
+        graphJSON = None
+        print("Error generating figure propotion",e)
+    
+    try:
         # Query dendrogram
         gene_prop_celltype = scfeature.gene_prop_celltype.find({'meta_dataset': {'$in': mata_sample_id2}})
         df_gene_prop_celltype = pd.DataFrame(list(gene_prop_celltype))
@@ -219,7 +221,17 @@ def show_scfeature():
             select_type = cell_type
         fig2 = process_dendrogram(df_gene_prop_celltype,select_type)
         graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
+    except Exception as e:
+        graphJSON2 = None
+        print("Error generating figure dendrogram",e)
+ 
+    # celltypes_all= ["All"]
+    # list(pd.DataFrame(list(celltypes)).iloc[:,0].values)
+    # []celltypes.append("All")
+    # print(list(pd.DataFrame(list(celltypes)).iloc[:,0].values).append("All")," is the appended list")
+    # # Pass color options to the html
 
+    try:
         # Query boxplot
         pathway_mean = scfeature.pathway_mean.find({'meta_dataset': {'$in': mata_sample_id2}})
         df_pathway_mean = pd.DataFrame(list(pathway_mean))
@@ -227,11 +239,9 @@ def show_scfeature():
         df_pathway_mean = df_pathway_mean.drop(columns=["_id"])
         fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature)
         graphJSON3 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
-
-    else:
-        graphJSON = None
-        graphJSON2 = None
+    except Exception as e:
         graphJSON3 = None
+        print("Error generating figure boxplot",e)
 
 
     return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,graphJSON3=graphJSON3,datasets=datasets,celltypes=celltypes,features=features)
@@ -315,8 +325,9 @@ def process_boxplot(data,cell_type,plot_type="gene",feature=None):
     if(not(feature in features)):
         feature = features[0]           
 
-    # if(not(cell_type is None)):
-    #     data = data.iloc[:, np.where(celltypes == cell_type)[0]] 
+    if(not(cell_type is None)):
+        if(not(cell_type == "All")):
+            data = data.iloc[:, np.where(celltypes == cell_type)[0]] 
 
     data_patient = data.index.values 
     data["patient"] = [x.split('_cond_')[0] for x in data_patient] 

@@ -62,6 +62,13 @@
 
 </div>
 
+
+<div class="jumbotron">
+<form action="{{ url_for('tasks.table_view')}}" method="post" style="display:inline-block">
+ <button class="btn btn-primary" name="jump home" type="submit"> Back </button>
+</form>
+</div>
+
 {% endblock %}
 
 {% block scripts %}
@@ -97,5 +104,18 @@
       $("#loadingbox").show();       
   }
 // ]]></script>
+
+
+<!-- Show loading box -->
+<script type="text/javascript">// <![CDATA[
+  function show_byid(id) {
+    var x = document.getElementById(id);
+    if (x.style.display === "none") {
+      x.style.display = "block";
+    } else {
+      x.style.display = "none";
+    }
+}// ]]></script>
+
 
 {% endblock %}
