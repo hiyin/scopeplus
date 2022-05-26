@@ -162,20 +162,24 @@ def show_plot():
 def show_scfeature():     
 
     # Get params from html
-    cell_type = request.form.get('name_opt_col')
-    cell_gene = request.form.get('name_opt_gene')
+    
+    
+    dataset = request.form.get('name_opt_dataset')
+    cell_type = request.form.get('name_opt_celltype')
+    feature = request.form.get('name_opt_feature')
 
-    if(cell_type == None):
-        cell_type = "Arunachalam_2020"
-    if(cell_gene == None):
-        cell_gene = "B"
+
+    print("Html params",dataset,cell_type,feature)	
+
+    if(dataset == None):
+        dataset = "Arunachalam_2020"
 
     fileds_dataset = mongo.single_cell_meta.distinct("meta_dataset")
     fileds_celltypes = get_field("level2")
 
     fileds_dataset_2 = mongo.single_cell_meta.aggregate(
             [
-                {"$match":{"meta_dataset":cell_type}},
+                {"$match":{"meta_dataset":dataset}},
                 {"$group": {"_id": {"meta_dataset": "$meta_dataset", "meta_sample_id2": "$meta_sample_id2"}}}
             ]
 
@@ -187,16 +191,16 @@ def show_scfeature():
     df_propotion = pd.DataFrame(list(propotion))
     df_propotion.to_csv(user_tmp[-1]+"/proportion.tsv", sep="\t")
 
-    print(df_propotion)
-
-    colors = fileds_dataset
-    genes = fileds_celltypes
+    datasets = fileds_dataset
+    celltypes = fileds_celltypes
+    features = []
+    print(["All"].append(list(celltypes))," is the appended list")
     # Pass color options to the html
     if(len(df_propotion)>0):
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
         df_melt=df_d.melt(id_vars=['meta_dataset','meta_severity'],value_name="propotion",var_name="cell_type")
         df_melt.to_csv(user_tmp[-1]+"/proportion_melt.tsv", sep="\t")
-        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",title=cell_type,
+        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",title="Cell type proportion of:" + dataset,
         color_discrete_sequence=sns.color_palette("tab20").as_hex())
         fig.update_xaxes(matches=None)
         fig.update_layout(
@@ -204,13 +208,16 @@ def show_scfeature():
         )
         graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
 
-        print("cell gene is:",cell_gene)
         # Query dendrogram
         gene_prop_celltype = scfeature.gene_prop_celltype.find({'meta_dataset': {'$in': mata_sample_id2}})
         df_gene_prop_celltype = pd.DataFrame(list(gene_prop_celltype))
         df_gene_prop_celltype.to_csv(user_tmp[-1]+"/df_gene_prop_celltype.csv")
         df_gene_prop_celltype = df_gene_prop_celltype.drop(columns=["_id"])
-        fig2 = process_dendrogram(df_gene_prop_celltype,cell_gene)
+        if(cell_type == None):
+            select_type = "B"
+        else:
+            select_type = cell_type
+        fig2 = process_dendrogram(df_gene_prop_celltype,select_type)
         graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
 
         # Query boxplot
@@ -218,7 +225,7 @@ def show_scfeature():
         df_pathway_mean = pd.DataFrame(list(pathway_mean))
         df_pathway_mean.to_csv(user_tmp[-1]+"/df_pathway_mean.csv")
         df_pathway_mean = df_pathway_mean.drop(columns=["_id"])
-        fig3 = process_boxplot(df_pathway_mean,cell_gene,plot_type="pathway")
+        fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature)
         graphJSON3 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
 
     else:
@@ -227,7 +234,7 @@ def show_scfeature():
         graphJSON3 = None
 
 
-    return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,graphJSON3=graphJSON3,colors=colors,genes=genes)
+    return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,graphJSON3=graphJSON3,datasets=datasets,celltypes=celltypes,features=features)
 
 ## Add by junyi
 def process_dendrogram(data,cell_type,plot_type="gene"):
@@ -239,7 +246,11 @@ def process_dendrogram(data,cell_type,plot_type="gene"):
         celltype = np.array([x.split('--')[1] for x in celltype] )
     data_patient = data.index.values 
     condition = data.meta_severity.values 
-    data = data.iloc[:, np.where(celltype == cell_type)[0]] 
+
+    if(cell_type in celltype):
+        data = data.iloc[:, np.where(celltype == cell_type)[0]] 
+    else:
+        return None
 
     condition_colour =['#f00314', '#ff8019',   
                                 '#3bb5ff', '#0500c7' , '#5c03fa', '#de00ed' , '#fae603']
@@ -273,7 +284,7 @@ def process_dendrogram(data,cell_type,plot_type="gene"):
         column_labels=list(df.columns.values),
         row_labels=list(df.index),
         column_colors= list(col_colors),
-        column_colors_label= "Condition",
+        row_colors_label= "Condition",
         color_map= [
         [0.0, '#000080'],
         [0.5, '#ffffff'],
@@ -289,18 +300,23 @@ def process_boxplot(data,cell_type,plot_type="gene",feature=None):
 
     data.set_index("meta_scfeature_id",inplace=True)
     data.drop(columns=['meta_dataset','meta_severity'],inplace=True)
-    celltype = data.columns.values
+    columns = data.columns.values
     
     if(plot_type=="gene"):
-        celltype = np.array([x.split('--')[0] for x in celltype] )
-        if(feature is None):
-            feature = "KLF6"
+        celltypes = np.array([x.split('--')[0] for x in columns] )
+        # if(feature is None):
+        #     feature = "KLF6"
+        features = list(set(np.array([x.split('--')[1] for x in columns] )))
     else:
-        celltype = np.array([x.split('--')[1] for x in celltype] )
-        if(feature is None):
-            feature = "HALLMARK-ADIPOGENESIS"
+        celltypes = np.array([x.split('--')[1] for x in columns] )
+        # if(feature is None):
+        #     feature = "HALLMARK-ADIPOGENESIS"            
+        features = list(set(np.array([x.split('--')[0] for x in columns] )))
+    if(not(feature in features)):
+        feature = features[0]           
 
-    data = data.iloc[:, np.where(celltype == cell_type)[0]] 
+    # if(not(cell_type is None)):
+    #     data = data.iloc[:, np.where(celltypes == cell_type)[0]] 
 
     data_patient = data.index.values 
     data["patient"] = [x.split('_cond_')[0] for x in data_patient] 
@@ -310,11 +326,16 @@ def process_boxplot(data,cell_type,plot_type="gene",feature=None):
     data = data[data["variable"].str.contains(feature) ]
 
     data.to_csv(user_tmp[-1]+"/df_data.csv")
-    fig = px.box(data, x="condition", y="value")
+    #fig = px.box(data, x="condition", y="value")
+    fig = px.box(data,  x="variable", y="value",color="condition")
     fig.update_layout(
-            autosize=False, width=900, height=600)
+            autosize=False, width=1200, height=800,
+            # legend=dict(
+            #         title=None, orientation="h", y=0, yanchor="top", x=0.5, xanchor="center"
+            #     )
+            )
 
-    return fig
+    return fig, features
 
 def plot_tse():
     df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)

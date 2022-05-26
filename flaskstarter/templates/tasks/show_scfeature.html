@@ -31,26 +31,34 @@
   <td>Dataset</td>
   <td>
     <form action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
-      <select id="opt_col" name="name_opt_col">
+      <select id="opt_dataset" name="name_opt_dataset">
           <option label=" "></option>
-          {% for val in colors %}
+          {% for val in datasets %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
       </select>
 
       <td>Cell type</td>
-      <select id="opt_gene" name="name_opt_gene">
+      <select id="opt_celltype" name="name_opt_celltype">
         <option label=" "></option>
-        {% for val in genes %}
+        {% for val in celltypes %}
+        <option value="{{val}}">{{val}}</option>
+        {% endfor %}
+      </select>
+      <td>Features</td>
+      <select id="opt_feature" name="name_opt_feature">
+        <option label=" "></option>
+        {% for val in features %}
         <option value="{{val}}">{{val}}</option>
         {% endfor %}
       </select>
       <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Select </button>
     </form>  
   </td>
+
    <div id="chart" class="chart"></div>
-   <div id="chart2" class="chart"></div>
    <div id="chart3" class="chart"></div>
+   <div id="chart2" class="chart"></div>
 
 </div>
 
