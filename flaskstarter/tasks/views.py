@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from ast import If
+from operator import index
 from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify
 from flask_login import login_required, current_user
 from ..extensions import db, mongo,scfeature
@@ -199,7 +200,7 @@ def show_scfeature():
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
         df_melt=df_d.melt(id_vars=['meta_dataset','meta_severity'],value_name="propotion",var_name="cell_type")
         df_melt.to_csv(user_tmp[-1]+"/proportion_melt.tsv", sep="\t")
-        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",title="Cell type proportion of:" + dataset,
+        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",title="Overview: cell type proportion in " + dataset,
         color_discrete_sequence=sns.color_palette("tab20").as_hex())
         fig.update_xaxes(matches=None)
         fig.update_layout(
@@ -210,27 +211,24 @@ def show_scfeature():
         graphJSON = None
         print("Error generating figure propotion",e)
     
-    try:
-        # Query dendrogram
-        gene_prop_celltype = scfeature.gene_prop_celltype.find({'meta_dataset': {'$in': mata_sample_id2}})
-        df_gene_prop_celltype = pd.DataFrame(list(gene_prop_celltype))
-        df_gene_prop_celltype.to_csv(user_tmp[-1]+"/df_gene_prop_celltype.csv")
-        df_gene_prop_celltype = df_gene_prop_celltype.drop(columns=["_id"])
-        if(cell_type == None):
-            select_type = "B"
-        else:
-            select_type = cell_type
-        fig2 = process_dendrogram(df_gene_prop_celltype,select_type)
-        graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
-    except Exception as e:
+    if(cell_type == "All"):	
         graphJSON2 = None
-        print("Error generating figure dendrogram",e)
- 
-    # celltypes_all= ["All"]
-    # list(pd.DataFrame(list(celltypes)).iloc[:,0].values)
-    # []celltypes.append("All")
-    # print(list(pd.DataFrame(list(celltypes)).iloc[:,0].values).append("All")," is the appended list")
-    # # Pass color options to the html
+    else:
+        try:
+            # Query dendrogram for each gene
+            gene_prop_celltype = scfeature.gene_prop_celltype.find({'meta_dataset': {'$in': mata_sample_id2}})
+            df_gene_prop_celltype = pd.DataFrame(list(gene_prop_celltype))
+            df_gene_prop_celltype.to_csv(user_tmp[-1]+"/df_gene_prop_celltype.csv")
+            df_gene_prop_celltype = df_gene_prop_celltype.drop(columns=["_id"])
+            if(not(cell_type in celltypes)):
+                graphJSON2 = None
+            else:
+                select_type = cell_type
+                fig2 = process_dendrogram(df_gene_prop_celltype,select_type)
+                graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
+        except Exception as e:
+            graphJSON2 = None
+            print("Error generating figure dendrogram",e)
 
     try:
         # Query boxplot
@@ -239,22 +237,43 @@ def show_scfeature():
         df_pathway_mean.to_csv(user_tmp[-1]+"/df_pathway_mean.csv")
         df_pathway_mean = df_pathway_mean.drop(columns=["_id"])
         fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature)
-        graphJSON3 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
+
+        if(feature is None):
+            graphJSON3 = None
+        elif(not(feature in features)):
+            graphJSON3 = None
+        else:
+            graphJSON3 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
+    
+        if(cell_type == "All"):	
+            graphJSON4 = None
+        elif(not(cell_type in celltypes)):
+            graphJSON4 = None
+        else:
+            select_type = cell_type
+            #df_pathway_mean.to_csv(user_tmp[-1]+"/df_test"+select_type+".csv")
+            fig4 = process_dendrogram(df_pathway_mean,select_type,plot_type="pathway")
+            graphJSON4 = json.dumps(fig4, cls=plotly.utils.PlotlyJSONEncoder)
+
     except Exception as e:
         graphJSON3 = None
+        graphJSON4 = None
         print("Error generating figure boxplot",e)
 
 
-    return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,graphJSON3=graphJSON3,datasets=datasets,celltypes=celltypes,features=features)
+    return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,graphJSON3=graphJSON3,graphJSON4=graphJSON4,datasets=datasets,celltypes=celltypes,features=features)
 
 ## Add by junyi
 def process_dendrogram(data,cell_type,plot_type="gene"):
-    data= data.set_index("meta_dataset")
-    celltype = data.columns.values
     if(plot_type=="gene"):
+        data= data.set_index("meta_dataset")
+        celltype = data.columns.values
         celltype = np.array([x.split('--')[0] for x in celltype] )
     else:
+        data = data.drop(columns=["meta_scfeature_id"])
+        celltype = data.columns[2:].values
         celltype = np.array([x.split('--')[1] for x in celltype] )
+
     data_patient = data.index.values 
     condition = data.meta_severity.values 
 
@@ -304,13 +323,15 @@ def process_dendrogram(data,cell_type,plot_type="gene"):
         height=1000,
         width=1200
     )
-
+    fig2.update(layout_showlegend=False)    
     return fig2
 
-def process_boxplot(data,cell_type,plot_type="gene",feature=None):
+def process_boxplot(input_data,cell_type,plot_type="gene",feature=None):
 
-    data.set_index("meta_scfeature_id",inplace=True)
-    data.drop(columns=['meta_dataset','meta_severity'],inplace=True)
+
+    data = input_data.set_index("meta_scfeature_id")
+    data = data.drop(columns=['meta_dataset','meta_severity'])
+
     columns = data.columns.values
     
     if(plot_type=="gene"):
@@ -337,8 +358,6 @@ def process_boxplot(data,cell_type,plot_type="gene",feature=None):
     data=data.melt(id_vars=['patient','condition'])
     data = data[data["variable"].str.contains(feature) ]
 
-    data.to_csv(user_tmp[-1]+"/df_data.csv")
-    #fig = px.box(data, x="condition", y="value")
     fig = px.box(data,  x="variable", y="value",color="condition")
     fig.update_layout(
             autosize=False, width=1200, height=800,

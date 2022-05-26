@@ -38,14 +38,14 @@
           {% endfor %}
       </select>
 
-      <td>Cell type</td>
+      <td>Cell types</td>
       <select id="opt_celltype" name="name_opt_celltype">
         <option label=" "></option>
         {% for val in celltypes %}
         <option value="{{val}}">{{val}}</option>
         {% endfor %}
       </select>
-      <td>Features</td>
+      <td>Pathways</td>
       <select id="opt_feature" name="name_opt_feature">
         <option label=" "></option>
         {% for val in features %}
@@ -57,8 +57,10 @@
   </td>
 
    <div id="chart" class="chart"></div>
-   <div id="chart3" class="chart"></div>
+   <div id="chart4" class="chart"></div>
    <div id="chart2" class="chart"></div>
+   <div id="chart3" class="chart"></div>
+
 
 </div>
 
@@ -94,6 +96,14 @@
   var graph3 = {{ graphJSON3 | safe }};
 
   Plotly.plot('chart3', graph3, {});
+
+</script>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+  var graph4 = {{ graphJSON4 | safe }};
+
+  Plotly.plot('chart4', graph4, {});
 
 </script>
 
