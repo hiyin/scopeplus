@@ -15,7 +15,13 @@
         <h3>Filter</h3>
         <table style="width:85%">
             <tbody>
-                <tr><td><div class="input-group mb-3"><input class="form-control" type="text" id="txt_id" placeholder="Search id"/></div></td></tr>
+                <tr><td><div class="input-group mb-3"><input class="form-control" type="text" id="txt_id" placeholder="Search id"/></div></td>
+                    <td>                    
+                        <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
+                        <button class="btn btn-primary" name="show_scfeature" type="submit"> Show scFeature plot </button>
+                    </form>
+                    </td>    
+                </tr>
                 <tr>
                     <td style="width:16%">
                     <select id="opt_sampleid" class="multibox" multiple="multiple">
@@ -72,7 +78,7 @@
                     <input type="button" class="btn btn-primary" style="display:inline-block" value="Clear" id="btnClear" />
                      </td>
                      <td>
-                    <button class="btn btn-primary" style="display:inline-block" id="btnAdvance">Advanced Search</button>
+                    <button class="btn btn-primary" style="display:inline-block" id="btnAdvance">Advanced Search</button>                
                     </td>
                 </tr>
 
@@ -109,9 +115,9 @@
       <button class="btn btn-primary" name="download" type="submit"> Download metadata </button>
     </form>
 
-    <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
+    <!-- <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
         <button class="btn btn-primary" name="show_scfeature" type="submit"> Show scFeature plot </button>
-      </form>
+      </form> -->
 
     <form action="{{ url_for('tasks.show_plot')}}" method="get" style="display:inline-block">
       <button class="btn btn-primary" name="show_plot" type="submit"> Show UMAP plot </button>

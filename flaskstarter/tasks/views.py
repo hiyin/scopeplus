@@ -192,6 +192,7 @@ def show_scfeature():
     features = []
     
     try:
+        # Query propotion
         propotion = scfeature.proportion_raw.find({'meta_dataset': {'$in': mata_sample_id2}})
         df_propotion = pd.DataFrame(list(propotion))
         df_propotion.to_csv(user_tmp[-1]+"/proportion.tsv", sep="\t")
@@ -389,7 +390,9 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None):
         #df_plot[gene_color] = df_plot[gene_color].fillna(value=0)
         #fig2 = px.violin(df_plot, y=gene_color, x=cell_color, box=False, points=False)
         #df_plot[gene_color] = np.clip(df_plot[gene_color],np.percentile(df_plot[gene_color], 5),np.percentile(df_plot[gene_color], 95))
-        fig2 = px.box(df_plot, y=gene_color, x=cell_color)
+        fig2 = px.box(df_plot, y=gene_color, x=cell_color,color=cell_color,color_discrete_sequence=
+            ["#F8A19F","#8E321C","#F6222E","#F1CE63","#B6992D","#59A14F","#499894","#4E79A7",
+            "#A6AAFE","#5930FB","#500EE2","#7427B9","#931ADD","#A04DB9","#C585AF","#B8418A","#AD0267","#7A325C","#cccccc","#b2b2b2"])
 
         fig2.update_layout(
         autosize=False, width=900, height=600)

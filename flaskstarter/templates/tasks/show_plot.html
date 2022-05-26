@@ -45,6 +45,13 @@
 
 </div>
 
+<div class="jumbotron">
+  <form action="{{ url_for('tasks.table_view')}}" method="get" style="display:inline-block">
+    <button class="btn btn-primary" name="jump_home" type="submit"> Home page</button>
+  </form>
+</div>
+
+
 {% endblock %}
 
 {% block scripts %}
