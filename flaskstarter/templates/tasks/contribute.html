@@ -21,7 +21,7 @@
             aria-describedby="inputGroupFileAddon01" name="file">
           <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
         </div>
-        <button class="btn btn-primary">Upload file</button>
+        <button class="btn btn-primary">Upload user files</button>
       </div>
 
 
@@ -31,7 +31,7 @@
     </div>
     <div class="jumbotron">
     <form method="POST" action="{{ url_for('tasks.run_scClassify')}}" enctype="multipart/form-data" style="display:inline-block">
-        <button class="btn btn-primary">Run scClassify</button>
+        <button class="btn btn-primary">Run scClassify pipeline</button>
     </form>
     <form method="POST" action="{{ url_for('tasks.download_scClassify')}}" enctype="multipart/form-data" style="display:inline-block">
         <button class="btn btn-primary">Download results</button>
