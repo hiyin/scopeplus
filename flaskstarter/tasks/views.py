@@ -283,7 +283,12 @@ def process_dendrogram(data,cell_type,plot_type="gene",title="Title"):
     condition = data.meta_severity.values 
 
     if(cell_type in celltype):
-        data = data.iloc[:, np.where(celltype == cell_type)[0]] 
+
+        if(plot_type=="gene"):
+            data = data.iloc[:, np.where(celltype == cell_type)[0]] 
+        else:
+            colNames = data.columns[data.columns.str.contains(pat = "--"+cell_type)] 
+            data = data.loc[:,colNames]
     else:
         return None
 
