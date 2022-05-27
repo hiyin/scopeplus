@@ -200,10 +200,14 @@ def show_scfeature():
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
         df_melt=df_d.melt(id_vars=['meta_dataset','meta_severity'],value_name="propotion",var_name="cell_type")
         #df_melt.to_csv(user_tmp[-1]+"/proportion_melt.tsv", sep="\t")
-        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",title="Overview: cell type proportion in " + dataset,
+        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",
         color_discrete_sequence=sns.color_palette("tab20").as_hex())
         fig.update_xaxes(matches=None)
         fig.update_layout(
+             title={
+                'text': "Overview: cell type proportion in " + dataset,
+                'x':0.5,
+                'xanchor': 'center'},
             autosize=True, width=1200, height=600
         )
         graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -224,7 +228,7 @@ def show_scfeature():
                 graphJSON2 = None
             else:
                 select_type = cell_type
-                fig2 = process_dendrogram(df_gene_prop_celltype,select_type)
+                fig2 = process_dendrogram(df_gene_prop_celltype,select_type,title="Marker gene proportions of cell types in " + dataset)
                 graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
         except Exception as e:
             graphJSON2 = None
@@ -236,7 +240,7 @@ def show_scfeature():
         df_pathway_mean = pd.DataFrame(list(pathway_mean))
         df_pathway_mean.to_csv(user_tmp[-1]+"/df_pathway_mean_"+dataset+".csv")
         df_pathway_mean = df_pathway_mean.drop(columns=["_id"])
-        fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature)
+        fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature,title="Pathway mean scores of: "+ cell_type + " cell types in dataset "+ dataset)
 
         if(feature is None):
             graphJSON3 = None
@@ -252,7 +256,7 @@ def show_scfeature():
         else:
             select_type = cell_type
             #df_pathway_mean.to_csv(user_tmp[-1]+"/df_test"+select_type+".csv")
-            fig4 = process_dendrogram(df_pathway_mean,select_type,plot_type="pathway")
+            fig4 = process_dendrogram(df_pathway_mean,select_type,plot_type="pathway",title="Pathway mean scores in dataset" + dataset)
             graphJSON4 = json.dumps(fig4, cls=plotly.utils.PlotlyJSONEncoder)
 
     except Exception as e:
@@ -264,7 +268,7 @@ def show_scfeature():
     return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,graphJSON3=graphJSON3,graphJSON4=graphJSON4,datasets=datasets,celltypes=celltypes,features=features)
 
 ## Add by junyi
-def process_dendrogram(data,cell_type,plot_type="gene"):
+def process_dendrogram(data,cell_type,plot_type="gene",title="Title"):
     data= data.set_index("meta_dataset")
 
     if(plot_type=="gene"):
@@ -319,7 +323,7 @@ def process_dendrogram(data,cell_type,plot_type="gene"):
         column_labels=list(df.columns.values),
         row_labels=list(df.index),
         #column_colors= list(col_colors),
-        row_colors_label= "Condition",
+        #row_colors_label= "Condition",
         color_map= [
         [0.0, '#000080'],
         [0.5, '#ffffff'],
@@ -328,10 +332,19 @@ def process_dendrogram(data,cell_type,plot_type="gene"):
         height=1000,
         width=1200
     )
-    fig2.update(layout_showlegend=False)    
+    fig2.update_layout(
+        title={
+        'text': title,
+        'y':0.95,
+        'x':0.5,
+        'xanchor': 'center',
+        'yanchor': 'top'}
+    )   
+
+    #fig2.update_layout(title_text='Pie',layout_showlegend=False)    
     return fig2
 
-def process_boxplot(input_data,cell_type,plot_type="gene",feature=None):
+def process_boxplot(input_data,cell_type,plot_type="gene",feature=None,title="Title"):
 
 
     data = input_data.set_index("meta_scfeature_id")
@@ -365,6 +378,11 @@ def process_boxplot(input_data,cell_type,plot_type="gene",feature=None):
 
     fig = px.box(data,  x="variable", y="value",color="condition")
     fig.update_layout(
+            title={
+                'text': title,
+                'x':0.5,
+                'xanchor': 'center'},
+
             autosize=False, width=1200, height=800,
             # legend=dict(
             #         title=None, orientation="h", y=0, yanchor="top", x=0.5, xanchor="center"
