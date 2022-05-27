@@ -14,7 +14,7 @@ import gzip
 import zipfile
 import shutil
 import re
-
+import glob
 import pandas as pd
 import numpy as np
 import plotly
@@ -196,10 +196,10 @@ def show_scfeature():
         # Query propotion
         propotion = scfeature.proportion_raw.find({'meta_dataset': {'$in': mata_sample_id2}})
         df_propotion = pd.DataFrame(list(propotion))
-        df_propotion.to_csv(user_tmp[-1]+"/proportion.tsv", sep="\t")
+        df_propotion.to_csv(user_tmp[-1]+"/df_proportion_raw_"+dataset+".csv")
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
         df_melt=df_d.melt(id_vars=['meta_dataset','meta_severity'],value_name="propotion",var_name="cell_type")
-        df_melt.to_csv(user_tmp[-1]+"/proportion_melt.tsv", sep="\t")
+        #df_melt.to_csv(user_tmp[-1]+"/proportion_melt.tsv", sep="\t")
         fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",title="Overview: cell type proportion in " + dataset,
         color_discrete_sequence=sns.color_palette("tab20").as_hex())
         fig.update_xaxes(matches=None)
@@ -218,7 +218,7 @@ def show_scfeature():
             # Query dendrogram for each gene
             gene_prop_celltype = scfeature.gene_prop_celltype.find({'meta_dataset': {'$in': mata_sample_id2}})
             df_gene_prop_celltype = pd.DataFrame(list(gene_prop_celltype))
-            df_gene_prop_celltype.to_csv(user_tmp[-1]+"/df_gene_prop_celltype.csv")
+            df_gene_prop_celltype.to_csv(user_tmp[-1]+"/df_gene_prop_celltype_"+dataset+".csv")
             df_gene_prop_celltype = df_gene_prop_celltype.drop(columns=["_id"])
             if(not(cell_type in celltypes)):
                 graphJSON2 = None
@@ -234,7 +234,7 @@ def show_scfeature():
         # Query boxplot
         pathway_mean = scfeature.pathway_mean.find({'meta_dataset': {'$in': mata_sample_id2}})
         df_pathway_mean = pd.DataFrame(list(pathway_mean))
-        df_pathway_mean.to_csv(user_tmp[-1]+"/df_pathway_mean.csv")
+        df_pathway_mean.to_csv(user_tmp[-1]+"/df_pathway_mean_"+dataset+".csv")
         df_pathway_mean = df_pathway_mean.drop(columns=["_id"])
         fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature)
 
@@ -601,6 +601,29 @@ def download_meta():
     write_file_meta(user_tmp[-1], meta)
     #return send_file(user_tmp[-1] + '/ids.csv', as_attachment=True)
     return send_file(user_tmp[-1] + '/meta.tsv', as_attachment=True)
+
+# Download big file
+@tasks.route('/download_scfeature',methods=['POST'])
+def download_scfeature():
+
+    
+    # list_files = [
+    #     user_tmp[-1]+"/df_gene_prop_celltype.csv",
+    #     user_tmp[-1]+"/df_pathway_mean.csv",
+    #     user_tmp[-1]+"/df_proportion_raw.csv"
+    # ]
+    list_files = glob.glob( user_tmp[-1]+"/*_gene_prop_celltype*.csv")+\
+    glob.glob( user_tmp[-1]+"/*_pathway_mean*.csv")+\
+    glob.glob( user_tmp[-1]+"/*_proportion_raw*.csv")
+
+    if(not (exists(user_tmp[-1] + '/scfeature.zip'))):
+        with zipfile.ZipFile(user_tmp[-1] + '/scfeature.zip', 'w') as zipMe:        
+            for file in list_files:
+                if(exists(file)):
+                    zipMe.write(file,arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
+
+    return send_file(user_tmp[-1] + '/scfeature.zip', as_attachment=True)
+
 
 
 @tasks.route('/download_umap', methods=['POST'])

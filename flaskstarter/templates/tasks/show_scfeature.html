@@ -66,8 +66,12 @@
 
 
 <div class="jumbotron">
+  <h4>Please choose any of the option below for data manipulation.</h4>
   <form action="{{ url_for('tasks.table_view')}}" method="get" style="display:inline-block">
     <button class="btn btn-primary" name="jump_home" type="submit"> Home page</button>
+  </form>
+  <form action="{{ url_for('tasks.download_scfeature')}}" method="post" style="display:inline-block">
+    <button class="btn btn-primary" name="download_scfeature" type="submit"> Download scFeature tables </button>
   </form>
 </div>
 
