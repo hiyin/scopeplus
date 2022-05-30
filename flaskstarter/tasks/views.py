@@ -369,7 +369,7 @@ def process_boxplot(input_data,cell_type,plot_type="gene",feature=None,title="Ti
         features = list(set(np.array([x.split('--')[0] for x in columns] )))
     if(not(feature in features)):
         feature = features[0]           
-
+    features.sort()
     if(not(cell_type is None)):
         if(not(cell_type == "All")):
             data = data.iloc[:, np.where(celltypes == cell_type)[0]] 
@@ -381,7 +381,10 @@ def process_boxplot(input_data,cell_type,plot_type="gene",feature=None,title="Ti
     data=data.melt(id_vars=['patient','condition'])
     data = data[data["variable"].str.contains(feature) ]
 
-    fig = px.box(data,  x="variable", y="value",color="condition")
+    fig = px.box(data,  x="variable", y="value",color="condition",color_discrete_sequence=
+            ['#3D9970','#FF851B','#FF4136'],
+            category_orders={'condition': ['Healthy','Mild/Moderate','Severe/Critical']},
+            )
     fig.update_layout(
             title={
                 'text': title,
@@ -389,6 +392,7 @@ def process_boxplot(input_data,cell_type,plot_type="gene",feature=None,title="Ti
                 'xanchor': 'center'},
 
             autosize=False, width=1200, height=800,
+            #legend_traceorder="reversed",
             # legend=dict(
             #         title=None, orientation="h", y=0, yanchor="top", x=0.5, xanchor="center"
             #     )
