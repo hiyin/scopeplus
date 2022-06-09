@@ -1,52 +1,14 @@
-# Flask-Starter
+# Covid-19 Cell Atlas
 
-Flask-Starter is a boilerplate starter template designed to help you quickstart your Flask web application development. It has all the ready-to-use bare minimum essentials.
-
-## Features
-
-- Flask 2.0, Python (`PEP8`)
-- Signup, Login with (email, password)
-- Forget/reset passwords
-- Email verification
-- User profile/password updates
-- User roles (admin, user, staff)
-- User profile status (active, inactive)
-- Admin dashboard for management
-- Contact us form
-- Basic tasks/todo model (easily replace with your use-case)
-- Bootstrap template (minimal)
-- Utility scripts (initiate dummy database, run test server)
-- Test & Production Configs
-- Tests [To Do]
+Covid-19 Cell Atlas Portal is a Flask web application development based on flaskstarter boilerplate. It has all the ready-to-use bare minimum essentials.
 
 
-## Flask 2.0 `async` or not `async`
-
- - asynchronous support in Flask 2.0 is an amazing feature
- - however, use it only when it has a clear advantage over the equivalent synchronous code
- - write asynchronous code, if your application's routes, etc. are making heavy I/O-bound operations, like:
-    - sending emails, making API calls to external servers, working with the file system, etc
- - otherwise, if your application is doing CPU-bound operations or long-running tasks, like:
-    - processing images or large files, creating backups or running AI/ML models, etc
-    - it is advised to use tools like "Celery" or "Huey", etc.
-
-
-## `async` demo in our application
-
-Check `emails/__init__.py` to see how emails being sent in `async` mode
-
-
-## Primary Goals
-
- - To help you save lots of hours as a developer, even if for a hobby project or commercial project :-)
- - To provide basic features of standard web apps, while staying as unopinionated as possible 
- - To make back-end development quick to start, with robust foundations
- - To help you quickly learn how to build a Flask based web application
- - To help you quick start coding your web app's main logic and features
+## Demo
+Video: https://d24h-my.sharepoint.com/:v:/g/personal/junyichen_d24h_hk/EZz9CeDLpq1Hl2snWY2f-dsBIP4Fq1Dx9hR4WRAWuzm22A?e=awW1nz
 
 
 ## Table of Contents
-
+1. [Deployment](#deployment)
 1. [Getting Started](#getting-started)
 1. [Screenshots](#screenshots)
 1. [Project Structure](#project-structure)
@@ -54,6 +16,17 @@ Check `emails/__init__.py` to see how emails being sent in `async` mode
 1. [Testing](#testing)
 1. [Need Help?](#need-help)
 
+
+## Deployment
+start D24H server at port 5000: execute "source run.sh"
+Below is run.sh snippet 
+```bash
+#!/bin/bash
+source venv/bin/activate
+export FLASK_ENV=development
+export FLASK_APP=manage.py
+nohup python3 -m flask run --host='0.0.0.0' > /home/d24h_prog5/flasklog/log.txt 2>&1 &
+```
 
 ## Getting Started
 
@@ -71,7 +44,7 @@ $ python3 -m venv /path/to/your/virtual/environment
 $ source <path/to/venv>/bin/activate
 ```
 
-For MAC
+For MAC/Linux local development
 ```bash
 $ cd ../../
 $ virtualenv venv
@@ -104,30 +77,27 @@ initialize database and get two default users (admin & demo), check `manage.py` 
 $ flask initdb
 ```
 
-5) start test server at `localhost:5000`
+start test server at `localhost:5000`
 
 ```bash
 $ flask run
 ```
 
-## Screenshots
-
-![Homepage](/screenshots/homepage.png)
-![SignUp](/screenshots/signup.png)
-![Login](/screenshots/login.png)
-![Dashboard](/screenshots/dashboard.png)
-![Tasks](/screenshots/tasks.png)
-![Profile](/screenshots/profile.png)
-![Admin](/screenshots/admin.png)
-
 
 ## Project Structure
 
 ```bash
-flask-starter/
+d24h_prog5@d24hp5ubuntu:~/covid19_cell_atlas_portal$ tree -I "venv|__pycache__"
+.
 ├── flaskstarter
 │   ├── app.py
 │   ├── config.py
+│   ├── covid2k_dense
+│   │   ├── __init__.py
+│   │   └── models.py
+│   ├── covid2k_meta
+│   │   ├── __init__.py
+│   │   └── models.py
 │   ├── decorators.py
 │   ├── emails
 │   │   └── __init__.py
@@ -138,6 +108,15 @@ flask-starter/
 │   │   ├── models.py
 │   │   └── views.py
 │   ├── __init__.py
+│   ├── model
+│   │   ├── meta.py
+│   │   └── umap.py
+│   ├── naso_tableview
+│   │   ├── __init__.py
+│   │   └── views.py
+│   ├── sample_meta_all
+│   │   ├── __init__.py
+│   │   └── models.py
 │   ├── settings
 │   │   ├── forms.py
 │   │   ├── __init__.py
@@ -145,7 +124,26 @@ flask-starter/
 │   ├── static
 │   │   ├── bootstrap.bundle.min.js
 │   │   ├── bootstrap.min.css
-│   │   └── jquery.slim.min.js
+│   │   ├── chevron-down.png
+│   │   ├── css
+│   │   │   └── template.css
+│   │   ├── D24H_Logo.png
+│   │   ├── Dataset_Banner.jpeg
+│   │   ├── download-file 1.svg
+│   │   ├── explore.png
+│   │   ├── folder-2.png
+│   │   ├── folder.png
+│   │   ├── Group 36.png
+│   │   ├── Group 37.png
+│   │   ├── Group 38.png
+│   │   ├── Group.png
+│   │   ├── jquery-3.6.0.min.js
+│   │   ├── jquery.slim.min.js
+│   │   ├── Login_Banner.jpeg
+│   │   ├── Mask_Group.png
+│   │   ├── microscope.png
+│   │   ├── newspaper.png
+│   │   └── Pointer.png
 │   ├── tasks
 │   │   ├── forms.py
 │   │   ├── __init__.py
@@ -164,7 +162,9 @@ flask-starter/
 │   │   │   ├── reset_password.html
 │   │   │   └── signup.html
 │   │   ├── layouts
+│   │   │   ├── banner.html
 │   │   │   ├── base.html
+│   │   │   ├── footer.html
 │   │   │   └── header.html
 │   │   ├── macros
 │   │   │   ├── _confirm_account.html
@@ -176,8 +176,14 @@ flask-starter/
 │   │   │   └── profile.html
 │   │   └── tasks
 │   │       ├── add_task.html
+│   │       ├── contribute.html
 │   │       ├── edit_task.html
+│   │       ├── landing.html
 │   │       ├── my_tasks.html
+│   │       ├── naso_tableview.html
+│   │       ├── show_plot.html
+│   │       ├── show_scfeature.html
+│   │       ├── table_view.html
 │   │       └── view_task.html
 │   ├── user
 │   │   ├── constants.py
@@ -187,7 +193,16 @@ flask-starter/
 ├── manage.py
 ├── README.md
 ├── requirements.txt
+├── run.old.sh
+├── run.sh
 ├── screenshots
+│   ├── admin.png
+│   ├── dashboard.png
+│   ├── homepage.png
+│   ├── login.png
+│   ├── profile.png
+│   ├── signup.png
+│   └── tasks.png
 └── tests
     ├── __init__.py
     └── test_flaskstarter.py
@@ -198,21 +213,63 @@ flask-starter/
 
 This application uses the following modules
 
- - Flask
- - Flask-SQLAlchemy
- - Flask-WTF
- - Flask-Mail
- - Flask-Caching
- - Flask-Login
- - Flask-Admin
- - pytest
- - Bootstrap (bare minimum so that you can replace it with any frontend library)
- - Jinja2
+- Flask[async]
+- Flask-SQLAlchemy
+- Flask-WTF
+- Flask-Mail
+- Flask-Caching
+- Flask-Login
+- Flask-Admin
+- email-validator
+- itsdangerous
+- WTForms==2.3.3
+- pytest
+- pandas
+- plotly
+- numpy
+- pymongo
+- shortuuid
+- seaborn
+- dashbio
+- gunicorn
 
 
 ## Testing
 
 Note: This web application has been tested thoroughly during multiple large projects, however tests for this bare minimum version would be added in `tests` folder very soon to help you get started.
+
+
+## Features
+
+- Flask 2.0, Python (`PEP8`)
+- Signup, Login with (email, password)
+- Forget/reset passwords
+- Email verification
+- User profile/password updates
+- User roles (admin, user, staff)
+- User profile status (active, inactive)
+- Admin dashboard for management
+- Contact us form
+- Bootstrap template (minimal)
+- Utility scripts (initiate dummy database, run test server)
+- Test & Production Configs
+
+
+## Flask 2.0 `async` or not `async`
+
+ - asynchronous support in Flask 2.0 is an amazing feature
+ - however, use it only when it has a clear advantage over the equivalent synchronous code
+ - write asynchronous code, if your application's routes, etc. are making heavy I/O-bound operations, like:
+    - sending emails, making API calls to external servers, working with the file system, etc
+ - otherwise, if your application is doing CPU-bound operations or long-running tasks, like:
+    - processing images or large files, creating backups or running AI/ML models, etc
+    - it is advised to use tools like "Celery" or "Huey", etc.
+
+
+## `async` demo in our application
+
+Check `emails/__init__.py` to see how emails being sent in `async` mode
+
 
 ## Need Help? 🤝
 
