@@ -10,10 +10,10 @@ Video: https://d24h-my.sharepoint.com/:v:/g/personal/junyichen_d24h_hk/EZz9CeDLp
 ## Table of Contents
 1. [Deployment](#deployment)
 1. [Getting Started](#getting-started)
-1. [Screenshots](#screenshots)
 1. [Project Structure](#project-structure)
 1. [Modules](#modules)
 1. [Testing](#testing)
+1. [Features](#features)
 1. [Need Help?](#need-help)
 
 
