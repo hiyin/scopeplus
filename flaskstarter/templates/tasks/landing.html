@@ -6,28 +6,66 @@
 
 {% block body %}
 {% include 'layouts/banner.html' %}
-<div class="container home">
+<div class="container">
   <div class="row justify-content-center">
-    <h2>Mission</h2>
+    <div class="intro-h">Dataset distribution</div>
+    <div id="chartdiv" style="width:100vw; height:100vh;"></div>
   </div>
 </div>
 
-<div class="intro">
+<div class="section01">
   <div class="container flex-column">
   <div class="intro-h">
-    What is the D²4H PBMC single-cell Data Share?
+    What is the D²4H Single-cell Data Share?
   </div>
   <div class="intro-c">
-    The D²4H PBMC single-cell Data Share stores and provides over 5 million PBMC single-cell data by 21 published single-cell sequencing datasets. Anyone can contribute data and explore data here.
+
+    The D²4H Single-cell Data Share stores and provides over 5 million single-cell data by 21 published single-cell sequencing datasets. Anyone can explore the insights from our analysis and download the data provided here for further analysis.
+
   </div>
   <div class="d-flex justify-content-center">
   <table class="intro-tb">
     <tr>
+      <td><img src="{{url_for('static', filename='newspaper.png')}}" width="140" height="140"/></td>
+      <td></td>
+      <td><img src="{{url_for('static', filename='explore.png')}}" width="140" height="140"/></td>
+      <td></td>
+      <td><img src="{{url_for('static', filename='folder.png')}}" width="140" height="140"/></td>
+    </tr>
+    <tr>
+      <td>
+        <p>Insight</p>
+      </td>
+      <td></td>
+      <td>
+        <p>Expore data</p>
+      </td>
+      <td></td>
+      <td>
+        <p>Download and Citation</p>
+      </td>
+    </tr>
+  </table>
+</div>
+</div>
+</div>
+
+<div class="section02">
+  <div class="container flex-column">
+  <div class="intro-h">
+    D²4H Single-cell Data Share Life Cycle
+  </div>
+  <div class="intro-c">
+    The D²4H Single-cell Data Share provides a platform for sharing single-cell data. We welcome anyone to contribute on our data sharing coummuniaty.
+  </div>
+  <div class="d-flex justify-content-center">
+  <table class="intro-tb">
+    <tr>
+      <td><img src="{{url_for('static', filename='folder-3.png')}}" width="140" height="140"/></td>
+      <td><img src="{{url_for('static', filename='Pointer.png')}}" width="95" height="95"/></td>
       <td><img src="{{url_for('static', filename='microscope.png')}}" width="140" height="140"/></td>
       <td><img src="{{url_for('static', filename='Pointer.png')}}" width="95" height="95"/></td>
-      <td><img src="{{url_for('static', filename='explore.png')}}" width="140" height="140"/></td>
-      <td><img src="{{url_for('static', filename='Pointer.png')}}" width="95" height="95"/></td>
-      <td><img src="{{url_for('static', filename='folder.png')}}" width="140" height="140"/></td>
+      <td><img src="{{url_for('static', filename='folder-2.png')}}" width="140" height="140"/></td>
     </tr>
     <tr>
       <td>
@@ -43,7 +81,104 @@
       </td>
     </tr>
   </table>
+  </div>
 </div>
 </div>
-</div>
+{% endblock %}
+
+{% block scripts %}
+
+<script src="https://www.amcharts.com/lib/4/core.js"></script>
+<script src="https://www.amcharts.com/lib/4/maps.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/geodata/worldLow.js"></script>
+<script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+
+
+<script>
+  am4core.useTheme(am4themes_animated);
+  var map = am4core.createFromConfig(
+    {
+      geodata: am4geodata_worldLow,
+      projection: "Miller",
+      series: [
+        {
+          type: "MapPolygonSeries",
+          useGeodata: true,
+          exclude: ["AQ"],
+          mapPolygons: {
+            tooltipText: "{name}: {value}",
+            fill: "rgba(110, 166, 157, 0.5)",
+            states: {
+              hover: {
+                properties: {
+                  fill: "#489587",
+                },
+              },
+            },
+          },
+          heatRules: [{
+            "target": "mapPolygons.template",
+            "property": "fill",
+            "min": "#1CC5DC",
+            "max": "#AA2EE6",
+            "dataField": "value"
+        }],
+          data: [
+            {
+              id: "US",
+              value: 12,
+            },
+            {
+              id: "DE",
+              value: 2,
+            },
+            {
+              id: "IL",
+              value: 1,
+            },
+            {
+              id: "UK",
+              value: 2,
+            },
+            {
+              id: "KR",
+              value: 1,
+            },
+            {
+              id: "CN",
+              value: 3,
+            },
+            {
+              id: "NL",
+              value: 1,
+            },
+            {
+              id: "FR",
+              value: 1,
+            },
+            {
+              id: "CA",
+              value: 1,
+            },
+          ],
+        },
+      ],
+      titles: [{
+        "text": "Dataset distribution by Region",
+        "fontFamily": "Inter",
+        "fontSize": 25,
+        "fill": "#275950",
+        "align": "left",
+        "paddingTop": 40,
+        "paddingLeft": 30,
+    }],
+    },
+    "chartdiv",
+    am4maps.MapChart
+  );
+  var heatLegend = map.createChild(am4charts.HeatLegend);
+</script>
+
+    
+
 {% endblock %}

@@ -15,6 +15,7 @@
   <div class="row justify-content-center">
     <h2>UMAP Plot</h2>
   </div>
+
   <td>Gene Option</td>
   <td>
     <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
@@ -28,22 +29,26 @@
     </form>  
   </td>
 
-  <td>Color Option</td>
+
+  <div  class="filter">
+    <td>Color Option</td>
   <td>
     <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
       <select id="opt_col" name="name_opt_col">
-          <option label=" "></option>
+          <option label="Color Option"></option>
           {% for val in colors %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
       </select>
-      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Select </button>
+      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Apply </button>
     </form>  
   </td>
+  </div>
    <div id="chart" class="chart"></div>
    <div id="chart2" class="chart"></div>
 
 </div>
+
 
 <div class="jumbotron">
   <h4>Please choose any of the option below for data manipulation.</h4>
@@ -56,6 +61,7 @@
 </div>
 
 
+{% include 'layouts/citation.html' %}
 {% endblock %}
 
 {% block scripts %}
@@ -94,5 +100,5 @@
       $("#loadingbox").show();       
   }
 // ]]></script>
-
+{% include 'layouts/citation.html' %}
 {% endblock %}
