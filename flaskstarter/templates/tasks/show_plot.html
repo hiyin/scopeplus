@@ -15,7 +15,6 @@
   <div class="row justify-content-center">
     <h2>UMAP Plot</h2>
   </div>
-
   <td>Gene Option</td>
   <td>
     <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
@@ -26,29 +25,25 @@
           {% endfor %}
       </datalist>
       <button id="idbtnSelectgene" name="btnSelectgene" type="submit" onclick="loading();"> Search </button>
-    </form>  
+    </form>
   </td>
 
-
-  <div  class="filter">
-    <td>Color Option</td>
+  <td>Color Option</td>
   <td>
     <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
       <select id="opt_col" name="name_opt_col">
-          <option label="Color Option"></option>
+          <option label=" "></option>
           {% for val in colors %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
       </select>
-      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Apply </button>
-    </form>  
+      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Select </button>
+    </form>
   </td>
-  </div>
    <div id="chart" class="chart"></div>
    <div id="chart2" class="chart"></div>
 
 </div>
-
 
 <div class="jumbotron">
   <h4>Please choose any of the option below for data manipulation.</h4>
@@ -61,7 +56,6 @@
 </div>
 
 
-{% include 'layouts/citation.html' %}
 {% endblock %}
 
 {% block scripts %}
@@ -71,7 +65,7 @@
               var scrollpos = localStorage.getItem('scrollpos');
               if (scrollpos) window.scrollTo(0, scrollpos);
           });
-  
+
           window.onbeforeunload = function(e) {
               localStorage.setItem('scrollpos', window.scrollY);
           };
@@ -97,8 +91,8 @@
 <script type="text/javascript">// <![CDATA[
   function loading(){
       $("#loading").show();
-      $("#loadingbox").show();       
+      $("#loadingbox").show();
   }
 // ]]></script>
-{% include 'layouts/citation.html' %}
+
 {% endblock %}
