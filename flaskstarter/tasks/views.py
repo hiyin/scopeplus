@@ -66,10 +66,22 @@ def upload_file():
 @tasks.route('/show_plot', methods=['GET', 'POST'])
 def show_plot():     
 
+    # Add initialization of graphJSON incase that return is not refered
+    graphJSON,graphJSON2 = None,None
+    cell_color="level2"
+    cell_gene=None
+    colors=["level2"]
+    genes=[]
+
     # Get params from html
     cell_color = request.form.get('name_opt_col')
     cell_gene = request.form.get('name_opt_gene')
-    df_genes = pd.read_csv(TMP_FOLDER+"/genes.tsv", sep="\t", header=None)
+
+    try:
+        df_genes = pd.read_csv(TMP_FOLDER+"/genes.tsv", sep="\t", header=None)
+    except Exception as e:
+        print(e)
+        print("Error loading genes.tsv" )
 
     # Add a flag to check if the local folder cached the ids
     flag_idmissing = 0    
@@ -77,8 +89,9 @@ def show_plot():
     if(len(collection_searched)==0):
         # No ids.csv file is presented:
         if(not (exists(user_tmp[-1] + '/ids.csv'))):
-            shutil.copy2(TMP_FOLDER+'/default/umap.csv', user_tmp[-1] + '/umap.csv') # complete target filename given
-            shutil.copy2(TMP_FOLDER+'/default/meta.tsv', user_tmp[-1] + '/meta.tsv') # complete target filename given
+            print("Error finding ids.tsv" )
+            # shutil.copy2(TMP_FOLDER+'/default/umap.csv', user_tmp[-1] + '/umap.csv') # complete target filename given
+            # shutil.copy2(TMP_FOLDER+'/default/meta.tsv', user_tmp[-1] + '/meta.tsv') # complete target filename given
             # Change to show default case
             flag_idmissing = 1
 
@@ -91,7 +104,7 @@ def show_plot():
             write_file_meta(user_tmp[-1],meta)
         
         # If ID is presented, no umap:
-        elif(not (exists(user_tmp[-1] + '/umap.tsv'))):
+        elif(not (exists(user_tmp[-1] + '/umap.csv'))):
             f = user_tmp[-1] + "/ids.csv"
             _byid = pd.read_csv(f).values.tolist()
             lookups = list(np.squeeze(_byid))
