@@ -182,7 +182,7 @@ def show_scfeature():
 
 
     print("Receive dataset2 is:",str(dataset_from_table))
-    print("Receive celltype is:",str(celltype_from_table))
+    print("Receive celltype is:",request.form)
 
 
     dataset = request.form.get('name_opt_dataset')
