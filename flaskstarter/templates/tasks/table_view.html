@@ -16,11 +16,11 @@
         <table style="width:85%">
             <tbody>
                 <tr><td><div class="input-group mb-3"><input class="form-control" type="text" id="txt_id" placeholder="Search id"/></div></td>
-                    <td>                    
+                    <!-- <td>                    
                         <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
-                        <button class="btn btn-primary" name="show_scfeature" type="submit"> Show scFeature plot </button>
-                    </form>
-                    </td>    
+                            <button class="btn btn-primary" name="show_scfeature2" type="submit"> Show scFeature plot </button>
+                        </form>
+                    </td>     -->
                 </tr>
                 <tr>
                     <td style="width:16%">
@@ -40,12 +40,15 @@
                     </select>
                     </td>
                     <td style="width:16%">
-                    <select id="opt_prediction" class="multibox" multiple="multiple">
+                    <form id="ctform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
+                    <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype">
                             <option label=" "></option>
                             {% for val in fprediction %}
                             <option value="{{val}}">{{val}}</option>
                             {% endfor %}
                     </select>
+                    </form>
+                    
                     </td>
                     <td style="width:16%">
                         <select id="opt_donor" class="multibox" multiple="multiple">
@@ -64,12 +67,20 @@
                         </select>
                     </td>
                     <td style="width:16%">
-                        <select id="opt_dataset" class="multibox" multiple="multiple">
-                            <option label=" "></option>
-                            {% for val in fdataset %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                        </select>
+                    <!-- Change by junyi 2022 0620-->
+                    <td>                    
+                        <form id="dsform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
+                            <select id="opt_dataset" class="multibox" multiple="multiple" name="name_tbv_dataset">
+                                <option label=" "></option>
+                                {% for val in fdataset %}
+                                    <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                            <td>                    
+                                <button class="btn btn-primary" name="show_scfeature" onclick="document.getElementById('ctform').submit();document.getElementById('dsform').submit();"> Show scFeature plot </button>
+                            </td>                    
+                        </form>
+                    </td>    
                     </td>
                     <td>
                     <input type="button" class="btn btn-primary" style="display:inline-block" value="Search" id="btnSearch" />

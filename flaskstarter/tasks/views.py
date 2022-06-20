@@ -177,16 +177,31 @@ def show_scfeature():
 
     # Get params from html
     
-    
+    dataset_from_table = request.form.get('name_tbv_dataset')
+    celltype_from_table = request.form.get('name_tbv_celltype')
+
+
+    print("Receive dataset2 is:",str(dataset_from_table))
+    print("Receive celltype is:",str(celltype_from_table))
+
+
     dataset = request.form.get('name_opt_dataset')
     cell_type = request.form.get('name_opt_celltype')
     feature = request.form.get('name_opt_feature')
 
 
-    print("Html params",dataset,cell_type,feature)	
+    if(dataset_from_table!=None):
+        dataset = dataset_from_table
 
     if(dataset == None):
         dataset = "Arunachalam_2020"
+
+    if(celltype_from_table!=None):
+        cell_type = celltype_from_table
+
+
+    print("Html params",dataset,cell_type,feature)	
+
 
     fileds_dataset = mongo.single_cell_meta.distinct("meta_dataset")
     fileds_celltypes = get_field("level2")
