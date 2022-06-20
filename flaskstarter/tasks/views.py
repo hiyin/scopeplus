@@ -248,13 +248,14 @@ def show_scfeature():
     else:
         try:
             # Query dendrogram for each gene
-            gene_prop_celltype = scfeature.gene_prop_celltype.find({'meta_dataset': {'$in': mata_sample_id2}})
+            gene_prop_celltype = scfeature.gene_prop_celltype.find({'meta_dataset': {'$in': mata_sample_id2},"level2":cell_type})
             df_gene_prop_celltype = pd.DataFrame(list(gene_prop_celltype))
             df_gene_prop_celltype.to_csv(user_tmp[-1]+"/df_gene_prop_celltype_"+dataset+".csv")
             df_gene_prop_celltype = df_gene_prop_celltype.drop(columns=["_id"])
             if(not(cell_type in celltypes)):
                 graphJSON2 = None
             else:
+                graphJSON2 = None
                 select_type = cell_type
                 fig2 = process_dendrogram(df_gene_prop_celltype,select_type,title="Marker gene proportions of cell types in " + dataset)
                 graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
@@ -297,28 +298,33 @@ def show_scfeature():
 
 ## Add by junyi
 def process_dendrogram(data,cell_type,plot_type="gene",title="Title"):
-    data= data.set_index("meta_dataset")
+    # data= data.set_index("meta_dataset")
 
-    if(plot_type=="gene"):
-        celltype = data.columns.values
-        celltype = np.array([x.split('--')[0] for x in celltype] )
-    else:
-        data = data.drop(columns=["meta_scfeature_id"])
-        celltype = data.columns[2:].values
-        celltype = np.array([x.split('--')[1] for x in celltype] )
+    # if(plot_type=="gene"):
+    #     celltype = data.columns.values
+    #     celltype = np.array([x.split('--')[0] for x in celltype] )
+    # else:
+    #     data = data.drop(columns=["meta_scfeature_id"])
+    #     celltype = data.columns[2:].values
+    #     celltype = np.array([x.split('--')[1] for x in celltype] )
 
-    data_patient = data.index.values 
-    condition = data.meta_severity.values 
+    # data_patient = data.index.values 
+    # condition = data.meta_severity.values 
 
-    if(cell_type in celltype):
+    # if(cell_type in celltype):
 
-        if(plot_type=="gene"):
-            data = data.iloc[:, np.where(celltype == cell_type)[0]] 
-        else:
-            colNames = data.columns[data.columns.str.contains(pat = "--"+cell_type)] 
-            data = data.loc[:,colNames]
-    else:
-        return None
+    #     if(plot_type=="gene"):
+    #         data = data.iloc[:, np.where(celltype == cell_type)[0]] 
+    #     else:
+    #         colNames = data.columns[data.columns.str.contains(pat = "--"+cell_type)] 
+    #         data = data.loc[:,colNames]
+    # else:
+    #     return None
+
+    df_paitient_cond = data.loc[:,["meta_dataset","meta_severity"]].drop_duplicates()
+    data_patient =df_paitient_cond.meta_dataset.values
+    condition = df_paitient_cond.meta_severity.values
+    data = data.set_index("meta_dataset").pivot(columns='meta_gene_feature', values='meta_propotion')
 
     condition_colour =['#f00314', '#ff8019',   
                                 '#3bb5ff', '#0500c7' , '#5c03fa', '#de00ed' , '#fae603']
