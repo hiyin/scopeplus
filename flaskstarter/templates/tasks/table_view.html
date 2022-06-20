@@ -15,10 +15,18 @@
         <h3>Filter</h3>
         <table style="width:85%">
             <tbody>
-                <tr><td><div class="input-group mb-3"><input class="form-control" type="text" id="txt_id" placeholder="Search id"/></div></td></tr>
+                <tr><td><div class="input-group mb-3"><input class="form-control" type="text" id="txt_id" placeholder="Search id"/></div></td>
+                    <!-- <td>                    
+                        <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
+                            <button class="btn btn-primary" name="show_scfeature2" type="submit"> Show scFeature plot </button>
+                        </form>
+                    </td>     -->
+                </tr>
                 <tr>
+                    <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block"></form>>
+
                     <td style="width:16%">
-                    <select id="opt_sampleid" class="multibox" multiple="multiple">
+                    <select id="opt_sampleid" class="multibox" multiple="multiple" name="name_tbv_sample" form="scfform">
                             <option label=" "></option>
                             {% for val in fsampleid %}
                             <option value="{{val}}">{{val}}</option>
@@ -26,7 +34,7 @@
                     </select>
                     </td>
                     <td style="width:16%">
-                    <select id="opt_age" class="multibox" multiple="multiple">
+                    <select id="opt_age" class="multibox" multiple="multiple"  name="name_tbv_age" form="scfform">
                             <option label=" "></option>
                             {% for val in fage %}
                             <option value="{{val}}">{{val}}</option>
@@ -34,15 +42,11 @@
                     </select>
                     </td>
                     <td style="width:16%">
-                    <select id="opt_prediction" class="multibox" multiple="multiple">
-                            <option label=" "></option>
-                            {% for val in fprediction %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                    </select>
+                    <!-- Change by junyi 2022 0620-->
+                    
                     </td>
                     <td style="width:16%">
-                        <select id="opt_donor" class="multibox" multiple="multiple">
+                        <select id="opt_donor" class="multibox" multiple="multiple" name="name_tbv_donor" form="scfform">
                             <option label=" "></option>
                             {% for val in fdonor %}
                             <option value="{{val}}">{{val}}</option>
@@ -50,20 +54,32 @@
                         </select>
                     </td>
                      <td style="width:16%">
-                        <select id="opt_status" class="multibox" multiple="multiple">
+                        <select id="opt_status" class="multibox" multiple="multiple" name="name_tbv_status" form="scfform">
                             <option label=" "></option>
                             {% for val in fstatus %}
                             <option value="{{val}}">{{val}}</option>
                             {% endfor %}
                         </select>
                     </td>
+                    <!-- Change by junyi 2022 0620-->
                     <td style="width:16%">
-                        <select id="opt_dataset" class="multibox" multiple="multiple">
+                        <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype" form="scfform">
                             <option label=" "></option>
-                            {% for val in fdataset %}
+                            {% for val in fprediction %}
                             <option value="{{val}}">{{val}}</option>
                             {% endfor %}
-                        </select>
+                    </select>
+                    </td>
+                    <td style="width:16%">
+                    <select id="opt_dataset" class="multibox" multiple="multiple" name="name_tbv_dataset" form="scfform">
+                        <option label=" "></option>
+                        {% for val in fdataset %}
+                            <option value="{{val}}">{{val}}</option>
+                        {% endfor %}
+                    </select>    
+                    </td>
+                    <td>
+                    <button id="scfbutton" class="btn btn-primary" name="show_scfeature"> Show scFeature plot </button>
                     </td>
                     <td>
                     <input type="button" class="btn btn-primary" style="display:inline-block" value="Search" id="btnSearch" />
@@ -72,8 +88,9 @@
                     <input type="button" class="btn btn-primary" style="display:inline-block" value="Clear" id="btnClear" />
                      </td>
                      <td>
-                    <button class="btn btn-primary" style="display:inline-block" id="btnAdvance">Advanced Search</button>
+                    <button class="btn btn-primary" style="display:inline-block" id="btnAdvance">Advanced Search</button>                
                     </td>
+
                 </tr>
 
             </tbody>
@@ -109,9 +126,9 @@
       <button class="btn btn-primary" name="download" type="submit"> Download metadata </button>
     </form>
 
-    <!-- <form action="{{ url_for('tasks.download_umap')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary" name="download_umap" type="submit"> Download UMAP </button>
-    </form> -->
+    <!-- <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
+        <button class="btn btn-primary" name="show_scfeature" type="submit"> Show scFeature plot </button>
+      </form> -->
 
     <form action="{{ url_for('tasks.show_plot')}}" method="get" style="display:inline-block">
       <button class="btn btn-primary" name="show_plot" type="submit"> Show UMAP plot </button>
@@ -301,4 +318,20 @@ $('select').selectpicker();
 
   }
 </script>
+
+<!-- <script>
+    
+    onclick="document.getElementById('scfform').submit();document.getElementById('dsform').submit();
+</script>
+ -->
+<script>
+    $('#scfbutton').click(function(){
+        // document.getElementById('dsform').submit();
+        document.getElementById('scfform').submit();
+
+    });
+ </script>
+ 
+
+{% include 'layouts/citation.html' %}
 {% endblock %}

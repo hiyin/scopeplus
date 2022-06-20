@@ -13,48 +13,67 @@
 
 <div class="container">
   <div class="row justify-content-center">
-    <h2>UMAP Plot</h2>
+    <h2>scFeature Plots</h2>
   </div>
-  <td>Gene Option</td>
+  <!-- <td>Cell type</td>
   <td>
-    <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
+    <form action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
       <input list="opt_gene" name="name_opt_gene">
         <datalist id="opt_gene">
           {% for val in genes %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
       </datalist>
-      <button id="idbtnSelectgene" name="btnSelectgene" type="submit" onclick="loading();"> Search </button>
-    </form>
-  </td>
+      <button id="idbtnSelectgene" name="btnSelectgene" type="submit" > Search </button>
+    </form>  
+  </td> -->
 
-  <td>Color Option</td>
+  <td>Dataset</td>
   <td>
-    <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
-      <select id="opt_col" name="name_opt_col">
+    <form action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
+      <select id="opt_dataset" name="name_opt_dataset">
           <option label=" "></option>
-          {% for val in colors %}
+          {% for val in datasets %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
       </select>
+
+      <td>Cell types</td>
+      <select id="opt_celltype" name="name_opt_celltype">
+        <option label=" "></option>
+        {% for val in celltypes %}
+        <option value="{{val}}">{{val}}</option>
+        {% endfor %}
+      </select>
+      <td>Pathways</td>
+      <select id="opt_feature" name="name_opt_feature">
+        <option label=" "></option>
+        {% for val in features %}
+        <option value="{{val}}">{{val}}</option>
+        {% endfor %}
+      </select>
       <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Select </button>
-    </form>
+    </form>  
   </td>
+
    <div id="chart" class="chart"></div>
+   <div id="chart4" class="chart"></div>
    <div id="chart2" class="chart"></div>
+   <div id="chart3" class="chart"></div>
+
 
 </div>
+
 
 <div class="jumbotron">
   <h4>Please choose any of the option below for data manipulation.</h4>
   <form action="{{ url_for('tasks.table_view')}}" method="get" style="display:inline-block">
     <button class="btn btn-primary" name="jump_home" type="submit"> Go to homepage</button>
   </form>
-  <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
-    <button class="btn btn-primary" name="download_matrix" type="submit"> Download matrix </button>
+  <form action="{{ url_for('tasks.download_scfeature')}}" method="post" style="display:inline-block">
+    <button class="btn btn-primary" name="download_scfeature" type="submit"> Download scFeatures </button>
   </form>
 </div>
-
 
 {% endblock %}
 
@@ -65,7 +84,7 @@
               var scrollpos = localStorage.getItem('scrollpos');
               if (scrollpos) window.scrollTo(0, scrollpos);
           });
-
+  
           window.onbeforeunload = function(e) {
               localStorage.setItem('scrollpos', window.scrollY);
           };
@@ -87,12 +106,41 @@
 
 </script>
 
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+  var graph3 = {{ graphJSON3 | safe }};
+
+  Plotly.plot('chart3', graph3, {});
+
+</script>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+  var graph4 = {{ graphJSON4 | safe }};
+
+  Plotly.plot('chart4', graph4, {});
+
+</script>
+
 <!-- Show loading box -->
 <script type="text/javascript">// <![CDATA[
   function loading(){
       $("#loading").show();
-      $("#loadingbox").show();
+      $("#loadingbox").show();       
   }
 // ]]></script>
+
+
+<!-- Show loading box -->
+<script type="text/javascript">// <![CDATA[
+  function show_byid(id) {
+    var x = document.getElementById(id);
+    if (x.style.display === "none") {
+      x.style.display = "block";
+    } else {
+      x.style.display = "none";
+    }
+}// ]]></script>
+
 
 {% endblock %}

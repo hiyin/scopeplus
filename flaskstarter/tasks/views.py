@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 
+from ast import If
+from operator import index
 from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify
 from flask_login import login_required, current_user
-from ..extensions import db, mongo
+from ..extensions import db, mongo,scfeature
 
 from flaskstarter.covid2k_meta import covid2k_metaModel
 from flaskstarter.tasks.forms import UmapForm
@@ -12,7 +14,7 @@ import gzip
 import zipfile
 import shutil
 import re
-
+import glob
 import pandas as pd
 import numpy as np
 import plotly
@@ -26,15 +28,19 @@ import pandas as pd
 import time
 from datetime import datetime
 from os.path import exists,basename
+import dash_bio
+from sklearn import preprocessing
+import seaborn as sns
+
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 # sub folders to manage different flask instances: not a good place to put, should be in API endpoint?
-# user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
-user_timestamp = "test"
+user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
+#user_timestamp = "test"
 user_tmp = [TMP_FOLDER + "/" + user_timestamp]
 print(user_tmp)
-#os.makedirs(user_tmp[-1])
+os.makedirs(user_tmp[-1])
 
 
 # New view
@@ -60,19 +66,32 @@ def upload_file():
 @tasks.route('/show_plot', methods=['GET', 'POST'])
 def show_plot():     
 
+    # Add initialization of graphJSON incase that return is not refered
+    graphJSON,graphJSON2 = None,None
+    cell_color="level2"
+    cell_gene=None
+    colors=["level2"]
+    genes=[]
+
     # Get params from html
     cell_color = request.form.get('name_opt_col')
     cell_gene = request.form.get('name_opt_gene')
-    df_genes = pd.read_csv(TMP_FOLDER+"/genes.tsv", sep="\t", header=None)
+
+    try:
+        df_genes = pd.read_csv(TMP_FOLDER+"/genes.tsv", sep="\t", header=None)
+    except Exception as e:
+        print(e)
+        print("Error loading genes.tsv" )
 
     # Add a flag to check if the local folder cached the ids
-    flag_idmissing = 0
+    flag_idmissing = 0    
     # Search box is empty
     if(len(collection_searched)==0):
         # No ids.csv file is presented:
         if(not (exists(user_tmp[-1] + '/ids.csv'))):
-            shutil.copy2(TMP_FOLDER+'/default/umap.csv', user_tmp[-1] + '/umap.csv') # complete target filename given
-            shutil.copy2(TMP_FOLDER+'/default/meta.tsv', user_tmp[-1] + '/meta.tsv') # complete target filename given
+            print("Error finding ids.tsv" )
+            # shutil.copy2(TMP_FOLDER+'/default/umap.csv', user_tmp[-1] + '/umap.csv') # complete target filename given
+            # shutil.copy2(TMP_FOLDER+'/default/meta.tsv', user_tmp[-1] + '/meta.tsv') # complete target filename given
             # Change to show default case
             flag_idmissing = 1
 
@@ -85,7 +104,7 @@ def show_plot():
             write_file_meta(user_tmp[-1],meta)
         
         # If ID is presented, no umap:
-        elif(not (exists(user_tmp[-1] + '/umap.tsv'))):
+        elif(not (exists(user_tmp[-1] + '/umap.csv'))):
             f = user_tmp[-1] + "/ids.csv"
             _byid = pd.read_csv(f).values.tolist()
             lookups = list(np.squeeze(_byid))
@@ -99,60 +118,315 @@ def show_plot():
         umap = mongo.umap.find({'id': {'$in': ids}})
         write_umap(user_tmp[-1], umap)
 
-    # Assume ids,meta files are provided
+        # Assume ids,meta files are provided
 
-    # No cell color is provided
-    if(cell_color is None):
-        cell_color="scClassify_prediction"
-    if(cell_gene is None):
-        print("----No gene selected")
-    else:
-        print("----Gene is selected")
-
-        # The gene name selected is avaliable
-        if(cell_gene in df_genes.values):
-            # Lookup gene in default dir or user dir based on condition
-            flag_same_query =  is_same_query(user_tmp[-1]+"/meta.tsv",collection_searched)
-            # Gene table is not cached or the query is differen from the previous
-            if((not exists(user_tmp[-1] + '/'+cell_gene+'.tsv')) or 
-             (flag_same_query == False)):
-
-                # Lookup from the database
-                if(flag_idmissing==0):
-                    _byid = pd.read_csv(user_tmp[-1]  + "/ids.csv").values.tolist()
-                else:
-                    _byid = pd.read_csv(TMP_FOLDER+'/default/ids.csv').values.tolist()
-                    
-                lookups = list(np.squeeze(_byid))
-                print("Query ing")
-                checkpoint_time = time.time()
-                query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
-                print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
-
-                ##text=List of strings to be written to file
-                # Force to write to the user folder
-                with open(user_tmp[-1] + '/'+cell_gene+'.tsv', 'w') as file:
-                    file.write("\t".join(["_id","gene","barcode",cell_gene]))
-                    file.write('\n')
-                    for line in query:
-                        file.write("\t".join([str(e) for e in line.values()]))
-                        file.write('\n')
-
-                checkpoint_time = time.time()
-                print("write finished --- %s seconds ---" % (time.time() - checkpoint_time))
+        # No cell color is provided
+        if(cell_color is None):
+            cell_color="level2"
+        if(cell_gene is None):
+            print("----No gene selected")
         else:
-            cell_gene = None
-            print("Gene not found")
-    # Plot umap
-    checkpoint_time = time.time()
-    graphJSON,graphJSON2,df_plot = plot_umap(cell_color,cell_gene)
-    print("Plot finished --- %s seconds ---" % (time.time() - checkpoint_time))
+            print("----Gene is selected")
 
-    # Pass color options to the html
-    colors = list(df_plot.columns.values.ravel())
-    genes = df_genes.values.ravel()
+            # The gene name selected is avaliable
+            if(cell_gene in df_genes.values):
+                # Lookup gene in default dir or user dir based on condition
+                flag_same_query =  is_same_query(user_tmp[-1]+"/meta.tsv",collection_searched)
+                # Gene table is not cached or the query is differen from the previous
+                if((not exists(user_tmp[-1] + '/'+cell_gene+'.tsv')) or 
+                (flag_same_query == False)):
+
+                    # Lookup from the database
+                    if(flag_idmissing==0):
+                        _byid = pd.read_csv(user_tmp[-1]  + "/ids.csv").values.tolist()
+                    else:
+                        _byid = pd.read_csv(TMP_FOLDER+'/default/ids.csv').values.tolist()
+                        
+                    lookups = list(np.squeeze(_byid))
+                    print("Query ing")
+                    checkpoint_time = time.time()
+                    query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
+                    print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
+
+                    ##text=List of strings to be written to file
+                    # Force to write to the user folder
+                    with open(user_tmp[-1] + '/'+cell_gene+'.tsv', 'w') as file:
+                        file.write("\t".join(["_id","gene","barcode",cell_gene]))
+                        file.write('\n')
+                        for line in query:
+                            file.write("\t".join([str(e) for e in line.values()]))
+                            file.write('\n')
+
+                    checkpoint_time = time.time()
+                    print("write finished --- %s seconds ---" % (time.time() - checkpoint_time))
+            else:
+                cell_gene = None
+                print("Gene not found")
+        # Plot umap
+        checkpoint_time = time.time()
+        graphJSON,graphJSON2,df_plot = plot_umap(cell_color,cell_gene)
+        print("Plot finished --- %s seconds ---" % (time.time() - checkpoint_time))
+
+        # Pass color options to the html
+        colors = list(df_plot.columns.values.ravel())
+        genes = df_genes.values.ravel()
     return render_template('tasks/show_plot.html', graphJSON=graphJSON,graphJSON2=graphJSON2,colors=colors,genes=genes)
 
+@tasks.route('/show_scfeature', methods=['GET', 'POST'])
+def show_scfeature():     
+
+    # Get params from html
+    #<!-- Change by junyi 2022 0620-->
+    dataset_from_table = request.form.get('name_tbv_dataset')
+    celltype_from_table = request.form.get('name_tbv_celltype')
+
+
+    print("Receive dataset2 is:",str(dataset_from_table))
+    print("Receive celltype is:",request.form)
+
+
+    dataset = request.form.get('name_opt_dataset')
+    cell_type = request.form.get('name_opt_celltype')
+    feature = request.form.get('name_opt_feature')
+
+
+    if(dataset_from_table!=None):
+        dataset = dataset_from_table
+
+    if(dataset == None):
+        dataset = "Arunachalam_2020"
+
+    if(celltype_from_table!=None):
+        cell_type = celltype_from_table
+
+
+    print("Html params",dataset,cell_type,feature)	
+
+
+    fileds_dataset = mongo.single_cell_meta.distinct("meta_dataset")
+    fileds_celltypes = get_field("level2")
+    fileds_dataset_2 = mongo.single_cell_meta.aggregate(
+            [
+                {"$match":{"meta_dataset":dataset}},
+                {"$group": {"_id": {"meta_dataset": "$meta_dataset", "meta_sample_id2": "$meta_sample_id2"}}}
+            ]
+
+    )
+    mata_sample_id2 = [x["_id"]["meta_sample_id2"] for x in list(fileds_dataset_2)]
+    print("Sample id 2: ",mata_sample_id2)
+
+    datasets = fileds_dataset
+    celltypes = ["All"]
+    celltypes=celltypes+fileds_celltypes
+    features = []
+    
+    try:
+        # Query propotion
+        propotion = scfeature.proportion_raw.find({'meta_dataset': {'$in': mata_sample_id2}})
+        df_propotion = pd.DataFrame(list(propotion))
+        df_propotion.to_csv(user_tmp[-1]+"/df_proportion_raw_"+dataset+".csv")
+        df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
+        df_melt=df_d.melt(id_vars=['meta_dataset','meta_severity'],value_name="propotion",var_name="cell_type")
+        #df_melt.to_csv(user_tmp[-1]+"/proportion_melt.tsv", sep="\t")
+        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",
+        color_discrete_sequence=sns.color_palette("tab20").as_hex())
+        fig.update_xaxes(matches=None)
+        fig.update_layout(
+             title={
+                'text': "Overview: cell type proportion in " + dataset,
+                'x':0.5,
+                'xanchor': 'center'},
+            autosize=True, width=1200, height=600
+        )
+        graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    except Exception as e:
+        graphJSON = None
+        print("Error generating figure propotion",e)
+    
+    if(cell_type == "All"):	
+        graphJSON2 = None
+    else:
+        try:
+            # Query dendrogram for each gene
+            gene_prop_celltype = scfeature.gene_prop_celltype.find({'meta_dataset': {'$in': mata_sample_id2}})
+            df_gene_prop_celltype = pd.DataFrame(list(gene_prop_celltype))
+            df_gene_prop_celltype.to_csv(user_tmp[-1]+"/df_gene_prop_celltype_"+dataset+".csv")
+            df_gene_prop_celltype = df_gene_prop_celltype.drop(columns=["_id"])
+            if(not(cell_type in celltypes)):
+                graphJSON2 = None
+            else:
+                select_type = cell_type
+                fig2 = process_dendrogram(df_gene_prop_celltype,select_type,title="Marker gene proportions of cell types in " + dataset)
+                graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
+        except Exception as e:
+            graphJSON2 = None
+            print("Error generating figure dendrogram",e)
+
+    try:
+        # Query boxplot
+        pathway_mean = scfeature.pathway_mean.find({'meta_dataset': {'$in': mata_sample_id2}})
+        df_pathway_mean = pd.DataFrame(list(pathway_mean))
+        df_pathway_mean.to_csv(user_tmp[-1]+"/df_pathway_mean_"+dataset+".csv")
+        df_pathway_mean = df_pathway_mean.drop(columns=["_id"])
+        fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature,title="Pathway mean scores of: "+ cell_type + " cell types in dataset "+ dataset)
+
+        if(feature is None):
+            graphJSON3 = None
+        elif(not(feature in features)):
+            graphJSON3 = None
+        else:
+            graphJSON3 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
+    
+        if(cell_type == "All"):	
+            graphJSON4 = None
+        elif(not(cell_type in celltypes)):
+            graphJSON4 = None
+        else:
+            select_type = cell_type
+            #df_pathway_mean.to_csv(user_tmp[-1]+"/df_test"+select_type+".csv")
+            fig4 = process_dendrogram(df_pathway_mean,select_type,plot_type="pathway",title="Pathway mean scores in dataset" + dataset)
+            graphJSON4 = json.dumps(fig4, cls=plotly.utils.PlotlyJSONEncoder)
+
+    except Exception as e:
+        graphJSON3 = None
+        graphJSON4 = None
+        print("Error generating figure boxplot",e)
+
+
+    return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,graphJSON3=graphJSON3,graphJSON4=graphJSON4,datasets=datasets,celltypes=celltypes,features=features)
+
+## Add by junyi
+def process_dendrogram(data,cell_type,plot_type="gene",title="Title"):
+    data= data.set_index("meta_dataset")
+
+    if(plot_type=="gene"):
+        celltype = data.columns.values
+        celltype = np.array([x.split('--')[0] for x in celltype] )
+    else:
+        data = data.drop(columns=["meta_scfeature_id"])
+        celltype = data.columns[2:].values
+        celltype = np.array([x.split('--')[1] for x in celltype] )
+
+    data_patient = data.index.values 
+    condition = data.meta_severity.values 
+
+    if(cell_type in celltype):
+
+        if(plot_type=="gene"):
+            data = data.iloc[:, np.where(celltype == cell_type)[0]] 
+        else:
+            colNames = data.columns[data.columns.str.contains(pat = "--"+cell_type)] 
+            data = data.loc[:,colNames]
+    else:
+        return None
+
+    condition_colour =['#f00314', '#ff8019',   
+                                '#3bb5ff', '#0500c7' , '#5c03fa', '#de00ed' , '#fae603']
+    remove =  np.where( np.array( data.sum(axis=0)  ) == 0)[0]
+    if remove.size > 0:
+        data.drop(data.columns[remove],axis=1,inplace=True) 
+    data_np = np.array( data )
+    top_feature = np.var(data_np, axis = 0) 
+    top_feature = np.argsort(top_feature)
+    top_feature = top_feature[::-1][0:50]
+
+    data = data.iloc[:,top_feature ]
+
+    data["condition"] = condition
+    my_palette = dict(zip( set(condition ) , condition_colour[0:len(set(condition))]))
+    col_colors = data.condition.map(my_palette)
+
+    data = data.drop('condition', 1)
+    data = data.transpose()
+
+    x = data.transpose().values 
+    min_max_scaler = preprocessing.MinMaxScaler()
+    x_scaled = min_max_scaler.fit_transform(x)
+    df = pd.DataFrame(x_scaled)
+    df = df.transpose()
+    df.columns = data.columns
+    df.index = data.index
+
+    if(plot_type!="gene"):
+        df = df.transpose()
+
+
+    fig2 = dash_bio.Clustergram(
+        data=df,
+        column_labels=list(df.columns.values),
+        row_labels=list(df.index),
+        #column_colors= list(col_colors),
+        #row_colors_label= "Condition",
+        color_map= [
+        [0.0, '#000080'],
+        [0.5, '#ffffff'],
+        [1.0, '#ff0000']
+        ],
+        height=1000,
+        width=1200
+    )
+    fig2.update_layout(
+        title={
+        'text': title,
+        'y':0.95,
+        'x':0.5,
+        'xanchor': 'center',
+        'yanchor': 'top'}
+    )   
+
+    #fig2.update_layout(title_text='Pie',layout_showlegend=False)    
+    return fig2
+
+def process_boxplot(input_data,cell_type,plot_type="gene",feature=None,title="Title"):
+
+
+    data = input_data.set_index("meta_scfeature_id")
+    data = data.drop(columns=['meta_dataset','meta_severity'])
+
+    columns = data.columns.values
+    
+    if(plot_type=="gene"):
+        celltypes = np.array([x.split('--')[0] for x in columns] )
+        # if(feature is None):
+        #     feature = "KLF6"
+        features = list(set(np.array([x.split('--')[1] for x in columns] )))
+    else:
+        celltypes = np.array([x.split('--')[1] for x in columns] )
+        # if(feature is None):
+        #     feature = "HALLMARK-ADIPOGENESIS"            
+        features = list(set(np.array([x.split('--')[0] for x in columns] )))
+    if(not(feature in features)):
+        feature = features[0]           
+    features.sort()
+    if(not(cell_type is None)):
+        if(not(cell_type == "All")):
+            data = data.iloc[:, np.where(celltypes == cell_type)[0]] 
+
+    data_patient = data.index.values 
+    data["patient"] = [x.split('_cond_')[0] for x in data_patient] 
+    data["condition"] = [x.split('_cond_')[1] for x in data_patient] 
+  
+    data=data.melt(id_vars=['patient','condition'])
+    data = data[data["variable"].str.contains(feature) ]
+
+    fig = px.box(data,  x="variable", y="value",color="condition",color_discrete_sequence=
+            ['#3D9970','#FF851B','#FF4136'],
+            category_orders={'condition': ['Healthy','Mild/Moderate','Severe/Critical']},
+            )
+    fig.update_layout(
+            title={
+                'text': title,
+                'x':0.5,
+                'xanchor': 'center'},
+
+            autosize=False, width=1200, height=800,
+            #legend_traceorder="reversed",
+            # legend=dict(
+            #         title=None, orientation="h", y=0, yanchor="top", x=0.5, xanchor="center"
+            #     )
+            )
+
+    return fig, features
 
 def plot_tse():
     df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)
@@ -168,6 +442,14 @@ def plot_tse():
     fig.update_layout(
         autosize=False, width=900, height=600
     )
+    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    return graphJSON
+
+def plot_stack_bar(df):
+    l = []
+    fig = px.histogram(df, x="sex", y="total_bill",
+                color='smoker', barmode='group',
+                height=400)
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     return graphJSON
 
@@ -187,7 +469,9 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None):
         #df_plot[gene_color] = df_plot[gene_color].fillna(value=0)
         #fig2 = px.violin(df_plot, y=gene_color, x=cell_color, box=False, points=False)
         #df_plot[gene_color] = np.clip(df_plot[gene_color],np.percentile(df_plot[gene_color], 5),np.percentile(df_plot[gene_color], 95))
-        fig2 = px.box(df_plot, y=gene_color, x=cell_color)
+        fig2 = px.box(df_plot, y=gene_color, x=cell_color,color=cell_color,color_discrete_sequence=
+            ["#F8A19F","#8E321C","#F6222E","#F1CE63","#B6992D","#59A14F","#499894","#4E79A7",
+            "#A6AAFE","#5930FB","#500EE2","#7427B9","#931ADD","#A04DB9","#C585AF","#B8418A","#AD0267","#7A325C","#cccccc","#b2b2b2"])
 
         fig2.update_layout(
         autosize=False, width=900, height=600)
@@ -201,7 +485,10 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None):
 
     else:
         fig = px.scatter(
-            df_plot, x="umap_0", y="umap_1",color=cell_color,color_continuous_scale="Viridis")
+            df_plot, x="umap_0", y="umap_1",color=cell_color,color_discrete_sequence=
+            ["#F8A19F","#8E321C","#F6222E","#F1CE63","#B6992D","#59A14F","#499894","#4E79A7",
+            "#A6AAFE","#5930FB","#500EE2","#7427B9","#931ADD","#A04DB9","#C585AF","#B8418A","#AD0267","#7A325C","#cccccc","#b2b2b2"]
+            ,color_continuous_scale="Viridis")
         fig.update_layout(
                 autosize=False, width=900, height=600)
         graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -238,13 +525,13 @@ def download_scClassify():
 
 @tasks.route('/table_view')
 def table_view():
-    fsampleid = get_field("sample_id")
-    fage = get_field("age")
+    fsampleid = get_field("meta_sample_id2")
+    fage = get_field("meta_age_category")
     print(fage)
-    fdonor = get_field("donor")
-    fprediction = get_field("scClassify_prediction")
-    fstatus = get_field("Status_on_day_collection_summary")
-    fdataset = get_field("dataset")
+    fdonor = get_field("meta_patient_id")
+    fprediction = get_field("level2")
+    fstatus = get_field("meta_severity")
+    fdataset = get_field("meta_dataset")
     return render_template('tasks/table_view.html',
                            fdonor=fdonor,
                            fage=fage,
@@ -299,7 +586,7 @@ def write_file_meta(path, towrite):
     print('writing meta to' + fn)
 
     ##text=List of strings to be written to file
-    print(towrite[0])
+    #print(towrite[0])
     with open(fn, 'w') as file:
         file.write("\t".join([str(e) for e in towrite[0].keys()]))
         file.write('\n')
@@ -369,6 +656,29 @@ def download_meta():
     write_file_meta(user_tmp[-1], meta)
     #return send_file(user_tmp[-1] + '/ids.csv', as_attachment=True)
     return send_file(user_tmp[-1] + '/meta.tsv', as_attachment=True)
+
+# Download big file
+@tasks.route('/download_scfeature',methods=['POST'])
+def download_scfeature():
+
+    
+    # list_files = [
+    #     user_tmp[-1]+"/df_gene_prop_celltype.csv",
+    #     user_tmp[-1]+"/df_pathway_mean.csv",
+    #     user_tmp[-1]+"/df_proportion_raw.csv"
+    # ]
+    list_files = glob.glob( user_tmp[-1]+"/*_gene_prop_celltype*.csv")+\
+    glob.glob( user_tmp[-1]+"/*_pathway_mean*.csv")+\
+    glob.glob( user_tmp[-1]+"/*_proportion_raw*.csv")
+
+    if(not (exists(user_tmp[-1] + '/scfeature.zip'))):
+        with zipfile.ZipFile(user_tmp[-1] + '/scfeature.zip', 'w') as zipMe:        
+            for file in list_files:
+                if(exists(file)):
+                    zipMe.write(file,arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
+
+    return send_file(user_tmp[-1] + '/scfeature.zip', as_attachment=True)
+
 
 
 @tasks.route('/download_umap', methods=['POST'])
@@ -464,7 +774,7 @@ collection_searched = []
 
 # http://www.dotnetawesome.com/2015/12/implement-custom-server-side-filtering-jquery-datatables.html
 @tasks.route('/api_db', methods=['GET', 'POST'])
-@login_required
+#@login_required
 def api_db():
     data = []
     if request.method == 'POST':
@@ -485,22 +795,22 @@ def api_db():
                     search_column = "id"
                     map[search_column] = column_value
                 elif "1" in i:
-                    search_column = "sample_id"
+                    search_column = "meta_sample_id2"
                     map[search_column] = column_value
                 elif "2" in i:
-                    search_column = "age"
+                    search_column = "meta_age_category"
                     map[search_column] = column_value
                 elif "3" in i:
-                    search_column = "scClassify_prediction"
+                    search_column = "level2"
                     map[search_column] = column_value
                 elif "4" in i:
-                    search_column = "donor"
+                    search_column = "meta_patient_id"
                     map[search_column] = column_value
                 elif "5" in i:
-                    search_column = "dataset"
+                    search_column = "meta_dataset"
                     map[search_column] = column_value
                 else:
-                    search_column = "Status_on_day_collection_summary"
+                    search_column = "meta_severity"
                     map[search_column] = column_value
         print(map)
         if search_value == '':
@@ -533,7 +843,7 @@ def api_db():
                 construct = []
                 re_match = re.compile(r'^\d{1,10}\.?\d{0,10}$')
                 for k in map:
-                    if (k in ["age", "sample_id"]):
+                    if (k in ["meta_age_category", "meta_sample_id2","meta_dataset","level2","meta_severity","meta_patient_id"]):
                         l = []
                         for ki in map[k]:
                             if re_match.findall(ki):
@@ -577,12 +887,12 @@ def api_db():
             for r in tmp:
                 data.append({
                         'id': r['id'],
-                        'sample_id': r['sample_id'],
-                        'age': r['age'],
-                        'prediction': r['scClassify_prediction'],
-                        'donor': r['donor'],
-                        'dataset': r['dataset'],
-                        'status': r['Status_on_day_collection_summary']
+                        'sample_id': r['meta_sample_id2'],
+                        'age': r['meta_age_category'],
+                        'prediction': r['level2'],
+                        'donor': r['meta_patient_id'],
+                        'dataset': r['meta_dataset'],
+                        'status': r['meta_severity']
                     })
 
         response = {

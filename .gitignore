@@ -5,3 +5,4 @@ __pycache__/
 db.sqlite
 cov192kaxis.csv
 .idea/
+*.log
