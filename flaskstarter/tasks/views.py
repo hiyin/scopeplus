@@ -176,7 +176,7 @@ def show_plot():
 def show_scfeature():     
 
     # Get params from html
-    
+    #<!-- Change by junyi 2022 0620-->
     dataset_from_table = request.form.get('name_tbv_dataset')
     celltype_from_table = request.form.get('name_tbv_celltype')
 
