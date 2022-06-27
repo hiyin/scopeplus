@@ -15,6 +15,8 @@ from .extensions import db, mail, cache, login_manager, admin, mongo
 from .utils import pretty_date
 import logging
 import os
+from datetime import timedelta
+
 from pymongo import MongoClient
 from .model.umap import UmapView
 from .model.meta import MetaView
@@ -47,6 +49,10 @@ def create_app(config=None, app_name=None, blueprints=None):
 
     app = Flask(app_name,
                 instance_relative_config=True)
+
+    # Add 0627 by junyi
+    app.config['SECRET_KEY'] = os.urandom(24)
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
 
     # add db
 

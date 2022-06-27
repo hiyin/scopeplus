@@ -43,7 +43,14 @@
                     </td>
                     <td style="width:16%">
                     <!-- Change by junyi 2022 0620-->
-                    
+                    <td style="width:16%">
+                        <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype" form="scfform">
+                            <option label=" "></option>
+                            {% for val in fprediction %}
+                            <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                    </select>
+                    </td>
                     </td>
                     <td style="width:16%">
                         <select id="opt_donor" class="multibox" multiple="multiple" name="name_tbv_donor" form="scfform">
@@ -62,14 +69,6 @@
                         </select>
                     </td>
                     <!-- Change by junyi 2022 0620-->
-                    <td style="width:16%">
-                        <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype" form="scfform">
-                            <option label=" "></option>
-                            {% for val in fprediction %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                    </select>
-                    </td>
                     <td style="width:16%">
                     <select id="opt_dataset" class="multibox" multiple="multiple" name="name_tbv_dataset" form="scfform">
                         <option label=" "></option>
