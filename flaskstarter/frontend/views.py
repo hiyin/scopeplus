@@ -21,6 +21,7 @@ from ..emails import send_async_email
 import sqlite3
 from datetime import datetime
 import os
+from ..extensions import db, mongo
 
 frontend = Blueprint('frontend', __name__)
 
@@ -32,14 +33,21 @@ def dashboard():
 
     return render_template('dashboard/dashboard.html', task_form=_task_form, _active_dash=True)
 
+def get_field(field_name):
+    key = mongo.single_cell_meta.distinct(field_name)
+    #uniq_field = mongo.single_cell_meta.aggregate([{"$group": {"_id": '$%s' % field_name}}]);
+    #key = [r['_id'] for r in uniq_field]
+    print("%s has %d uniq fields" % (field_name, len(key)))
+    return key
 
 @frontend.route('/')
 def index():
     # current_app.logger.debug('debug')
+    fdataset = get_field("dataset")
     if current_user.is_authenticated:
-        return redirect(url_for('tasks.table_view'))
-
-    return render_template('tasks/landing.html', _active_home=True)
+        #return redirect(url_for('tasks.table_view'))
+        return render_template('tasks/landing.html', _active_home=True, fdataset=fdataset)
+    return render_template('tasks/landing.html', _active_home=True, fdataset=fdataset)
 
 #@frontend.route('/home')
 #def home():

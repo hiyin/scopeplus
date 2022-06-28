@@ -123,7 +123,7 @@ def download_scClassify():
     return send_file(user_tmp[-1] + "/scClassify_predicted_results.csv", as_attachment=True)
 
 
-@tasks.route('/table_view')
+@tasks.route('/table_view', methods=['POST', 'GET'])
 def table_view():
     fsampleid = get_field("sample_id")
     fage = get_field("age")
@@ -131,13 +131,28 @@ def table_view():
     fprediction = get_field("scClassify_prediction")
     fstatus = get_field("Status_on_day_collection_summary")
     fdataset = get_field("dataset")
+    if "main" in request.args:
+        l = request.args["main"]
+        if l == "":
+            return render_template('tasks/table_view.html',
+                                   fdonor=fdonor,
+                                   fage=fage,
+                                   fsampleid=fsampleid,
+                                   fprediction=fprediction,
+                                   fstatus=fstatus,
+                                   fdataset=fdataset,
+                                   link=l)
+    else:
+        l = None
+
     return render_template('tasks/table_view.html',
                            fdonor=fdonor,
                            fage=fage,
                            fsampleid=fsampleid,
                            fprediction=fprediction,
                            fstatus=fstatus,
-                           fdataset=fdataset)
+                           fdataset=fdataset,
+                           link=l)
 
 
 #ids = [x["_id"] for x in list(db.single_cell_meta.find({}, {"_id": 1}))]
@@ -307,7 +322,13 @@ def api_db():
         row = int(request.form['start'])
         rowperpage = int(request.form['length'])
         page_no = int(row/rowperpage + 1)
-        search_value = request.form["search[value]"]
+        #search_value = request.form["search[value]"]
+        print(request.args)
+        if 'main' in request.args:
+            search_value = request.args['main']
+            print(request.args)
+        else:
+            search_value = request.form["search[value]"]
         print("draw: %s | row: %s | global search value: %s" % (draw, row, search_value))
         print(request.form)
         start = (page_no - 1)*rowperpage

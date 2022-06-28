@@ -8,7 +8,17 @@
 {% include 'layouts/banner.html' %}
 <div class="container home">
   <div class="row justify-content-center">
-    <h2>Mission</h2>
+    <h2>Dataset Overview</h2>
+    <table class="table table-striped">
+      <thead><tr><th>Name</th><th>Link</th></tr></thead>
+      <tbody>
+       {% for val in fdataset %}
+       <tr><td>{{val}}</td><td><a href='{{url_for("tasks.table_view", main={"dataset": val}|tojson)}}'>Link</a></td></tr>
+
+       {% endfor %}
+      </tbody>
+    </table>
+
   </div>
 </div>
 
