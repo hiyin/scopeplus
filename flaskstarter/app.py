@@ -52,7 +52,7 @@ def create_app(config=None, app_name=None, blueprints=None):
 
     # Add 0627 by junyi
     app.config['SECRET_KEY'] = os.urandom(24)
-    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
     # add db
 

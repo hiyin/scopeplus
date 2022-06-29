@@ -2,7 +2,7 @@
 
 from ast import If
 from operator import index
-from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify
+from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session
 from flask_login import login_required, current_user
 from ..extensions import db, mongo,scfeature
 
@@ -67,7 +67,7 @@ def upload_file():
 def show_plot():     
 
     # Add initialization of graphJSON incase that return is not refered
-    graphJSON,graphJSON2 = None,None
+    #graphJSON,graphJSON2 = None,None
     cell_color="level2"
     cell_gene=None
     colors=["level2"]
@@ -83,12 +83,18 @@ def show_plot():
         print(e)
         print("Error loading genes.tsv" )
 
+    # Create tmpfolder is not exist
+    query_timestamp = session.get("query_timestamp")
+    user_id = str(current_user.id)
+    tmp_folder = os.path.join(user_tmp[-1],user_id,query_timestamp)
+    os.makedirs(tmp_folder, exist_ok=True)
+
     # Add a flag to check if the local folder cached the ids
     flag_idmissing = 0    
     # Search box is empty
     if(len(collection_searched)==0):
         # No ids.csv file is presented:
-        if(not (exists(user_tmp[-1] + '/ids.csv'))):
+        if(not (exists(tmp_folder + '/ids.csv'))):
             print("Error finding ids.tsv" )
             # shutil.copy2(TMP_FOLDER+'/default/umap.csv', user_tmp[-1] + '/umap.csv') # complete target filename given
             # shutil.copy2(TMP_FOLDER+'/default/meta.tsv', user_tmp[-1] + '/meta.tsv') # complete target filename given
@@ -96,27 +102,27 @@ def show_plot():
             flag_idmissing = 1
 
         # ID is presented, no meta data:
-        elif(not (exists(user_tmp[-1] + '/meta.tsv'))):
-            f = user_tmp[-1] + "/ids.csv"
+        elif(not (exists(tmp_folder + '/meta.tsv'))):
+            f = tmp_folder + "/ids.csv"
             _byid = pd.read_csv(f).values.tolist()
             lookups = list(np.squeeze(_byid))
             meta = mongo.single_cell_meta.find({'id': {'$in': lookups}})
-            write_file_meta(user_tmp[-1],meta)
+            write_file_meta(tmp_folder,meta)
         
         # If ID is presented, no umap:
-        elif(not (exists(user_tmp[-1] + '/umap.csv'))):
-            f = user_tmp[-1] + "/ids.csv"
+        elif(not (exists(tmp_folder + '/umap.csv'))):
+            f = tmp_folder + "/ids.csv"
             _byid = pd.read_csv(f).values.tolist()
             lookups = list(np.squeeze(_byid))
             umap = mongo.umap.find({'id': {'$in': lookups}})
-            write_umap(user_tmp[-1], umap)
+            write_umap(tmp_folder, umap)
 
     # If search box not empty, write id meta umap
     else:
         meta = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}})
-        ids = write_id_meta(user_tmp[-1], meta)
+        ids = write_id_meta(tmp_folder, meta)
         umap = mongo.umap.find({'id': {'$in': ids}})
-        write_umap(user_tmp[-1], umap)
+        write_umap(tmp_folder, umap)
 
         # Assume ids,meta files are provided
 
@@ -131,14 +137,14 @@ def show_plot():
             # The gene name selected is avaliable
             if(cell_gene in df_genes.values):
                 # Lookup gene in default dir or user dir based on condition
-                flag_same_query =  is_same_query(user_tmp[-1]+"/meta.tsv",collection_searched)
+                flag_same_query =  is_same_query(tmp_folder+"/meta.tsv",collection_searched)
                 # Gene table is not cached or the query is differen from the previous
-                if((not exists(user_tmp[-1] + '/'+cell_gene+'.tsv')) or 
+                if((not exists(tmp_folder + '/'+cell_gene+'.tsv')) or 
                 (flag_same_query == False)):
 
                     # Lookup from the database
                     if(flag_idmissing==0):
-                        _byid = pd.read_csv(user_tmp[-1]  + "/ids.csv").values.tolist()
+                        _byid = pd.read_csv(tmp_folder  + "/ids.csv").values.tolist()
                     else:
                         _byid = pd.read_csv(TMP_FOLDER+'/default/ids.csv').values.tolist()
                         
@@ -150,7 +156,7 @@ def show_plot():
 
                     ##text=List of strings to be written to file
                     # Force to write to the user folder
-                    with open(user_tmp[-1] + '/'+cell_gene+'.tsv', 'w') as file:
+                    with open(tmp_folder + '/'+cell_gene+'.tsv', 'w') as file:
                         file.write("\t".join(["_id","gene","barcode",cell_gene]))
                         file.write('\n')
                         for line in query:
@@ -164,7 +170,7 @@ def show_plot():
                 print("Gene not found")
         # Plot umap
         checkpoint_time = time.time()
-        graphJSON,graphJSON2,df_plot = plot_umap(cell_color,cell_gene)
+        graphJSON,graphJSON2,df_plot = plot_umap(cell_color,cell_gene,tmp_folder)
         print("Plot finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
         # Pass color options to the html
@@ -174,6 +180,8 @@ def show_plot():
 
 @tasks.route('/show_scfeature', methods=['GET', 'POST'])
 def show_scfeature():     
+
+    
 
     # Get params from html
     #<!-- Change by junyi 2022 0620-->
@@ -454,15 +462,15 @@ def plot_stack_bar(df):
     return graphJSON
 
 ## Create by junyi
-def plot_umap(cell_color='scClassify_prediction',gene_color=None):
-    df = pd.read_csv(user_tmp[-1] + '/umap.csv', index_col=0)
+def plot_umap(cell_color='scClassify_prediction',gene_color=None,tmp_folder="."):
+    df = pd.read_csv(tmp_folder + '/umap.csv', index_col=0)
     df.columns = ["umap_0","umap_1"]
-    df_meta = pd.read_csv(user_tmp[-1] + '/meta.tsv', index_col=1,sep="\t")
+    df_meta = pd.read_csv(tmp_folder + '/meta.tsv', index_col=1,sep="\t")
     df_plot = df.merge(df_meta, left_index=True, right_index=True)
 
 
     if(not(gene_color is None)):
-        df_gene = pd.read_csv(user_tmp[-1] + '/'+gene_color+'.tsv',sep="\t", index_col=2)
+        df_gene = pd.read_csv(tmp_folder + '/'+gene_color+'.tsv',sep="\t", index_col=2)
         df_plot = df_plot.merge(df_gene, left_index=True, right_index=True,how="left")
         print(df_plot.shape)
         df_plot[gene_color] = df_plot[gene_color].fillna(value=0)
@@ -548,7 +556,7 @@ data = []
 
 # Write big file
 def write_file_byid(path, towrite):
-    fn = path + '/ids.csv'
+    fn = os.path.join(path,'ids.csv')
     print('writing ids to' + fn)
     file = open(fn, 'w+', newline='\n')
     #print(towrite[0])
@@ -560,8 +568,8 @@ def write_file_byid(path, towrite):
 
 # Write id meta file
 def write_id_meta(path, towrite):
-    fid = path + '/ids.csv'
-    fmeta = path + '/meta.tsv'
+    fid = os.path.join(path,'ids.csv')
+    fmeta = os.path.join(path,'meta.tsv')
 
     print('writing ids and meta')
     ids = []
@@ -582,18 +590,50 @@ def write_id_meta(path, towrite):
 
 # Write file
 def write_file_meta(path, towrite):
-    fn = path + '/meta.tsv'
+    fn = os.path.join(path,'meta.tsv')
     print('writing meta to' + fn)
 
+    fields = [
+    '_id','id','barcode','meta_dataset','meta_tissue','meta_sample_type',\
+    'meta_protocol','meta_technology','meta_sample_id','meta_patient_id',\
+    'meta_sample_time','meta_disease','meta_severity','meta_WHO_scores',\
+    'meta_outcome','meta_days_from_onset_of_symptoms','meta_ethinicity',\
+    'meta_gender','meta_age','meta_BMI','meta_PreExistingHypertension',\
+    'meta_PreExistingHeartDisease','barcodes','level1','level2','level3',\
+    'meta_sample_id2','meta_age_category']
     ##text=List of strings to be written to file
     #print(towrite[0])
     with open(fn, 'w') as file:
-        file.write("\t".join([str(e) for e in towrite[0].keys()]))
+        file.write("\t".join(fields))
         file.write('\n')
 
-        for line in towrite:
-            file.write("\t".join([str(e) for e in line.values()]))
+        # for line in towrite:
+        #     file.write("\t".join([str(e) for e in line.values()]))
+        #     file.write('\n')
+        for num, doc in enumerate(towrite):
+            # convert ObjectId() to str
+            file.write("\t".join([str(e) for e in doc.values()]))
             file.write('\n')
+
+
+    # docs = pd.DataFrame(columns=fields)
+
+    # for num, doc in enumerate(towrite):
+    #     # convert ObjectId() to str
+    #     doc["_id"] = str(doc["_id"])
+    #     # get document _id from dict
+    #     doc_id = doc["_id"]
+    #     # create a Series obj from the MongoDB dict
+    #     series_obj = pd.Series(doc, name=doc_id)
+    #     # append the MongoDB Series obj to the DataFrame obj
+    #     docs = pd.concat( [docs,series_obj] )
+
+    # # export MongoDB documents to CSV
+    # #csv_export = docs.to_csv(sep="\t") # CSV delimited by commas
+    # #print ("\nCSV data:", csv_export)
+    # # export MongoDB documents to a CSV file
+    # docs.to_csv(fn,sep="\t", index=False)
+
 
 def write_umap(path, towrite):
     fn = path + '/umap.csv'
@@ -647,15 +687,36 @@ def remove_files(path):
         if((exists(f))):
             shutil.os.remove(f)
 
+def store_queryinfo(session,force=True):
+    query_timestamp = session.get("query_timestamp")
+    if(force==True):
+        print("Pop old query timestamp")
+        user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
+        session["query_timestamp"] = user_timestamp
+    else:
+        if((query_timestamp==None)):
+            user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
+            session["query_timestamp"] = user_timestamp
+    return session
+
+
 # Download big file
 @tasks.route('/download_meta',methods=['POST'])
 def download_meta():
     meta = list(mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}))
+    time.sleep(2)
+
+    user_timestamp = session.get("query_timestamp")
+    user_id = str(current_user.id)
+    tmp_folder = os.path.join(user_tmp[-1],user_id,user_timestamp)
+    session["tmp_folder"] = tmp_folder
+    os.makedirs(tmp_folder, exist_ok=True)
+
     print('writing ids to csv file only once, firstly load the data')
-    write_file_byid(user_tmp[-1], meta)
-    write_file_meta(user_tmp[-1], meta)
+    write_file_byid(tmp_folder, meta)
+    write_file_meta(tmp_folder, meta)
     #return send_file(user_tmp[-1] + '/ids.csv', as_attachment=True)
-    return send_file(user_tmp[-1] + '/meta.tsv', as_attachment=True)
+    return send_file(os.path.join(tmp_folder,'meta.tsv'), as_attachment=True)
 
 # Download big file
 @tasks.route('/download_scfeature',methods=['POST'])
@@ -697,30 +758,38 @@ def download_umap():
 
 @tasks.route('/download_matrix',methods=['POST'])
 def download_matrix():
+
+    user_timestamp = session.get("query_timestamp")
+    user_id = str(current_user.id)
+
+    tmp_folder = os.path.join(user_tmp[-1],user_id,user_timestamp)
+    session["tmp_folder"] = tmp_folder
+    os.makedirs(tmp_folder, exist_ok=True)
+
     # No query is search, then we use default use case:
     if(len(collection_searched)==0):
-        if(not (exists(user_tmp[-1] + '/ids.csv'))):
+        if(not (exists(tmp_folder + '/ids.csv'))):
             return send_file(TMP_FOLDER+'/default/matrix.zip', as_attachment=True)
     else:
         # If query is presented, remove the result old queries
-        if((exists(user_tmp[-1] + '/meta.tsv'))):
-            flag_same_query = is_same_query(user_tmp[-1] + '/meta.tsv',collection_searched=collection_searched)
+        if((exists(tmp_folder + '/meta.tsv'))):
+            flag_same_query = is_same_query(tmp_folder + '/meta.tsv',collection_searched=collection_searched)
             # Different from the old query
             if(flag_same_query == False):
                 print("Remove files because the old query is deprecared")
-                remove_files(user_tmp[-1])
+                remove_files(tmp_folder)
             else:
                 print("Keep files because the old query is the same")
         # No old queries
         else:
-            remove_files(user_tmp[-1])
+            remove_files(tmp_folder)
 
         meta = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}})
-        ids = write_id_meta(user_tmp[-1], meta)
+        ids = write_id_meta(tmp_folder, meta)
 
     # Down load 10x matrix if not exist
-    if(not (exists(user_tmp[-1] + '/matrix.mtx.gz'))):
-        _byid = pd.read_csv(user_tmp[-1] + "/ids.csv").values.tolist()
+    if(not (exists(tmp_folder + '/matrix.mtx.gz'))):
+        _byid = pd.read_csv(tmp_folder + "/ids.csv").values.tolist()
         lookups = list(np.squeeze(_byid))
         print("debugging")
         start_time2 = time.time()
@@ -746,26 +815,26 @@ def download_matrix():
             return result_dict
 
         # Save gene name
-        if(not (exists(user_tmp[-1] + '/genes.tsv.gz'))):
-            dict_gene = get_dict(TMP_FOLDER + "/genes.tsv", save_path=user_tmp[-1] + "/genes.tsv.gz")
+        if(not (exists(tmp_folder + '/genes.tsv.gz'))):
+            dict_gene = get_dict(TMP_FOLDER + "/genes.tsv", save_path=tmp_folder + "/genes.tsv.gz")
         # Save barcodes
-        if(not (exists(user_tmp[-1] + '/barcodes.tsv.gz'))):
-            dict_barcode = get_dict(user_tmp[-1] + "/ids.csv", sep=",", save_path=user_tmp[-1] + "/barcodes.tsv.gz")
-        write_10x_mtx(user_tmp[-1], dict_gene, dict_barcode, doc_count, mtx)
+        if(not (exists(tmp_folder + '/barcodes.tsv.gz'))):
+            dict_barcode = get_dict(tmp_folder + "/ids.csv", sep=",", save_path=tmp_folder + "/barcodes.tsv.gz")
+        write_10x_mtx(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
 
-    if(not (exists(user_tmp[-1] + '/matrix.zip'))):
+    if(not (exists(tmp_folder + '/matrix.zip'))):
         list_files = [
-            user_tmp[-1] + '/matrix.mtx.gz',
-            user_tmp[-1] + '/genes.tsv.gz',
-            user_tmp[-1] + '/barcodes.tsv.gz',
-            user_tmp[-1] + '/meta.tsv'
+            tmp_folder + '/matrix.mtx.gz',
+            tmp_folder + '/genes.tsv.gz',
+            tmp_folder + '/barcodes.tsv.gz',
+            tmp_folder + '/meta.tsv'
         ]
-        with zipfile.ZipFile(user_tmp[-1] + '/matrix.zip', 'w') as zipMe:        
+        with zipfile.ZipFile(tmp_folder + '/matrix.zip', 'w') as zipMe:        
             for file in list_files:
                 if(exists(file)):
                     zipMe.write(file,arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
 
-    return send_file(user_tmp[-1] + '/matrix.zip', as_attachment=True)
+    return send_file(tmp_folder + '/matrix.zip', as_attachment=True)
 
 
 # set in-memory storage for collection of ids for meta data table display
@@ -901,7 +970,8 @@ def api_db():
                 'iTotalDisplayRecords': total_records_filter,
                 'aaData': data,
         }
-
+        store_queryinfo(session)
+        session["query"] = map
         return jsonify(response)
 
 
