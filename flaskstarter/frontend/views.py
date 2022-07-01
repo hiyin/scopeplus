@@ -43,10 +43,8 @@ df = df.dropna(subset=['Country Code'])
 
 @frontend.route('/')
 def index():
-    country = df['Country Code']
-    study = df['Study']
     data = df.to_dict()
-    return render_template('tasks/landing.html', country=country, study=study, data=data, _active_home=True)
+    return render_template('tasks/landing.html', data=data, _active_home=True)
 
 # @frontend.route('/')
 # def index():
