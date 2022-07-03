@@ -21,6 +21,7 @@ from ..emails import send_async_email
 import sqlite3
 from datetime import datetime
 import os
+import pandas as pd
 
 frontend = Blueprint('frontend', __name__)
 
@@ -33,13 +34,25 @@ def dashboard():
     return render_template('dashboard/dashboard.html', task_form=_task_form, _active_dash=True)
 
 
+# Load landing page data
+filepath = os.path.abspath(os.getcwd())
+filename = os.path.join(
+    filepath, 'flaskstarter/PBMC_study_meta/PBMC_study_meta.csv')
+df = pd.read_csv(filename)
+df = df.dropna(subset=['Country Code'])
+
 @frontend.route('/')
 def index():
-    # current_app.logger.debug('debug')
-    if current_user.is_authenticated:
-        return redirect(url_for('tasks.table_view'))
+    data = df.to_dict()
+    return render_template('tasks/landing.html', data=data, _active_home=True)
 
-    return render_template('tasks/landing.html', _active_home=True)
+# @frontend.route('/')
+# def index():
+#     # current_app.logger.debug('debug')
+#     if current_user.is_authenticated:
+#         return redirect(url_for('tasks.table_view'))
+
+#     return render_template('tasks/landing.html', _active_home=True)
 
 #@frontend.route('/home')
 #def home():
