@@ -7,6 +7,9 @@ from flaskstarter.extensions import db
 from flaskstarter.user import Users, ADMIN, USER, ACTIVE
 from flaskstarter.tasks import MyTaskModel
 from flask_pymongo import PyMongo
+from gevent import monkey
+monkey.patch_all()
+
 application = create_app()
 
 #
