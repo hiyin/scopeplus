@@ -4,9 +4,16 @@
 
 <div class="container">
   <div class="row justify-content-center">
-    <div class="intro-h">Dataset distribution</div>
+    <div class="intro-h">Dataset Distribution</div>
     <div id="map" style="width: 100vw; height: 100vh"></div>
   </div>
+</div>
+
+<div class="section02">
+    <div class="intro-h">Cell Type Distribution</div>
+    <div id="pieChart" style="width: 100vw; height: 100vh"></div>
+  </div>
+
 </div>
 
 <div class="section01">
@@ -134,6 +141,7 @@
 <script src="https://www.amcharts.com/lib/4/maps.js"></script>
 <script src="https://cdn.amcharts.com/lib/4/geodata/worldLow.js"></script>
 <script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
 
 <script>
 
@@ -170,7 +178,7 @@
    // Configure series
    const polygonTemplate = polygonSeries.mapPolygons.template;
 
-   polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="https://en.wikipedia.org/wiki/{name.urlEncode()}">Explore more</a>';
+   polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="https://en.wikipedia.org/wiki/{name.urlEncode()}">Explore</a>';
    polygonTemplate.fill = am4core.color("rgba(110, 166, 157, 0.5)");
 
    // Create hover state and set alternative fill color
@@ -218,6 +226,87 @@
 
 
    polygonSeries.data = objs;
+</script>
+
+<script>
+  // Create chart instance
+const pieChart = am4core.create("pieChart", am4charts.PieChart);
+
+// Add data
+pieChart.data = [{
+  "country": "Lithuania",
+  "litres": 501.9
+}, {
+  "type": "B",
+  "pieces": 405705
+}, {
+  "type": "CD14 Mono",
+  "pieces": 1038595
+}, {
+  "type": "CD16 Mono",
+  "pieces": 151574
+}, {
+  "type": "CD4 T",
+  "pieces": 1264918
+}, {
+  "type": "CD8 T",
+  "pieces": 453699
+}, {
+  "type": "DC",
+  "pieces": 61060
+}, {
+  "type": "DN",
+  "pieces": 6563
+}, {
+  "type": "HSPC",
+  "pieces": 10593
+}, {
+  "type": "ILC",
+  "pieces": 123
+}, {
+  "type": "MAIT",
+  "pieces": 67890
+}, {
+  "type": "MAST",
+  "pieces": 2436
+}, {
+  "type": "NK",
+  "pieces": 590622
+}, {
+  "type": "NKT",
+  "pieces": 220130
+}, {
+  "type": "Neutrophil",
+  "pieces": 196407
+}, {
+  "type": "Plasma",
+  "pieces": 70265
+}, {
+  "type": "Platelet",
+  "pieces": 82727
+}, {
+  "type": "RBC",
+  "pieces": 23007
+}, {
+  "type": "gdT",
+  "pieces": 83618
+}, {
+  "type": "intermediate",
+  "pieces": 159847
+}, {
+  "type": "unassigned",
+  "pieces": 33979
+}];
+
+
+
+// Add and configure Series
+var pieSeries = pieChart.series.push(new am4charts.PieSeries());
+pieSeries.dataFields.value = "pieces";
+pieSeries.dataFields.category = "type";
+pieSeries.tooltip.label.interactionsEnabled = true;
+pieSeries.tooltip.keepTargetHover = true;
+pieSeries.slices.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://localhost:5000/">Explore</a>';
 </script>
 
 {% endblock %}
