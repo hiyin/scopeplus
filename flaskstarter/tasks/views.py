@@ -28,9 +28,9 @@ import pandas as pd
 import time
 from datetime import datetime
 from os.path import exists,basename
-import dash_bio
-from sklearn import preprocessing
-import seaborn as sns
+# import dash_bio
+# from sklearn import preprocessing
+# import seaborn as sns
 
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
