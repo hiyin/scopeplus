@@ -6,6 +6,17 @@
   <div class="row justify-content-center">
     <div class="intro-h">Dataset Distribution</div>
     <div id="map" style="width: 100vw; height: 100vh"></div>
+
+    <table class="table table-striped">
+      <thead><tr><th>Name</th><th>Link</th></tr></thead>
+      <tbody>
+      {% for val in fdataset %}
+      <tr><td>{{val}}</td><td><a href='{{url_for("tasks.table_view", main={"meta_dataset": val}|tojson)}}'>Link</a></td></tr>
+
+      {% endfor %}
+      </tbody>
+    </table>  
+
   </div>
 </div>
 
@@ -15,6 +26,8 @@
   </div>
 
 </div>
+
+
 
 <div class="section01">
 

@@ -12,7 +12,7 @@ from flask_login import (login_required, login_user, current_user,
 
 from ..tasks import MyTaskForm
 from ..user import Users, ACTIVE
-from ..extensions import db, login_manager
+from ..extensions import db, login_manager, mongo
 from .forms import (SignupForm, LoginForm, RecoverPasswordForm,
                     ChangePasswordForm, ContactUsForm)
 from .models import ContactUs
@@ -34,6 +34,13 @@ def dashboard():
     return render_template('dashboard/dashboard.html', task_form=_task_form, _active_dash=True)
 
 
+def get_field(field_name):
+    key = mongo.single_cell_meta.distinct(field_name)
+    #uniq_field = mongo.single_cell_meta.aggregate([{"$group": {"_id": '$%s' % field_name}}]);
+    #key = [r['_id'] for r in uniq_field]
+    print("%s has %d uniq fields" % (field_name, len(key)))
+    return key
+
 # Load landing page data
 filepath = os.path.abspath(os.getcwd())
 filename = os.path.join(
@@ -41,11 +48,13 @@ filename = os.path.join(
 df = pd.read_csv(filename)
 df = df.dropna(subset=['Country Code'])
 
-@frontend.route('/')
+@frontend.route('/', methods=["GET", "POST"])
 def index():
     data = df.to_dict()
-    return render_template('tasks/landing.html', data=data, _active_home=True)
-
+    fdataset = get_field("meta_dataset")
+    if current_user.is_authenticated:
+        return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset)
+    return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset)
 # @frontend.route('/')
 # def index():
 #     # current_app.logger.debug('debug')
@@ -53,11 +62,6 @@ def index():
 #         return redirect(url_for('tasks.table_view'))
 
 #     return render_template('tasks/landing.html', _active_home=True)
-
-#@frontend.route('/home')
-#def home():
-
-#   return render_template('frontend/landing.html', _active_home=True)
 
 @frontend.route('/contact-us', methods=['GET', 'POST'])
 def contact_us():

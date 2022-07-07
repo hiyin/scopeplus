@@ -23,7 +23,7 @@
                     </td>     -->
                 </tr>
                 <tr>
-                    <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block"></form>>
+                    <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block"></form>
 
                     <td style="width:16%">
                     <select id="opt_sampleid" class="multibox" multiple="multiple" name="name_tbv_sample" form="scfform">
@@ -123,6 +123,9 @@
        <h4>Please choose any of the option below for data manipulation.</h4>
 
     <!-- Edited by Junyi 0628 -->
+    <button class="btn btn-primary" name="refresh_table" type="submit" style="display:inline-block" onclick="window.location.href='{{ url_for( 'frontend.index') }}';"> Return to Home </button>
+    <button class="btn btn-primary" name="refresh_table" type="submit" style="display:inline-block" onclick="window.location.href='{{ url_for( 'tasks.table_view', main='')}}';"> Refresh table </button>  
+
     <form action="{{ url_for('tasks.download_meta')}}" method="post" style="display:inline-block">
       <button class="btn btn-primary" name="download" type="submit"> Download metadata </button>
     </form>
@@ -234,7 +237,7 @@ $(document).ready(function() {
                 'serverSide': true,
                 'serverMethod': 'post',
                 'ajax': {
-                    'url':'{{ url_for('tasks.api_db')}}'
+                    'url':'{{ url_for('tasks.api_db', main=link)}}'
                 },
                 'lengthMenu': [[10, 25, 50, 100], [10, 25, 50, 100]],
                 searching: true,
