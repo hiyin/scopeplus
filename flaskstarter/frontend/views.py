@@ -41,6 +41,25 @@ def get_field(field_name):
     print("%s has %d uniq fields" % (field_name, len(key)))
     return key
 
+from bson.son import SON
+import pprint
+def get_field_count():
+    pipeline = [
+        {"$unwind": "$level2"},
+        {"$group": {"_id": "$level2", "count": {"$sum": 1}}},
+        {"$project": SON([("count", 1), ("_id", 1)])}
+    ]
+
+
+    res=list(mongo.single_cell_meta.aggregate(pipeline))
+    # for item in res:
+    #     print(item)
+    #     print(item['_id'])
+    #     print(item["count"])
+    return res
+    
+
+
 # Load landing page data
 filepath = os.path.abspath(os.getcwd())
 filename = os.path.join(
@@ -52,9 +71,11 @@ df = df.dropna(subset=['Country Code'])
 def index():
     data = df.to_dict()
     fdataset = get_field("meta_dataset")
+    res = get_field_count()
+    pprint.pprint(res)
     if current_user.is_authenticated:
-        return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset)
-    return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset)
+        return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res)
+    return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res)
 # @frontend.route('/')
 # def index():
 #     # current_app.logger.debug('debug')
