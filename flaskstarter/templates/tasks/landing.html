@@ -225,7 +225,6 @@
 
      for ( let country in data["Country Code"]) {
        let obj = {id: data["Country Code"][country], value: 1}
-       console.log(obj)
        if (objs.length > 0) {
         for (let j = 0; j < objs.length; j++) {
           if (objs[j].id == obj.id) {
@@ -241,8 +240,6 @@
         objs.push(obj)
       }
      }
-     console.log(objs);
-
 
    polygonSeries.data = objs;
 </script>
@@ -251,89 +248,40 @@
   // Create chart instance
 const pieChart = am4core.create("pieChart", am4charts.PieChart);
 
-// Add data
-
-  pieChart.data=[
-  {% for dict_item in fcelltype|tojson %}
-  {
-      "type" : {{dict_item._id}},
-      "pieces" : {{dict_item.count}}
-
-  },
-  {% endfor %}
-  ];
-
-// pieChart.data = [{
-//   "type": "B",
-//   "pieces": 405705
-// }, {
-//   "type": "CD14 Mono",
-//   "pieces": 1038595
-// }, {
-//   "type": "CD16 Mono",
-//   "pieces": 151574
-// }, {
-//   "type": "CD4 T",
-//   "pieces": 1264918
-// }, {
-//   "type": "CD8 T",
-//   "pieces": 453699
-// }, {
-//   "type": "DC",
-//   "pieces": 61060
-// }, {
-//   "type": "DN",
-//   "pieces": 6563
-// }, {
-//   "type": "HSPC",
-//   "pieces": 10593
-// }, {
-//   "type": "ILC",
-//   "pieces": 123
-// }, {
-//   "type": "MAIT",
-//   "pieces": 67890
-// }, {
-//   "type": "MAST",
-//   "pieces": 2436
-// }, {
-//   "type": "NK",
-//   "pieces": 590622
-// }, {
-//   "type": "NKT",
-//   "pieces": 220130
-// }, {
-//   "type": "Neutrophil",
-//   "pieces": 196407
-// }, {
-//   "type": "Plasma",
-//   "pieces": 70265
-// }, {
-//   "type": "Platelet",
-//   "pieces": 82727
-// }, {
-//   "type": "RBC",
-//   "pieces": 23007
-// }, {
-//   "type": "gdT",
-//   "pieces": 83618
-// }, {
-//   "type": "intermediate",
-//   "pieces": 159847
-// }, {
-//   "type": "unassigned",
-//   "pieces": 33979
-// }];
-
-
-
 // Add and configure Series
 var pieSeries = pieChart.series.push(new am4charts.PieSeries());
 pieSeries.dataFields.value = "pieces";
 pieSeries.dataFields.category = "type";
 pieSeries.tooltip.label.interactionsEnabled = true;
 pieSeries.tooltip.keepTargetHover = true;
-pieSeries.slices.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://localhost:5000/">Explore</a>';
+
+// Add data
+
+const pieData = {{ fcelltype|tojson }};
+const pieObjs = []
+
+for ( let celltype in pieData) {
+  let pieObj = {"type": pieData[celltype]._id, "pieces": pieData[celltype].count}
+  pieObjs.push(pieObj)
+  pieSeries.slices.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://0.0.0.0:5000/tasks/table_view?main=%7B%22level2%22%3A+%22{type}%22%7D">Explore</a>';
+
+// https://en.wikipedia.org/wiki/{name.urlEncode()}
+}
+
+  pieChart.data=pieObjs;
+  
+//  pieChart.data=[
+//  {% for dict_item in fcelltype|tojson %}
+//  {
+//      "type" : {{dict_item._id}},
+//      "pieces" : {{dict_item.count}}
+
+//  },
+//  {% endfor %}
+//  ];
+
+
+
 </script>
 
 {% endblock %}
