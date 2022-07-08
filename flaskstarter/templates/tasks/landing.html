@@ -7,11 +7,36 @@
     <div class="intro-h">Dataset Distribution</div>
     <div id="map" style="width: 100vw; height: 100vh"></div>
 
-    <table class="table table-striped">
-      <thead><tr><th>Name</th><th>Link</th></tr></thead>
+    <table id="distro_data" class="table table-striped">
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Dataset</th>
+          <th>Tissue</th>
+          <th>Protocol</th>
+          <th>Technology</th>
+          <th>Number of samples</th>
+          <th>Number of cells</th>
+          <th>Country</th>
+          <th>Published_Date</th>
+          <th>Journal</th>
+          <th>Link</th>
+        </tr>
+      </thead>
       <tbody>
-      {% for val in fdataset %}
-      <tr><td>{{val}}</td><td><a href='{{url_for("tasks.table_view", main={"meta_dataset": val}|tojson)}}'>Link</a></td></tr>
+      {% for item in fdataset %}
+      <tr>
+        <td>{{item.id}}</td>
+        <td>{{item.meta_dataset}}</td>
+        <td>{{item.meta_tissue}}</td>
+        <td>{{item.meta_protocol}}</td>
+        <td>{{item.meta_technology}}</td>
+        <td>{{item.number_of_samples}}</td>
+        <td>{{item.number_of_cells}}</td>
+        <td>{{item.Country}}</td>
+        <td>{{item.Published_Date}}</td>
+        <td>{{item.Journal}}</td>
+        <td><a href='{{url_for("tasks.table_view", main={"meta_dataset": item.meta_dataset}|tojson)}}'>Link</a></td></tr>
 
       {% endfor %}
       </tbody>
@@ -239,6 +264,11 @@
       } else {
         objs.push(obj)
       }
+
+      if (data["Country Code"][country] == "United States") {
+      polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="https://en.wikipedia.org/wiki/{name.urlEncode()}">Explore</a>';
+      }
+
      }
 
    polygonSeries.data = objs;
@@ -280,8 +310,12 @@ for ( let celltype in pieData) {
 //  {% endfor %}
 //  ];
 
-
+$(document).ready( function () {
+    $('#distro_data').DataTable();
+} );
 
 </script>
+
+
 
 {% endblock %}

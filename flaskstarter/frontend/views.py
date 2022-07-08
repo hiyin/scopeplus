@@ -22,6 +22,8 @@ import sqlite3
 from datetime import datetime
 import os
 import pandas as pd
+from bson.son import SON
+import pprint
 
 frontend = Blueprint('frontend', __name__)
 
@@ -34,15 +36,15 @@ def dashboard():
     return render_template('dashboard/dashboard.html', task_form=_task_form, _active_dash=True)
 
 
-def get_field(field_name):
-    key = mongo.single_cell_meta.distinct(field_name)
+def get_all_study_meta():
+    res = list(mongo.pbmc_all_study_meta.find())
+    print(res[1])
     #uniq_field = mongo.single_cell_meta.aggregate([{"$group": {"_id": '$%s' % field_name}}]);
     #key = [r['_id'] for r in uniq_field]
-    print("%s has %d uniq fields" % (field_name, len(key)))
-    return key
+    
+    return res
 
-from bson.son import SON
-import pprint
+
 def get_field_count():
     pipeline = [
         {"$unwind": "$level2"},
@@ -70,7 +72,7 @@ df = df.dropna(subset=['Country Code'])
 @frontend.route('/', methods=["GET", "POST"])
 def index():
     data = df.to_dict()
-    fdataset = get_field("meta_dataset")
+    fdataset = get_all_study_meta()
     res = get_field_count()
     pprint.pprint(res)
     if current_user.is_authenticated:
