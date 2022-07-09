@@ -43,14 +43,12 @@
                     </td>
                     <td style="width:16%">
                     <!-- Change by junyi 2022 0620-->
-                    <td style="width:16%">
-                        <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype" form="scfform">
-                            <option label=" "></option>
-                            {% for val in fprediction %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                    </select>
-                    </td>
+                            <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype" form="scfform">
+                                <option label=" "></option>
+                                {% for val in fprediction %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                        </select>
                     </td>
                     <td style="width:16%">
                         <select id="opt_donor" class="multibox" multiple="multiple" name="name_tbv_donor" form="scfform">
@@ -77,6 +75,15 @@
                         {% endfor %}
                     </select>    
                     </td>
+                    <td style="width:16%">
+                        <select id="opt_country" class="multibox" multiple="multiple" name="name_tbv_country" form="scfform">
+                            <option label=" "></option>
+                            {% for val in fcountry %}
+                                <option value="{{val}}">{{val}}</option>
+                            {% endfor %}
+                        </select>    
+                    </td>
+
                     <td>
                     <button id="scfbutton" class="btn btn-primary" name="show_scfeature"> Show scFeature plot </button>
                     </td>
@@ -115,6 +122,7 @@
                 <th>donor</th>
                 <th>dataset</th>
                 <th>status</th>
+                <th>country</th>
             </tr>
         </thead>
     </table>
@@ -229,6 +237,17 @@ $(document).ready(function() {
             maxHeight: 450
     });
 
+
+    $('#opt_country').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Country',
+            buttonWidth: '150px',
+            maxHeight: 450
+    });
+
     $('#empTable').DataTable({
                 'processing':true,
                 'language': {
@@ -249,7 +268,9 @@ $(document).ready(function() {
                     { data: 'prediction' },
                     { data: 'donor' },
                     { data: 'dataset' },
-                    { data: 'status'}
+                    { data: 'status'},
+                    { data: 'country'},
+
                 ],
                 "columnDefs": [
                 { "width": "28%", "targets": 0 },
@@ -258,7 +279,8 @@ $(document).ready(function() {
                 { "width": "7%", "targets": 3 },
                 { "width": "14%", "targets": 4 },
                 { "width": "14%", "targets": 5 },
-                { "width": "14%", "targets": 6 }
+                { "width": "14%", "targets": 6 },
+                { "width": "14%", "targets": 7 },
                 ],
                 initComplete : function() {
                     var input = $('#customSearchBox').unbind(),
@@ -289,6 +311,7 @@ $(document).ready(function() {
                 oTable.columns(4).search($('#opt_donor').val().join("|"));
                 oTable.columns(5).search($('#opt_dataset').val().join("|"));
                 oTable.columns(6).search($('#opt_status').val().join("|"));
+                oTable.columns(7).search($('#opt_country').val().join("|"));
                 //hit search on server
                 oTable.draw();
             });
@@ -302,6 +325,7 @@ $(document).ready(function() {
                 $('#opt_donor').multiselect('clearSelection');
                 $('#opt_dataset').multiselect('clearSelection');
                 $('#opt_status').multiselect('clearSelection');
+                $('#opt_country').multiselect('clearSelection');
 
 
             });

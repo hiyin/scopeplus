@@ -106,7 +106,7 @@ def show_plot():
             f = tmp_folder + "/ids.csv"
             _byid = pd.read_csv(f).values.tolist()
             lookups = list(np.squeeze(_byid))
-            meta = mongo.single_cell_meta.find({'id': {'$in': lookups}})
+            meta = mongo.single_cell_meta_country.find({'id': {'$in': lookups}})
             write_file_meta(tmp_folder,meta)
         
         # If ID is presented, no umap:
@@ -119,7 +119,7 @@ def show_plot():
 
     # If search box not empty, write id meta umap
     else:
-        meta = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}})
+        meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
         ids = write_id_meta(tmp_folder, meta)
         umap = mongo.umap.find({'id': {'$in': ids}})
         write_umap(tmp_folder, umap)
@@ -211,9 +211,9 @@ def show_scfeature():
     print("Html params",dataset,cell_type,feature)	
 
 
-    fileds_dataset = mongo.single_cell_meta.distinct("meta_dataset")
+    fileds_dataset = mongo.single_cell_meta_country.distinct("meta_dataset")
     fileds_celltypes = get_field("level2")
-    fileds_dataset_2 = mongo.single_cell_meta.aggregate(
+    fileds_dataset_2 = mongo.single_cell_meta_country.aggregate(
             [
                 {"$match":{"meta_dataset":dataset}},
                 {"$group": {"_id": {"meta_dataset": "$meta_dataset", "meta_sample_id2": "$meta_sample_id2"}}}
@@ -540,6 +540,7 @@ def table_view():
     fprediction = get_field("level2")
     fstatus = get_field("meta_severity")
     fdataset = get_field("meta_dataset")
+    fcountry = get_field("pbmc.Country")
     if "main" in request.args:
         l = request.args["main"]
         if l == "":
@@ -550,6 +551,7 @@ def table_view():
                                    fprediction=fprediction,
                                    fstatus=fstatus,
                                    fdataset=fdataset,
+                                   fcountry=fcountry,
                                    link=l)
     else:
         l = None
@@ -560,10 +562,11 @@ def table_view():
                            fprediction=fprediction,
                            fstatus=fstatus,
                            fdataset=fdataset,
+                           fcountry=fcountry,
                            link=l)
 
 
-#ids = [x["_id"] for x in list(db.single_cell_meta.find({}, {"_id": 1}))]
+#ids = [x["_id"] for x in list(db.single_cell_meta_country.find({}, {"_id": 1}))]
 
 data = []
 
@@ -717,7 +720,8 @@ def store_queryinfo(session,force=True):
 # Download big file
 @tasks.route('/download_meta',methods=['POST'])
 def download_meta():
-    meta = list(mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}))
+    print(collection_searched_query[-1])
+    meta = list(mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}}))
     time.sleep(2)
 
     user_timestamp = session.get("query_timestamp")
@@ -760,7 +764,7 @@ def download_scfeature():
 def download_umap():
     f = user_tmp[-1] + "/ids.csv"
     if not os.path.isfile(f):
-        id = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
+        id = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
         write_file_byid(user_tmp[-1], id)
         print(f)
 
@@ -798,7 +802,7 @@ def download_matrix():
         else:
             remove_files(tmp_folder)
 
-        meta = mongo.single_cell_meta.find({'_id': {'$in': collection_searched}})
+        meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
         ids = write_id_meta(tmp_folder, meta)
 
     # Down load 10x matrix if not exist
@@ -854,7 +858,7 @@ def download_matrix():
 # set in-memory storage for collection of ids for meta data table display
 collection = []
 collection_searched = []
-
+collection_searched_query = []
 # http://www.dotnetawesome.com/2015/12/implement-custom-server-side-filtering-jquery-datatables.html
 @tasks.route('/api_db', methods=['GET', 'POST'])
 #@login_required
@@ -865,6 +869,7 @@ def api_db():
         row = int(request.form['start'])
         rowperpage = int(request.form['length'])
         page_no = int(row/rowperpage + 1)
+        print(request.form)
         ## index page navigation graph url redirection
         if 'main' in request.args:
             search_value = request.args['main']
@@ -898,32 +903,35 @@ def api_db():
                 elif "5" in i:
                     search_column = "meta_dataset"
                     map[search_column] = column_value
-                else:
+                elif "6" in i:
                     search_column = "meta_severity"
+                    map[search_column] = column_value
+                else:
+                    search_column = "pbmc.Country"
                     map[search_column] = column_value
         print(map)
         if search_value == '':
             if len(collection) == 0:
-                ids = [x["_id"] for x in mongo.single_cell_meta.find({}, {"_id": 1})]
+                ids = [x["_id"] for x in mongo.single_cell_meta_country.find({}, {"_id": 1})]
                 collection.extend(ids)
-                tmp = mongo.single_cell_meta.find({'_id': {'$in': collection[start:end]}})
+                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection[start:end]}})
                 total_records = len(collection)
 
             else:
                 # refresh searchValue's stored ids when clicked "clear"
                 collection_searched.clear()
-                tmp = mongo.single_cell_meta.find({'_id': {'$in': collection[start:end]}})
+                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection[start:end]}})
                 total_records = len(collection)
 
         else:
             if len(collection_searched) == 0:
-                ids = [x["_id"] for x in mongo.single_cell_meta.find(json.loads(search_value), {"_id": 1})]
+                ids = [x["_id"] for x in mongo.single_cell_meta_country.find(json.loads(search_value), {"_id": 1})]
                 collection_searched.extend(ids)
-                tmp = mongo.single_cell_meta.find({'_id': {'$in': collection_searched[start:end]}})
+                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
                 total_records = len(collection_searched)
 
             else:
-                tmp = mongo.single_cell_meta.find({'_id': {'$in': collection_searched[start:end]}})
+                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
                 total_records = len(collection_searched)
 
         if map:
@@ -932,7 +940,7 @@ def api_db():
                 construct = []
                 re_match = re.compile(r'^\d{1,10}\.?\d{0,10}$')
                 for k in map:
-                    if (k in ["meta_age_category", "meta_sample_id2","meta_dataset","level2","meta_severity","meta_patient_id"]):
+                    if (k in ["meta_age_category", "meta_sample_id2","meta_dataset","level2","meta_severity","meta_patient_id","pbmc.Country"]):
                         l = []
                         for ki in map[k]:
                             if re_match.findall(ki):
@@ -947,14 +955,18 @@ def api_db():
                         q = {k: {"$in": l}}
                         print(q)
                         construct.append(q)
+                    else:
+                        print(map[k])
+
                 print(construct)
-                ids = [x["_id"] for x in mongo.single_cell_meta.find({"$and": construct}, {"_id": 1})]
+                ids = [x["_id"] for x in mongo.single_cell_meta_country.find({"$and": construct}, {"_id": 1})]
                 collection_searched.extend(ids)
-                tmp = mongo.single_cell_meta.find({'_id': {'$in': collection_searched[start:end]}})
+                collection_searched_query.extend(construct)
+                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
                 total_records = len(collection_searched)
 
             else:
-                tmp = mongo.single_cell_meta.find({'_id': {'$in': collection_searched[start:end]}})
+                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
                 total_records = len(collection_searched)
                 # clear search result once new search input is clicked.
                 collection_searched.clear()
@@ -969,7 +981,8 @@ def api_db():
                 'prediction': "",
                 'donor': "",
                 'dataset': "",
-                'status': ""
+                'status': "",
+                'country':""
             })
 
         else:
@@ -981,7 +994,8 @@ def api_db():
                         'prediction': r['level2'],
                         'donor': r['meta_patient_id'],
                         'dataset': r['meta_dataset'],
-                        'status': r['meta_severity']
+                        'status': r['meta_severity'],
+                        'country': r['pbmc'][0]['Country']
                     })
 
         response = {
@@ -1101,15 +1115,14 @@ def plot():
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     return graphJSON
 
-    #query = { 'donor': {'$in': selected_vals}}
-    #ids = [x["_id"] for x in list(mongo.single_cell_meta.find(query, {"_id": 1}))]
-
-
-
 def get_field(field_name):
-    key = mongo.single_cell_meta.distinct(field_name)
-    #uniq_field = mongo.single_cell_meta.aggregate([{"$group": {"_id": '$%s' % field_name}}]);
-    #key = [r['_id'] for r in uniq_field]
+    key = mongo.single_cell_meta_country.distinct(field_name)
     print("%s has %d uniq fields" % (field_name, len(key)))
     return key
 
+
+
+def get_study_field(field_name):
+    key = mongo.pbmc_all_study_meta.distinct(field_name)
+    print("%s has %d uniq fields" % (field_name, len(key)))
+    return key
