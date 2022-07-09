@@ -222,8 +222,10 @@
    // Configure series
    const polygonTemplate = polygonSeries.mapPolygons.template;
 
-   polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="https://en.wikipedia.org/wiki/{name.urlEncode()}">Explore</a>';
+   polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="http://147.8.194.29:5000/tasks/table_view?main=%7B%22meta_dataset%22%3A+%7B%22$in%22%3A+%5B{dataset}5D%7D%7D">Explore</a>';
    polygonTemplate.fill = am4core.color("rgba(110, 166, 157, 0.5)");
+   //polygonTemplate.tooltipText = '<b>{name}: {value}</b>';
+
 
    // Create hover state and set alternative fill color
    const hs = polygonTemplate.states.create("hover");
@@ -249,7 +251,7 @@
      const objs = []
 
      for ( let country in data["Country Code"]) {
-       let obj = {id: data["Country Code"][country], value: 1}
+       let obj = {id: data["Country Code"][country], value: 1, dataset: ""};
        if (objs.length > 0) {
         for (let j = 0; j < objs.length; j++) {
           if (objs[j].id == obj.id) {
@@ -257,17 +259,55 @@
             objs[j].value = k + 1;
             break;
           } else if (j == objs.length - 1) {
+            console.log(data["Country Code"][country])
+            if (data["Country Code"][country] == "US") {
+              obj.dataset = "%22COMBAT_2022%22,+%22Stephenson_2021%22%"
+            } else if (data["Country Code"][country] == "GB") {
+              obj.dataset = "%22Lee_2020%22,+%22Liu_2021%22%"
+            } else if (data["Country Code"][country] == "DE") {
+              obj.dataset = ""
+            } else if (data["Country Code"][country] == "IL") {
+              obj.dataset = ""
+            } else if (data["Country Code"][country] == "KR") {
+              obj.dataset = ""
+            } else if (data["Country Code"][country] == "CN") {
+              obj.dataset = ""
+            } else if (data["Country Code"][country] == "NL") {
+              obj.dataset = ""
+            } else if (data["Country Code"][country] == "FR") {
+              obj.dataset = ""
+            } else if (data["Country Code"][country] == "CA") {
+              obj.dataset = ""
+            }
             objs.push(obj);
             break;
           }
         }
       } else {
+        console.log(data["Country Code"][country])
+        if (data["Country Code"][country] == "US") {
+          obj.dataset = "%22COMBAT_2022%22,+%22Stephenson_2021%22%"
+        } else if (data["Country Code"][country] == "GB") {
+          obj.dataset = "%22Lee_2020%22,+%22Liu_2021%22%"
+        } else if (data["Country Code"][country] == "DE") {
+          obj.dataset = ""
+        } else if (data["Country Code"][country] == "IL") {
+          obj.dataset = ""
+        } else if (data["Country Code"][country] == "KR") {
+          obj.dataset = ""
+        } else if (data["Country Code"][country] == "CN") {
+          obj.dataset = ""
+        } else if (data["Country Code"][country] == "NL") {
+          obj.dataset = ""
+        } else if (data["Country Code"][country] == "FR") {
+          obj.dataset = ""
+        } else if (data["Country Code"][country] == "CA") {
+          obj.dataset = ""
+        }
         objs.push(obj)
       }
 
-      if (data["Country Code"][country] == "United States") {
-      polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="https://en.wikipedia.org/wiki/{name.urlEncode()}">Explore</a>';
-      }
+      
 
      }
 
