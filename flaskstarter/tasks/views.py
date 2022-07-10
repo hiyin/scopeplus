@@ -35,6 +35,11 @@ from os.path import exists,basename
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
+
+# set in-memory storage for collection of ids for meta data table display
+collection = []
+collection_searched = []
+
 # sub folders to manage different flask instances: not a good place to put, should be in API endpoint?
 user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
 #user_timestamp = "test"
@@ -62,7 +67,7 @@ def upload_file():
 
     return redirect(url_for('tasks.contribute'))
 
-
+@login_required
 @tasks.route('/show_plot', methods=['GET', 'POST'])
 def show_plot():     
 
@@ -72,7 +77,9 @@ def show_plot():
     cell_gene=None
     colors=["level2"]
     genes=[]
-
+    import os
+    print("Checking worker id")
+    print(os.getpid())
     # Get params from html
     cell_color = request.form.get('name_opt_col')
     cell_gene = request.form.get('name_opt_gene')
@@ -85,14 +92,18 @@ def show_plot():
 
     # Create tmpfolder is not exist
     query_timestamp = session.get("query_timestamp")
+    print("Checking user information")
     user_id = str(current_user.id)
+    print(user_id)
     tmp_folder = os.path.join(user_tmp[-1],user_id,query_timestamp)
     os.makedirs(tmp_folder, exist_ok=True)
-
+    print("Checking collection_searched_query if empty and logged-in user id?")
+    print(session["user_id"])
+    print(session["query"])
     # Add a flag to check if the local folder cached the ids
-    flag_idmissing = 0    
+    # flag_idmissing = 0    
     # Search box is empty
-    if(len(collection_searched)==0):
+    if(len(session["query"])==0):
         # No ids.csv file is presented:
         # if(not (exists(tmp_folder + '/ids.csv'))):
         #     print("Error finding ids.tsv" )
@@ -107,7 +118,7 @@ def show_plot():
             #_byid = pd.read_csv(f).values.tolist()
             #lookups = list(np.squeeze(_byid))
             #meta = mongo.single_cell_meta_country.find({'id': {'$in': lookups}})
-            meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
+            meta = mongo.single_cell_meta_country.find({})
             write_file_meta(tmp_folder, meta)
         
         # If ID is presented, no umap:
@@ -119,7 +130,6 @@ def show_plot():
 
             pipeline = [
                 {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
-                {"$match": collection_searched_query[-1] }, 
                 {"$project": { "umap": 1, "_id": 0 } }, 
                 {"$unwind": '$umap' }, 
                 {"$replaceRoot": { "newRoot": "$umap" } }
@@ -133,15 +143,27 @@ def show_plot():
     else:
         print("Search value provided, write id, meta...")
         #meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
-        meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
-        pipeline = [
-                {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
-                {"$match": collection_searched_query[-1] }, 
-                {"$project": { "umap": 1, "_id": 0 } }, 
-                {"$unwind": '$umap' }, 
-                {"$replaceRoot": { "newRoot": "$umap" } }
+        if isinstance(session["query"], dict):
+            meta = mongo.single_cell_meta_country.find(session["query"])
+        else:
+            meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+        #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+        if isinstance(session["query"], dict):
+            pipeline = [
+                    {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
+                    {"$match": {"$and": session["query"] } }, 
+                    {"$project": { "umap": 1, "_id": 0 } }, 
+                    {"$unwind": '$umap' }, 
+                    {"$replaceRoot": { "newRoot": "$umap" } }
+                ]
+        else:
+            pipeline = [
+                    {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
+                    {"$match": session["query"] }, 
+                    {"$project": { "umap": 1, "_id": 0 } }, 
+                    {"$unwind": '$umap' }, 
+                    {"$replaceRoot": { "newRoot": "$umap" } }
             ]
-
         umap = mongo.single_cell_meta_country.aggregate(pipeline)
         write_file_meta(tmp_folder, meta)
         #umap = mongo.umap.find({'id': {'$in': ids}})
@@ -177,7 +199,7 @@ def show_plot():
                     # use join table - aggregation
                     pipeline = [
                         { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
-                        { "$match": collection_searched_query[-1] }, 
+                        { "$match": {"$and": session["query"] }  }, 
                         { "$unwind": "$matrix" }, 
                         { "$match": { "matrix.gene_name": cell_gene }}, 
                         {"$project":  { "matrix": 1, "_id": 0 } }, 
@@ -652,7 +674,7 @@ def write_file_meta(path, towrite):
     'meta_outcome','meta_days_from_onset_of_symptoms','meta_ethinicity',\
     'meta_gender','meta_age','meta_BMI','meta_PreExistingHypertension',\
     'meta_PreExistingHeartDisease','barcodes','level1','level2','level3',\
-    'meta_sample_id2','meta_age_category']
+    'meta_sample_id2','meta_age_category', 'country']
     ##text=List of strings to be written to file
     #print(towrite[0])
     with open(fn, 'w') as file:
@@ -753,19 +775,22 @@ def store_queryinfo(session,force=True):
 
 
 # Download big file
+@login_required
 @tasks.route('/download_meta',methods=['POST'])
 def download_meta():
     print("Debugging BSON document exceeded error...use query string instead: ")
-    print(collection_searched_query[-1])
     #meta = list(mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}}))
-    meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
-
-
+    #meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
     user_timestamp = session.get("query_timestamp")
     user_id = str(current_user.id)
     tmp_folder = os.path.join(user_tmp[-1],user_id,user_timestamp)
     session["tmp_folder"] = tmp_folder
     os.makedirs(tmp_folder, exist_ok=True)
+    if isinstance(session["query"], dict):
+        meta = mongo.single_cell_meta_country.find(session["query"])
+    else:
+        meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+
 
     print('writing ids to csv file only once, firstly load the data')
     #write_file_byid(tmp_folder, meta)
@@ -810,7 +835,7 @@ def download_scfeature():
 #     umap = mongo.umap.find({'id': {'$in': lookups}})
 #     write_umap(user_tmp[-1], umap)
 #     return send_file(user_tmp[-1] + '/umap.csv', as_attachment=True)
-
+@login_required
 @tasks.route('/download_matrix',methods=['POST'])
 def download_matrix():
 
@@ -840,7 +865,8 @@ def download_matrix():
             remove_files(tmp_folder)
 
         # meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
-        meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
+        #meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
+        meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
         write_file_meta(tmp_folder, meta)
 
     # Down load 10x matrix if not exist
@@ -852,7 +878,7 @@ def download_matrix():
         # mtx = mongo.matrix.find({'barcode': {'$in': lookups}})
         pipeline = [
                         { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
-                        { "$match": collection_searched_query[-1] }, 
+                        { "$match": {"$and": session["query"] }  }, 
                         { "$unwind": "$matrix" }, 
                         {"$project":  { "matrix": 1, "_id": 0 } }, 
                         { "$replaceRoot": { "newRoot": "$matrix" } } 
@@ -903,11 +929,9 @@ def download_matrix():
     return send_file(tmp_folder + '/matrix.zip', as_attachment=True)
 
 
-# set in-memory storage for collection of ids for meta data table display
-collection = []
-collection_searched = []
-collection_searched_query = []
+
 # http://www.dotnetawesome.com/2015/12/implement-custom-server-side-filtering-jquery-datatables.html
+@login_required
 @tasks.route('/api_db', methods=['GET', 'POST'])
 #@login_required
 def api_db():
@@ -926,7 +950,11 @@ def api_db():
             search_value = request.form["search[value]"]
 
         print("draw: %s | row: %s | global search value: %s" % (draw, row, search_value))
-
+        print("Checking user information")
+        print(str(current_user.id))
+        store_queryinfo(session)
+        session["user_id"] = str(current_user.id)
+        print(session["user_id"])
         start = (page_no - 1)*rowperpage
         end = start + rowperpage
         map = {}
@@ -972,6 +1000,8 @@ def api_db():
                 total_records = len(collection)
 
         else:
+            print("global search value provided")
+            #session["query"] = ?
             if len(collection_searched) == 0:
                 ids = [x["_id"] for x in mongo.single_cell_meta_country.find(json.loads(search_value), {"_id": 1})]
                 collection_searched.extend(ids)
@@ -983,6 +1013,7 @@ def api_db():
                 total_records = len(collection_searched)
 
         if map:
+            print("Column-specific (multi) search value provided")
             if len(collection_searched) == 0:
                 print("using search id")
                 construct = []
@@ -1007,9 +1038,13 @@ def api_db():
                         print(map[k])
 
                 print(construct)
+                print("Saving construct to session query obj")
+                session["query"] = construct
+                print(session["query"])
                 ids = [x["_id"] for x in mongo.single_cell_meta_country.find({"$and": construct}, {"_id": 1})]
+                # Update the last user query by user id. 
                 collection_searched.extend(ids)
-                collection_searched_query.extend(construct)
+                #collection_searched_query.extend(construct)
                 tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
                 total_records = len(collection_searched)
 
@@ -1052,8 +1087,7 @@ def api_db():
                 'iTotalDisplayRecords': total_records_filter,
                 'aaData': data,
         }
-        store_queryinfo(session)
-        session["query"] = map
+
         return jsonify(response)
 
 
