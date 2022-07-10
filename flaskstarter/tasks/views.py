@@ -143,23 +143,38 @@ def show_plot():
     else:
         print("Search value provided, write id, meta...")
         #meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
+
         if isinstance(session["query"], dict):
+            print(session["query"])
             meta = mongo.single_cell_meta_country.find(session["query"])
+        elif  isinstance(session["query"], list) and len(session["query"][0]) == 1:
+            meta = mongo.single_cell_meta_country.find(session["query"][0])
         else:
-            meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+            meta = mongo.single_cell_meta_country.find({"$and": session["query"]})    
         #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
         if isinstance(session["query"], dict):
+            print("Getting instance of dict")
+
             pipeline = [
                     {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
-                    {"$match": {"$and": session["query"] } }, 
+                    {"$match": session["query"] }, 
                     {"$project": { "umap": 1, "_id": 0 } }, 
                     {"$unwind": '$umap' }, 
                     {"$replaceRoot": { "newRoot": "$umap" } }
                 ]
+        elif isinstance(session["query"], list) and len(session["query"][0]) == 1:
+            print("Getting instance of list and getting  first element")
+            pipeline = [
+                    {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
+                    {"$match": session["query"][0] }, 
+                    {"$project": { "umap": 1, "_id": 0 } }, 
+                    {"$unwind": '$umap' }, 
+                    {"$replaceRoot": { "newRoot": "$umap" } }
+                ]        
         else:
             pipeline = [
                     {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
-                    {"$match": session["query"] }, 
+                    {"$match": {"$and": session["query"] }  }, 
                     {"$project": { "umap": 1, "_id": 0 } }, 
                     {"$unwind": '$umap' }, 
                     {"$replaceRoot": { "newRoot": "$umap" } }
@@ -787,7 +802,10 @@ def download_meta():
     session["tmp_folder"] = tmp_folder
     os.makedirs(tmp_folder, exist_ok=True)
     if isinstance(session["query"], dict):
-        meta = mongo.single_cell_meta_country.find(session["query"])
+        meta = mongo.single_cell_meta_country.find(session["query"]) 
+    elif isinstance(session["query"], list) and len(session["query"][0]) == 1:
+        print(session["query"])
+        meta = mongo.single_cell_meta_country.find(session["query"][0])
     else:
         meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
 
@@ -866,7 +884,12 @@ def download_matrix():
 
         # meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
         #meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
-        meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+        #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+        if isinstance(session["query"], dict) or len(session["query"][0]) == 1:
+            print(session["query"])
+            meta = mongo.single_cell_meta_country.find(session["query"])
+        else:
+            meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
         write_file_meta(tmp_folder, meta)
 
     # Down load 10x matrix if not exist
@@ -1001,7 +1024,8 @@ def api_db():
 
         else:
             print("global search value provided")
-            #session["query"] = ?
+            session["query"] = json.loads(search_value)
+            print(session["query"])
             if len(collection_searched) == 0:
                 ids = [x["_id"] for x in mongo.single_cell_meta_country.find(json.loads(search_value), {"_id": 1})]
                 collection_searched.extend(ids)
