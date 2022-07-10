@@ -94,15 +94,15 @@ def show_plot():
     # Search box is empty
     if(len(collection_searched)==0):
         # No ids.csv file is presented:
-        if(not (exists(tmp_folder + '/ids.csv'))):
-            print("Error finding ids.tsv" )
-            # shutil.copy2(TMP_FOLDER+'/default/umap.csv', user_tmp[-1] + '/umap.csv') # complete target filename given
-            # shutil.copy2(TMP_FOLDER+'/default/meta.tsv', user_tmp[-1] + '/meta.tsv') # complete target filename given
-            # Change to show default case
-            flag_idmissing = 1
+        # if(not (exists(tmp_folder + '/ids.csv'))):
+        #     print("Error finding ids.tsv" )
+        #     # shutil.copy2(TMP_FOLDER+'/default/umap.csv', user_tmp[-1] + '/umap.csv') # complete target filename given
+        #     # shutil.copy2(TMP_FOLDER+'/default/meta.tsv', user_tmp[-1] + '/meta.tsv') # complete target filename given
+        #     # Change to show default case
+        #     flag_idmissing = 1
 
         # ID is presented, no meta data:
-        elif(not (exists(tmp_folder + '/meta.tsv'))):
+        if(not (exists(tmp_folder + '/meta.tsv'))):
             #f = tmp_folder + "/ids.csv"
             #_byid = pd.read_csv(f).values.tolist()
             #lookups = list(np.squeeze(_byid))
@@ -797,19 +797,19 @@ def download_scfeature():
 
 
 
-@tasks.route('/download_umap', methods=['POST'])
-def download_umap():
-    f = user_tmp[-1] + "/ids.csv"
-    if not os.path.isfile(f):
-        id = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
-        write_file_byid(user_tmp[-1], id)
-        print(f)
+# @tasks.route('/download_umap', methods=['POST'])
+# def download_umap():
+#     f = user_tmp[-1] + "/ids.csv"
+#     if not os.path.isfile(f):
+#         id = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
+#         write_file_byid(user_tmp[-1], id)
+#         print(f)
 
-    _byid = pd.read_csv(f).values.tolist()
-    lookups = list(np.squeeze(_byid))
-    umap = mongo.umap.find({'id': {'$in': lookups}})
-    write_umap(user_tmp[-1], umap)
-    return send_file(user_tmp[-1] + '/umap.csv', as_attachment=True)
+#     _byid = pd.read_csv(f).values.tolist()
+#     lookups = list(np.squeeze(_byid))
+#     umap = mongo.umap.find({'id': {'$in': lookups}})
+#     write_umap(user_tmp[-1], umap)
+#     return send_file(user_tmp[-1] + '/umap.csv', as_attachment=True)
 
 @tasks.route('/download_matrix',methods=['POST'])
 def download_matrix():
@@ -823,8 +823,8 @@ def download_matrix():
 
     # No query is search, then we use default use case:
     if(len(collection_searched)==0):
-        if(not (exists(tmp_folder + '/ids.csv'))):
-            return send_file(TMP_FOLDER+'/default/matrix.zip', as_attachment=True)
+        #if(not (exists(tmp_folder + '/ids.csv'))):
+        return send_file(TMP_FOLDER+'/default/matrix.zip', as_attachment=True)
     else:
         # If query is presented, remove the result old queries
         if((exists(tmp_folder + '/meta.tsv'))):
@@ -839,16 +839,27 @@ def download_matrix():
         else:
             remove_files(tmp_folder)
 
-        meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
-        ids = write_id_meta(tmp_folder, meta)
+        # meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
+        meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
+        write_file_meta(tmp_folder, meta)
 
     # Down load 10x matrix if not exist
     if(not (exists(tmp_folder + '/matrix.mtx.gz'))):
-        _byid = pd.read_csv(tmp_folder + "/ids.csv").values.tolist()
-        lookups = list(np.squeeze(_byid))
+        # _byid = pd.read_csv(tmp_folder + "/ids.csv").values.tolist()
+        # lookups = list(np.squeeze(_byid))
         print("debugging")
         start_time2 = time.time()
-        mtx = mongo.matrix.find({'barcode': {'$in': lookups}})
+        # mtx = mongo.matrix.find({'barcode': {'$in': lookups}})
+        pipeline = [
+                        { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
+                        { "$match": collection_searched_query[-1] }, 
+                        { "$unwind": "$matrix" }, 
+                        {"$project":  { "matrix": 1, "_id": 0 } }, 
+                        { "$replaceRoot": { "newRoot": "$matrix" } } 
+                    ]
+
+        mtx = mongo.single_cell_meta_country.aggregate(pipeline)
+
         print("query finished --- %s seconds ---" % (time.time() - start_time2))
 
         start_time2 = time.time()
