@@ -103,25 +103,48 @@ def show_plot():
 
         # ID is presented, no meta data:
         elif(not (exists(tmp_folder + '/meta.tsv'))):
-            f = tmp_folder + "/ids.csv"
-            _byid = pd.read_csv(f).values.tolist()
-            lookups = list(np.squeeze(_byid))
-            meta = mongo.single_cell_meta_country.find({'id': {'$in': lookups}})
-            write_file_meta(tmp_folder,meta)
+            #f = tmp_folder + "/ids.csv"
+            #_byid = pd.read_csv(f).values.tolist()
+            #lookups = list(np.squeeze(_byid))
+            #meta = mongo.single_cell_meta_country.find({'id': {'$in': lookups}})
+            meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
+            write_file_meta(tmp_folder, meta)
         
         # If ID is presented, no umap:
         elif(not (exists(tmp_folder + '/umap.csv'))):
-            f = tmp_folder + "/ids.csv"
-            _byid = pd.read_csv(f).values.tolist()
-            lookups = list(np.squeeze(_byid))
-            umap = mongo.umap.find({'id': {'$in': lookups}})
+            #f = tmp_folder + "/ids.csv"
+            #_byid = pd.read_csv(f).values.tolist()
+            #lookups = list(np.squeeze(_byid))
+            #umap = mongo.umap.find({'id': {'$in': lookups}})
+
+            pipeline = [
+                {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
+                {"$match": collection_searched_query[-1] }, 
+                {"$project": { "umap": 1, "_id": 0 } }, 
+                {"$unwind": '$umap' }, 
+                {"$replaceRoot": { "newRoot": "$umap" } }
+            ]
+
+            umap = mongo.single_cell_meta_country.aggregate(pipeline)
+
             write_umap(tmp_folder, umap)
 
     # If search box not empty, write id meta umap
     else:
-        meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
-        ids = write_id_meta(tmp_folder, meta)
-        umap = mongo.umap.find({'id': {'$in': ids}})
+        print("Search value provided, write id, meta...")
+        #meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
+        meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
+        pipeline = [
+                {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
+                {"$match": collection_searched_query[-1] }, 
+                {"$project": { "umap": 1, "_id": 0 } }, 
+                {"$unwind": '$umap' }, 
+                {"$replaceRoot": { "newRoot": "$umap" } }
+            ]
+
+        umap = mongo.single_cell_meta_country.aggregate(pipeline)
+        write_file_meta(tmp_folder, meta)
+        #umap = mongo.umap.find({'id': {'$in': ids}})
         write_umap(tmp_folder, umap)
 
         # Assume ids,meta files are provided
@@ -143,15 +166,26 @@ def show_plot():
                 (flag_same_query == False)):
 
                     # Lookup from the database
-                    if(flag_idmissing==0):
-                        _byid = pd.read_csv(tmp_folder  + "/ids.csv").values.tolist()
-                    else:
-                        _byid = pd.read_csv(TMP_FOLDER+'/default/ids.csv').values.tolist()
+                    # if(flag_idmissing==0):
+                    #     _byid = pd.read_csv(tmp_folder  + "/ids.csv").values.tolist()
+                    # else:
+                    #     _byid = pd.read_csv(TMP_FOLDER+'/default/ids.csv').values.tolist()
                         
-                    lookups = list(np.squeeze(_byid))
-                    print("Query ing")
+                    #lookups = list(np.squeeze(_byid))
+                    print("Querying matrix collection...")
                     checkpoint_time = time.time()
-                    query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
+                    # use join table - aggregation
+                    pipeline = [
+                        { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
+                        { "$match": collection_searched_query[-1] }, 
+                        { "$unwind": "$matrix" }, 
+                        { "$match": { "matrix.gene_name": cell_gene }}, 
+                        {"$project":  { "matrix": 1, "_id": 0 } }, 
+                        { "$replaceRoot": { "newRoot": "$matrix" } } 
+                    ]
+
+                    result = mongo.single_cell_meta_country.aggregate(pipeline)
+                    #query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
                     print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
                     ##text=List of strings to be written to file
@@ -159,7 +193,7 @@ def show_plot():
                     with open(tmp_folder + '/'+cell_gene+'.tsv', 'w') as file:
                         file.write("\t".join(["_id","gene","barcode",cell_gene]))
                         file.write('\n')
-                        for line in query:
+                        for line in result:
                             file.write("\t".join([str(e) for e in line.values()]))
                             file.write('\n')
 
@@ -469,6 +503,7 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None,tmp_folder=".")
     df_plot = df.merge(df_meta, left_index=True, right_index=True)
 
 
+
     if(not(gene_color is None)):
         df_gene = pd.read_csv(tmp_folder + '/'+gene_color+'.tsv',sep="\t", index_col=2)
         df_plot = df_plot.merge(df_gene, left_index=True, right_index=True,how="left")
@@ -723,8 +758,8 @@ def download_meta():
     print("Debugging BSON document exceeded error...use query string instead: ")
     print(collection_searched_query[-1])
     #meta = list(mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}}))
-    meta = list(mongo.single_cell_meta_country.find(collection_searched_query[-1]))
-    time.sleep(2)
+    meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
+
 
     user_timestamp = session.get("query_timestamp")
     user_id = str(current_user.id)
@@ -733,7 +768,7 @@ def download_meta():
     os.makedirs(tmp_folder, exist_ok=True)
 
     print('writing ids to csv file only once, firstly load the data')
-    write_file_byid(tmp_folder, meta)
+    #write_file_byid(tmp_folder, meta)
     write_file_meta(tmp_folder, meta)
     #return send_file(user_tmp[-1] + '/ids.csv', as_attachment=True)
     return send_file(os.path.join(tmp_folder,'meta.tsv'), as_attachment=True)
