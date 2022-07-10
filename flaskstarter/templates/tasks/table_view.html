@@ -142,9 +142,11 @@
         <button class="btn btn-primary" name="show_scfeature" type="submit"> Show scFeature plot </button>
       </form> -->
 
-    <form action="{{ url_for('tasks.show_plot')}}" method="get" style="display:inline-block">
+    <!-- <form action="{{ url_for('tasks.show_plot')}}" method="get" style="display:inline-block">
       <button class="btn btn-primary" name="show_plot" type="submit"> Show UMAP plot </button>
-    </form>
+    </form> -->
+    <button class="btn btn-primary" name="refresh_table" type="submit" style="display:inline-block" onclick="window.location.href='{{ url_for( 'tasks.show_plot') }}';"> Return to Home </button>
+
 
     <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
       <button class="btn btn-primary" name="download_matrix" type="submit"> Download matrix </button>
