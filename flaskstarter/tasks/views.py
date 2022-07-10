@@ -720,8 +720,10 @@ def store_queryinfo(session,force=True):
 # Download big file
 @tasks.route('/download_meta',methods=['POST'])
 def download_meta():
+    print("Debugging BSON document exceeded error...use query string instead: ")
     print(collection_searched_query[-1])
-    meta = list(mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}}))
+    #meta = list(mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}}))
+    meta = list(mongo.single_cell_meta_country.find(collection_searched_query[-1]))
     time.sleep(2)
 
     user_timestamp = session.get("query_timestamp")
