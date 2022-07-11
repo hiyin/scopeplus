@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 from ast import If
 from operator import index
@@ -279,24 +280,24 @@ def show_scfeature():
 
     # Get params from html
     #<!-- Change by junyi 2022 0620-->
-    dataset_from_table = request.form.get('name_tbv_dataset')
+    #dataset_from_table = request.form.get('name_tbv_dataset')
     celltype_from_table = request.form.get('name_tbv_celltype')
 
 
-    print("Receive dataset2 is:",str(dataset_from_table))
+    #print("Receive dataset2 is:",str(dataset_from_table))
     print("Receive celltype is:",request.form)
 
 
-    dataset = request.form.get('name_opt_dataset')
+    #dataset = request.form.get('name_opt_dataset')
     cell_type = request.form.get('name_opt_celltype')
     feature = request.form.get('name_opt_feature')
 
 
-    if(dataset_from_table!=None):
-        dataset = dataset_from_table
+    # if(dataset_from_table!=None):
+    #     dataset = dataset_from_table
 
-    if(dataset == None):
-        dataset = "Arunachalam_2020"
+    # if(dataset == None):
+    #     dataset = "Arunachalam_2020"
 
     if(celltype_from_table!=None):
         cell_type = celltype_from_table
@@ -304,20 +305,32 @@ def show_scfeature():
 
     print("Html params",dataset,cell_type,feature)	
 
-
-    fileds_dataset = mongo.single_cell_meta_country.distinct("meta_dataset")
+            
+    ### if ... not ... getting metaset
+    ### Junyi's code
+    # fileds_dataset = mongo.single_cell_meta_country.distinct("meta_dataset")
     fileds_celltypes = get_field("level2")
-    fileds_dataset_2 = mongo.single_cell_meta_country.aggregate(
-            [
-                {"$match":{"meta_dataset":dataset}},
-                {"$group": {"_id": {"meta_dataset": "$meta_dataset", "meta_sample_id2": "$meta_sample_id2"}}}
-            ]
+    # fileds_dataset_2 = mongo.single_cell_meta_country.aggregate(
+    #         [
+    #             {"$match":{"meta_dataset":dataset}},
+    #             {"$group": {"_id": {"meta_dataset": "$meta_dataset", "meta_sample_id2": "$meta_sample_id2"}}}
+    #         ]
 
-    )
-    mata_sample_id2 = [x["_id"]["meta_sample_id2"] for x in list(fileds_dataset_2)]
-    print("Sample id 2: ",mata_sample_id2)
+    # )
 
-    datasets = fileds_dataset
+    #mata_sample_id2 = [x["_id"]["meta_sample_id2"] for x in list(fileds_dataset_2)]
+    ## Angela's attempt
+    print(session["query"])
+    if isinstance(session["query"], dict):
+        mata_sample_id2 = list(mongo.single_cell_meta_country.find(session["query"], {"meta_sample_id2":1,"_id":0})).distinct("meta_sample_id2")
+    elif isinstance(session["query"], list) and len(session["query"][0]) == 1:
+        print(session["query"])
+        mata_sample_id2 = list(mongo.single_cell_meta_country.find(session["query"][0], {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
+    else:
+        mata_sample_id2 = list(mongo.single_cell_meta_country.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0})).distinct("meta_sample_id2")
+    print("Testing Angela's code ...Sample id 2: ",mata_sample_id2)
+
+    # datasets = fileds_dataset
     celltypes = ["All"]
     celltypes=celltypes+fileds_celltypes
     features = []
