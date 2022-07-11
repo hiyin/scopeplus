@@ -211,15 +211,38 @@ def show_plot():
                     #lookups = list(np.squeeze(_byid))
                     print("Querying matrix collection...")
                     checkpoint_time = time.time()
-                    # use join table - aggregation
-                    pipeline = [
-                        { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
-                        { "$match": {"$and": session["query"] }  }, 
-                        { "$unwind": "$matrix" }, 
-                        { "$match": { "matrix.gene_name": cell_gene }}, 
-                        {"$project":  { "matrix": 1, "_id": 0 } }, 
-                        { "$replaceRoot": { "newRoot": "$matrix" } } 
-                    ]
+                    # use join table - aggregation with matrix table - get gene info
+
+                    if isinstance(session["query"], dict):
+                        print("Getting instance of dict")
+                        pipeline = [
+                                { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
+                                { "$match": session["query"]  }, 
+                                { "$unwind": "$matrix" }, 
+                                { "$match": { "matrix.gene_name": cell_gene }}, 
+                                {"$project":  { "matrix": 1, "_id": 0 } }, 
+                                { "$replaceRoot": { "newRoot": "$matrix" } } 
+                        ]
+
+                    elif isinstance(session["query"], list) and len(session["query"][0]) == 1:
+                        print("Getting instance of list and getting  first element")
+                        pipeline = [
+                                { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
+                                { "$match": session["query"][0]  }, 
+                                { "$unwind": "$matrix" }, 
+                                { "$match": { "matrix.gene_name": cell_gene }}, 
+                                {"$project":  { "matrix": 1, "_id": 0 } }, 
+                                { "$replaceRoot": { "newRoot": "$matrix" } } 
+                        ]            
+                    else:
+                         pipeline = [
+                                { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
+                                { "$match": {"$and": session["query"] }  }, 
+                                { "$unwind": "$matrix" }, 
+                                { "$match": { "matrix.gene_name": cell_gene }}, 
+                                {"$project":  { "matrix": 1, "_id": 0 } }, 
+                                { "$replaceRoot": { "newRoot": "$matrix" } } 
+                        ]
 
                     result = mongo.single_cell_meta_country.aggregate(pipeline)
                     #query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
@@ -811,7 +834,7 @@ def download_meta():
 
 
     print('writing ids to csv file only once, firstly load the data')
-    #write_file_byid(tmp_folder, meta)
+    #write_file_byid(tmp_folder, meta) # ids.csv is used in download_matrix barcode_dict
     write_file_meta(tmp_folder, meta)
     #return send_file(user_tmp[-1] + '/ids.csv', as_attachment=True)
     return send_file(os.path.join(tmp_folder,'meta.tsv'), as_attachment=True)
@@ -885,13 +908,15 @@ def download_matrix():
         # meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
         #meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
         #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
-        if isinstance(session["query"], dict) or len(session["query"][0]) == 1:
+        if isinstance(session["query"], dict):
+            meta = mongo.single_cell_meta_country.find(session["query"]) 
+        elif isinstance(session["query"], list) and len(session["query"][0]) == 1:
             print(session["query"])
-            meta = mongo.single_cell_meta_country.find(session["query"])
+            meta = mongo.single_cell_meta_country.find(session["query"][0])
         else:
             meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
-        write_file_meta(tmp_folder, meta)
-
+        #write_file_meta(tmp_folder, meta)
+        write_id_meta(tmp_folder, meta)
     # Down load 10x matrix if not exist
     if(not (exists(tmp_folder + '/matrix.mtx.gz'))):
         # _byid = pd.read_csv(tmp_folder + "/ids.csv").values.tolist()
@@ -899,13 +924,32 @@ def download_matrix():
         print("debugging")
         start_time2 = time.time()
         # mtx = mongo.matrix.find({'barcode': {'$in': lookups}})
-        pipeline = [
-                        { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
-                        { "$match": {"$and": session["query"] }  }, 
-                        { "$unwind": "$matrix" }, 
-                        {"$project":  { "matrix": 1, "_id": 0 } }, 
-                        { "$replaceRoot": { "newRoot": "$matrix" } } 
-                    ]
+        if isinstance(session["query"], dict):
+            print("Getting instance of dict")
+            pipeline = [
+                {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
+                {"$match": session["query"] }, 
+                {"$project": { "matrix": 1, "_id": 0 } }, 
+                {"$unwind": '$matrix' }, 
+                {"$replaceRoot": { "newRoot": "$matrix" } }
+            ]
+        elif isinstance(session["query"], list) and len(session["query"][0]) == 1:
+            print("Getting instance of list and getting  first element")
+            pipeline = [
+                {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
+                {"$match": session["query"][0] }, 
+                {"$project": { "matrix": 1, "_id": 0 } }, 
+                {"$unwind": '$matrix' }, 
+                {"$replaceRoot": { "newRoot": "$matrix" } }
+            ]        
+        else:
+            pipeline = [
+                {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
+                {"$match": {"$and": session["query"] }  }, 
+                {"$project": { "matrix": 1, "_id": 0 } }, 
+                {"$unwind": '$matrix' }, 
+                {"$replaceRoot": { "newRoot": "$matrix" } }
+            ]
 
         mtx = mongo.single_cell_meta_country.aggregate(pipeline)
 
@@ -914,7 +958,9 @@ def download_matrix():
         start_time2 = time.time()
         #query_counts = mtx.size()
         #mtx = list(mtx)
-        doc_count = mongo.matrix.count_documents({'barcode': {'$in': lookups}})
+        #doc_count = mongo.matrix.count_documents({'barcode': {'$in': lookups}})
+        # temporary check of length of matrix returned
+        doc_count = 1
 
         print("list finished --- %s seconds ---" % (time.time() - start_time2))
 
@@ -934,6 +980,8 @@ def download_matrix():
             dict_gene = get_dict(TMP_FOLDER + "/genes.tsv", save_path=tmp_folder + "/genes.tsv.gz")
         # Save barcodes
         if(not (exists(tmp_folder + '/barcodes.tsv.gz'))):
+            #write_file_byid(tmp_folder, meta)
+            # todo: this line will error if try download_mtx in show_plot page after gene is selected. as barcodes are not generated
             dict_barcode = get_dict(tmp_folder + "/ids.csv", sep=",", save_path=tmp_folder + "/barcodes.tsv.gz")
         write_10x_mtx(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
 
