@@ -29,9 +29,9 @@ import pandas as pd
 import time
 from datetime import datetime
 from os.path import exists,basename
-# import dash_bio
-# from sklearn import preprocessing
-# import seaborn as sns
+import dash_bio
+from sklearn import preprocessing
+import seaborn as sns
 
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
@@ -285,7 +285,7 @@ def show_scfeature():
 
 
     #print("Receive dataset2 is:",str(dataset_from_table))
-    print("Receive celltype is:",request.form)
+    #print("Receive celltype is:",request.form)
 
 
     #dataset = request.form.get('name_opt_dataset')
@@ -294,7 +294,6 @@ def show_scfeature():
 
 
     # if(dataset_from_table!=None):
-    #     dataset = dataset_from_table
 
     # if(dataset == None):
     #     dataset = "Arunachalam_2020"
@@ -303,13 +302,20 @@ def show_scfeature():
         cell_type = celltype_from_table
 
 
-    print("Html params",dataset,cell_type,feature)	
-
+    # print("Html params",dataset,cell_type,feature)	
+    print("Html params", cell_type, feature)
             
     ### if ... not ... getting metaset
     ### Junyi's code
     # fileds_dataset = mongo.single_cell_meta_country.distinct("meta_dataset")
-    fileds_celltypes = get_field("level2")
+    # fileds_celltypes = get_field("level2")
+    if isinstance(session["query"], dict):
+        fileds_celltypes = list(mongo.single_cell_meta_country.find(session["query"], {"meta_sample_id2":1,"_id":0}).distinct("level2"))
+    elif isinstance(session["query"], list):
+        if len(session["query"]) == 1:
+            fileds_celltypes = list(mongo.single_cell_meta_country.find(session["query"][0], {"meta_sample_id2":1,"_id":0}).distinct("level2"))
+        else:
+            fileds_celltypes = list(mongo.single_cell_meta_country.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0}).distinct("level2"))
     # fileds_dataset_2 = mongo.single_cell_meta_country.aggregate(
     #         [
     #             {"$match":{"meta_dataset":dataset}},
@@ -317,20 +323,24 @@ def show_scfeature():
     #         ]
 
     # )
-
+    print(fileds_celltypes)
     #mata_sample_id2 = [x["_id"]["meta_sample_id2"] for x in list(fileds_dataset_2)]
     ## Angela's attempt
     print(session["query"])
     if isinstance(session["query"], dict):
-        mata_sample_id2 = list(mongo.single_cell_meta_country.find(session["query"], {"meta_sample_id2":1,"_id":0})).distinct("meta_sample_id2")
-    elif isinstance(session["query"], list) and len(session["query"][0]) == 1:
-        print(session["query"])
-        mata_sample_id2 = list(mongo.single_cell_meta_country.find(session["query"][0], {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
-    else:
-        mata_sample_id2 = list(mongo.single_cell_meta_country.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0})).distinct("meta_sample_id2")
+        mata_sample_id2 = list(mongo.single_cell_meta_country.find(session["query"], {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
+    elif isinstance(session["query"], list):
+        if len(session["query"]) == 1:
+            print("Getting single column filter")
+            mata_sample_id2 = list(mongo.single_cell_meta_country.find(session["query"][0], {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
+        else:
+            print("Getting multi-column filter")
+            mata_sample_id2 = list(mongo.single_cell_meta_country.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
     print("Testing Angela's code ...Sample id 2: ",mata_sample_id2)
 
     # datasets = fileds_dataset
+    #dataset =  " ".join(mata_sample_id2)
+    dataset= ""
     celltypes = ["All"]
     celltypes=celltypes+fileds_celltypes
     features = []
@@ -363,6 +373,7 @@ def show_scfeature():
     else:
         try:
             # Query dendrogram for each gene
+            print("Getting dendrogram information from db")
             gene_prop_celltype = scfeature.gene_prop_celltype.find({'meta_dataset': {'$in': mata_sample_id2}})
             df_gene_prop_celltype = pd.DataFrame(list(gene_prop_celltype))
             df_gene_prop_celltype.to_csv(user_tmp[-1]+"/df_gene_prop_celltype_"+dataset+".csv")
@@ -379,10 +390,16 @@ def show_scfeature():
 
     try:
         # Query boxplot
+        print("Getting dendrogram information from db")
         pathway_mean = scfeature.pathway_mean.find({'meta_dataset': {'$in': mata_sample_id2}})
+        print("Getting pathway mean information into dataframe")
         df_pathway_mean = pd.DataFrame(list(pathway_mean))
         df_pathway_mean.to_csv(user_tmp[-1]+"/df_pathway_mean_"+dataset+".csv")
         df_pathway_mean = df_pathway_mean.drop(columns=["_id"])
+        print("Getting boxplot")
+        print(cell_type)
+        print(dataset)
+        print(feature)
         fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature,title="Pathway mean scores of: "+ cell_type + " cell types in dataset "+ dataset)
 
         if(feature is None):
@@ -408,7 +425,8 @@ def show_scfeature():
         print("Error generating figure boxplot",e)
 
 
-    return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,graphJSON3=graphJSON3,graphJSON4=graphJSON4,datasets=datasets,celltypes=celltypes,features=features)
+    #return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,graphJSON3=graphJSON3,graphJSON4=graphJSON4,datasets=datasets,celltypes=celltypes,features=features)
+    return render_template('tasks/show_scfeature.html', graphJSON=graphJSON,graphJSON2=graphJSON2,graphJSON3=graphJSON3,graphJSON4=graphJSON4,celltypes=celltypes,features=features)
 
 ## Add by junyi
 def process_dendrogram(data,cell_type,plot_type="gene",title="Title"):
