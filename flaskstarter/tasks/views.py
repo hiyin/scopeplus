@@ -148,7 +148,7 @@ def show_plot():
         if isinstance(session["query"], dict):
             print(session["query"])
             meta = mongo.single_cell_meta_country.find(session["query"])
-        elif  isinstance(session["query"], list) and len(session["query"][0]) == 1:
+        elif  isinstance(session["query"], list) and len(session["query"]) == 1:
             meta = mongo.single_cell_meta_country.find(session["query"][0])
         else:
             meta = mongo.single_cell_meta_country.find({"$and": session["query"]})    
@@ -163,7 +163,7 @@ def show_plot():
                     {"$unwind": '$umap' }, 
                     {"$replaceRoot": { "newRoot": "$umap" } }
                 ]
-        elif isinstance(session["query"], list) and len(session["query"][0]) == 1:
+        elif isinstance(session["query"], list) and len(session["query"]) == 1:
             print("Getting instance of list and getting  first element")
             pipeline = [
                     {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
@@ -225,7 +225,7 @@ def show_plot():
                                 { "$replaceRoot": { "newRoot": "$matrix" } } 
                         ]
 
-                    elif isinstance(session["query"], list) and len(session["query"][0]) == 1:
+                    elif isinstance(session["query"], list) and len(session["query"]) == 1:
                         print("Getting instance of list and getting  first element")
                         pipeline = [
                                 { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
@@ -857,7 +857,7 @@ def download_meta():
     os.makedirs(tmp_folder, exist_ok=True)
     if isinstance(session["query"], dict):
         meta = mongo.single_cell_meta_country.find(session["query"]) 
-    elif isinstance(session["query"], list) and len(session["query"][0]) == 1:
+    elif isinstance(session["query"], list) and len(session["query"]) == 1:
         print(session["query"])
         meta = mongo.single_cell_meta_country.find(session["query"][0])
     else:
@@ -941,11 +941,12 @@ def download_matrix():
         #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
         if isinstance(session["query"], dict):
             meta = mongo.single_cell_meta_country.find(session["query"]) 
-        elif isinstance(session["query"], list) and len(session["query"][0]) == 1:
-            print(session["query"])
-            meta = mongo.single_cell_meta_country.find(session["query"][0])
-        else:
-            meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+        elif isinstance(session["query"], list):
+            if len(session["query"]) == 1:
+                print(session["query"])
+                meta = mongo.single_cell_meta_country.find(session["query"][0])
+            else:
+                meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
         #write_file_meta(tmp_folder, meta)
         write_id_meta(tmp_folder, meta)
     # Down load 10x matrix if not exist
@@ -964,7 +965,7 @@ def download_matrix():
                 {"$unwind": '$matrix' }, 
                 {"$replaceRoot": { "newRoot": "$matrix" } }
             ]
-        elif isinstance(session["query"], list) and len(session["query"][0]) == 1:
+        elif isinstance(session["query"], list) and len(session["query"]) == 1:
             print("Getting instance of list and getting  first element")
             pipeline = [
                 {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
