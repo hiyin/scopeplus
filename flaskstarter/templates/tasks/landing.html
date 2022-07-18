@@ -7,6 +7,9 @@
     <div class="intro-h">Dataset Distribution</div>
     <div id="map" style="width: 100vw; height: 100vh"></div>
 
+    <div class="intro-h" style="padding-top: 100px">Cell Type Distribution</div>
+    <div id="typeChart" style="width: 100vw; height: 100vh"></div>
+
     <table id="distro_data" class="table table-striped">
       <thead>
         <tr>
@@ -44,11 +47,6 @@
 
   </div>
 </div>
-
-<div class="section02">
-    <div class="intro-h">Cell Type Distribution</div>
-    <div id="pieChart" style="width: 100vw; height: 100vh"></div>
-  </div>
 
 </div>
 
@@ -230,6 +228,8 @@
    polygonTemplate.tooltipPosition = "fixed";
    polygonSeries.tooltip.label.interactionsEnabled = true;
    polygonSeries.tooltip.keepTargetHover = true;
+   polygonSeries.tooltip.getFillFromObject = false;
+   polygonSeries.tooltip.background.fill = am4core.color("rgba(110, 166, 157, 0.9)");
 
    // heatRules
    polygonSeries.heatRules.push({
@@ -244,7 +244,7 @@
      const data = {{ data|tojson }}
      const objs = []
 
-     for ( let country in data["Country Code"]) {
+for ( let country in data["Country Code"]) {
        let obj = {id: data["Country Code"][country], value: 1, dataset: ""};
        if (objs.length > 0) {
         for (let j = 0; j < objs.length; j++) {
@@ -269,9 +269,9 @@
             } else if (data["Country Code"][country] == "NL") {
               obj.dataset = "Netherlands"
             } else if (data["Country Code"][country] == "FR") {
-              obj.dataset = ""
+              obj.dataset = "France"
             } else if (data["Country Code"][country] == "CA") {
-              obj.dataset = ""
+              obj.dataset = "Canada"
             }
             objs.push(obj);
             break;
@@ -294,55 +294,75 @@
         } else if (data["Country Code"][country] == "NL") {
           obj.dataset = "Netherlands"
         } else if (data["Country Code"][country] == "FR") {
-          obj.dataset = ""
+          obj.dataset = "France"
         } else if (data["Country Code"][country] == "CA") {
-          obj.dataset = ""
+          obj.dataset = "Canada"
         }
         objs.push(obj)
       }
 
       
 
-     }
+}
 
    polygonSeries.data = objs;
 </script>
 
 <script>
-  // Create chart instance
-const pieChart = am4core.create("pieChart", am4charts.PieChart);
 
-// Add and configure Series
-var pieSeries = pieChart.series.push(new am4charts.PieSeries());
-pieSeries.dataFields.value = "pieces";
-pieSeries.dataFields.category = "type";
-pieSeries.tooltip.label.interactionsEnabled = true;
-pieSeries.tooltip.keepTargetHover = true;
+am4core.ready(function() {
 
-// Add data
+  // Themes begin
+  am4core.useTheme(am4themes_animated);
+  // Themes end
+  
+  var chart = am4core.create("typeChart", am4charts.XYChart);
+  chart.padding(40, 40, 40, 40);
+  
+  var categoryAxis = chart.yAxes.push(new am4charts.CategoryAxis());
+  categoryAxis.renderer.grid.template.location = 0;
+  categoryAxis.dataFields.category = "type";
+  categoryAxis.renderer.minGridDistance = 1;
+  categoryAxis.renderer.inversed = true;
+  categoryAxis.renderer.grid.template.disabled = true;
 
+  var valueAxis = chart.xAxes.push(new am4charts.ValueAxis());
+  valueAxis.min = 0;
+  
+  var series = chart.series.push(new am4charts.ColumnSeries());
+  series.dataFields.categoryY = "type";
+  series.dataFields.valueX = "pieces";
+  //series.columns.template.hoverOnFocus = true;
+  
+  series.columns.template.strokeOpacity = 0;
+  series.columns.template.column.cornerRadiusBottomRight = 5;
+  series.columns.template.column.cornerRadiusTopRight = 5;
+
+  
+  // as by default columns of the same series are of the same color, we add adapter which takes colors from chart.colors color set
+  series.columns.template.adapter.add("fill", function(fill, target){
+    return chart.colors.getIndex(target.dataItem.index);
+  });
+  categoryAxis.sortBySeries = series;
+
+  // Add data
 const pieData = {{ fcelltype|tojson }};
 const pieObjs = []
 
 for ( let celltype in pieData) {
   let pieObj = {"type": pieData[celltype]._id, "pieces": pieData[celltype].count}
-  pieObjs.push(pieObj)
-  pieSeries.slices.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://0.0.0.0:5000/tasks/table_view?main=%7B%22level2%22%3A+%22{type}%22%7D">Explore</a>';
-
-// https://en.wikipedia.org/wiki/{name.urlEncode()}
+  pieObjs.push(pieObj);
 }
 
-  pieChart.data=pieObjs;
+ chart.data=pieObjs;
+ series.tooltip.label.interactionsEnabled = true;
+ series.tooltip.keepTargetHover = true;
+ series.tooltip.getFillFromObject = false;
+ series.tooltip.background.fill = am4core.color("rgba(110, 166, 157, 0.9)");
+ series.columns.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://147.8.194.29:5000/tasks/table_view?main=%7B%22level2%22%3A+%22{type}%22%7D">Explore</a>';
   
-//  pieChart.data=[
-//  {% for dict_item in fcelltype|tojson %}
-//  {
-//      "type" : {{dict_item._id}},
-//      "pieces" : {{dict_item.count}}
+}); // end am4core.ready()
 
-//  },
-//  {% endfor %}
-//  ];
 
 $(document).ready( function () {
     $('#distro_data').DataTable();
