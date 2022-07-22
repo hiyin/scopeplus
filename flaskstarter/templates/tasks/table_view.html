@@ -171,6 +171,8 @@
 
 </style>
 <script>
+// $.fn.DataTable.ext.pager.numbers_length = 20;
+
 
 $(document).ready(function() {
     $("#globalsearch").hide();
@@ -250,7 +252,9 @@ $(document).ready(function() {
             maxHeight: 450
     });
 
+
     $('#empTable').DataTable({
+                'pagingType' : "input",
                 'processing':true,
                 'language': {
                     'processing': '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>'

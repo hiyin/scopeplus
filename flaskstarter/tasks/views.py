@@ -1032,7 +1032,6 @@ def download_matrix():
     return send_file(tmp_folder + '/matrix.zip', as_attachment=True)
 
 
-
 # http://www.dotnetawesome.com/2015/12/implement-custom-server-side-filtering-jquery-datatables.html
 @login_required
 @tasks.route('/api_db', methods=['GET', 'POST'])
@@ -1052,7 +1051,7 @@ def api_db():
         else:
             search_value = request.form["search[value]"]
 
-        print("draw: %s | row: %s | global search value: %s" % (draw, row, search_value))
+        print("draw: %s | row: %s | page size: %s | page num: %s | global search value: '%s'" % (draw, row, rowperpage, page_no, search_value))
         print("Checking user information")
         print(str(current_user.id))
         store_queryinfo(session)
@@ -1090,31 +1089,54 @@ def api_db():
                     map[search_column] = column_value
         print(map)
         if search_value == '':
-            if len(collection) == 0:
-                ids = [x["_id"] for x in mongo.single_cell_meta_country.find({}, {"_id": 1})]
-                collection.extend(ids)
-                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection[start:end]}})
-                total_records = len(collection)
+            # Pagination algorithm 1
+            # if len(collection) == 0:
+            #     ids = [x["_id"] for x in mongo.single_cell_meta_country.find({}, {"_id": 1})]
+            #     collection.extend(ids)
+            #     tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection[start:end]}})
+            #     total_records = len(collection)
 
-            else:
-                # refresh searchValue's stored ids when clicked "clear"
-                collection_searched.clear()
-                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection[start:end]}})
-                total_records = len(collection)
+            # else:
+            #     # refresh searchValue's stored ids when clicked "clear"
+            #     collection_searched.clear()
+            #     tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection[start:end]}})
+            #     total_records = len(collection)
+
+            # Pagination algorithm 2
+            # Calculate number of documents to skip
+            print("Using Pagination by mongodb skip-limit")
+            skips = rowperpage * (page_no - 1)
+
+            # Skip and limit
+            tmp = mongo.single_cell_meta_country.find().skip(skips).limit(rowperpage)
+            total_records = mongo.command("collstats","single_cell_meta_country")['count']    
 
         else:
             print("global search value provided")
             session["query"] = json.loads(search_value)
             print(session["query"])
-            if len(collection_searched) == 0:
-                ids = [x["_id"] for x in mongo.single_cell_meta_country.find(json.loads(search_value), {"_id": 1})]
-                collection_searched.extend(ids)
-                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
-                total_records = len(collection_searched)
+            # Pagination algorithm 1
+            # print("Using Pagination by mongodb ObjectIndex")
+            # if len(collection_searched) == 0:
+            #     ids = [x["_id"] for x in mongo.single_cell_meta_country.find(json.loads(search_value), {"_id": 1})]
+            #     collection_searched.extend(ids)
+            #     tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
+            #     total_records = len(collection_searched)
 
-            else:
-                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
-                total_records = len(collection_searched)
+            # else:
+            #     tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
+            #     total_records = len(collection_searched)
+
+            # Pagination algorithm 2
+            # Calculate number of documents to skip
+            print("Using Pagination by mongodb skip-limit")
+            skips = rowperpage * (page_no - 1)
+
+            # Skip and limit
+            tmp = mongo.single_cell_meta_country.find(json.loads(search_value)).skip(skips).limit(rowperpage)
+            total_records = mongo.command("collstats","single_cell_meta_country")['count']
+
+ 
 
         if map:
             print("Column-specific (multi) search value provided")
@@ -1145,12 +1167,21 @@ def api_db():
                 print("Saving construct to session query obj")
                 session["query"] = construct
                 print(session["query"])
-                ids = [x["_id"] for x in mongo.single_cell_meta_country.find({"$and": construct}, {"_id": 1})]
-                # Update the last user query by user id. 
-                collection_searched.extend(ids)
-                #collection_searched_query.extend(construct)
-                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
-                total_records = len(collection_searched)
+                # Pagination algorithm 1
+                # ids = [x["_id"] for x in mongo.single_cell_meta_country.find({"$and": construct}, {"_id": 1})]
+                # # Update the last user query by user id. 
+                # collection_searched.extend(ids)
+                # #collection_searched_query.extend(construct)
+                # tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
+                # total_records = len(collection_searched)
+
+                # Pagination algorithm 2
+                # Calculate number of documents to skip
+                skips = rowperpage * (page_no - 1)
+
+                # Skip and limit
+                tmp = mongo.single_cell_meta_country.find({"$and": construct}, {"_id": 1}).skip(skips).limit(rowperpage)
+                total_records = mongo.command("collstats","single_cell_meta_country")['count']
 
             else:
                 tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
@@ -1194,112 +1225,6 @@ def api_db():
 
         return jsonify(response)
 
-
-@tasks.route('/home', methods=['GET', 'POST'])
-@login_required
-def home(condition=''):
-    print('debug...')
-    print('change condition...')
-    print(condition)
-    graphJSON = {}
-
-    if not condition:
-        _all_tasks = covid2k_metaModel.query.all()
-        print(_all_tasks)
-        print('show default')
-
-    else:
-        if isinstance(condition, str):
-            if condition == 'all':
-                _all_tasks = covid2k_metaModel.query.all()
-                print(_all_tasks)
-                writefile('/tmp/flaskstarter-instance/', _all_tasks)
-                print('show all')
-            else:
-                print('show' + condition)
-                # _all_tasks = db.session.execute('SELECT * FROM covid2k_meta WHERE age LIKE 52')
-                _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.age.contains(condition)).all()
-                writefile('/tmp/flaskstarter-instance/', _all_tasks)
-                graphJSON = plot()
-        elif isinstance(condition, list):
-            _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.donor.in_(condition)).all()
-            writefile('/tmp/flaskstarter-instance/', _all_tasks)
-            graphJSON = plot()
-            print('show donors')
-
-
-    print("reload...")
-    print(condition)
-    col_values = get_col_values()
-
-    return render_template('tasks/my_tasks.html',
-                           all_tasks=_all_tasks,
-                           graphJSON=graphJSON,
-                           _active_tasks=True)
-
-def writefile(path, towrite):
-    print('writing data' + path)
-    file = open(path + 'result.csv', 'w+', newline='\n')
-    data = [[task.X] for task in towrite]
-    with file:
-        write = csv.writer(file)
-        write.writerows(data)
-
-
-@tasks.route('/showall',methods=['POST'])
-def showall():
-    return home('all')
-
-
-@tasks.route('/age52',methods=['POST'])
-def age_filter():
-    return home('20')
-
-@tasks.route('/download',methods=['POST'])
-def download():
-    plot()
-    return send_file('/tmp/flaskstarter-instance/result.csv', as_attachment=True)
-
-
-def get_col_values():
-    #_col_values = covid2k_metaModel.query.with_entities(covid2k_metaModel.donor)
-    donors = [c.donor for c in covid2k_metaModel.query.with_entities(covid2k_metaModel.donor).distinct()]
-    print(len(donors))
-    return donors
-
-
-
-@tasks.route('/get_multiselect', methods=['POST'])
-# uses list to store returned condition for my_tasks
-def get_multiselect():
-    selected_vals = request.form.getlist('multiselect')
-    print(request.form)
-    print(selected_vals)
-
-    return home(selected_vals)
-
-
-# to move outside of web app
-def plot():
-    path = '/tmp/flaskstarter-instance/'
-    result = pd.read_csv(path + 'result.csv', header=None)
-    df = pd.read_csv(path + 'cov192kaxis.csv', index_col=0)
-    l = []
-    for i in df.index:
-        for j in result.values:
-            if i == j:
-                print(i)
-                print(df.loc[i].values)
-                l.append(df.loc[i].values)
-    sln = np.stack(l)
-    projections = sln
-    fig = px.scatter(
-        projections, x=0, y=1)
-    fig.update_layout(
-        autosize=False, width=900, height=600
-    )
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    return graphJSON
 
 def get_field(field_name):
     key = mongo.single_cell_meta_country.distinct(field_name)
