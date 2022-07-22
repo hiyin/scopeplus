@@ -339,18 +339,6 @@ $(document).ready(function() {
 });
 
 
-$('select').selectpicker();
-
-  document.getElementById('select').onclick = function () {
-    var selected = [];
-    for (var option of document.getElementById('multiselect').options) {
-      if (option.selected) {
-        selected.push(option.value);
-      }
-    }
-    alert("Successfully selected the following donors for filtering" + selected);
-
-  }
 </script>
 
 <!-- <script>
@@ -364,6 +352,40 @@ $('select').selectpicker();
         document.getElementById('scfform').submit();
 
     });
+
+
+    window.addEventListener('load', function() {
+        console.log('All datatable records loaded');
+        console.log(Date($.now()));
+    });
+
+    $('#empTable').on('preXhr.dt', function ( e, settings, data ) {
+        console.log("Ajax fired");
+        console.log($.now());
+    });
+    
+    $('#empTable').on('page.dt', function() {
+        console.log("Page changed");
+        console.log($.now());
+    });
+
+    var startTime;
+    var endTime;
+    var diff;
+    $('#empTable')
+    .on( 'preDraw', function () {
+        
+        startTime = +new Date();
+        console.log(startTime);
+    } )
+    .on( 'draw.dt', function () {
+        endTime = +new Date();
+        diff = endTime - startTime;
+        console.log( 'Page change took: '+(diff)+'mS' );
+        //console.log($.now());
+    } );
+
+
  </script>
  
 

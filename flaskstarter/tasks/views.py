@@ -1031,6 +1031,32 @@ def download_matrix():
 
     return send_file(tmp_folder + '/matrix.zip', as_attachment=True)
 
+# Constructor for column-filter after multi-select
+def query_builder(map):
+    construct = []
+    re_match = re.compile(r'^\d{1,10}\.?\d{0,10}$')
+    for k in map:
+        if (k in ["meta_age_category", "meta_sample_id2", "meta_dataset", "level2", "meta_severity", "meta_patient_id", "pbmc.Country"]):
+            l = []
+            for ki in map[k]:
+                if re_match.findall(ki):
+                    # if string only contains numbers, we need to convert it to integer to search
+                    # age contains strings and integers, but the front-end will always process them to strings
+                    if ki.isdigit():
+                        l.append(int(ki))
+                    else:
+                        l.append(int(float(ki)))
+                else:
+                    l.append(ki)
+            q = {k: {"$in": l}}
+            print(q)
+            construct.append(q)
+        else:
+            print(map[k])
+
+    print(construct)
+    return construct
+
 
 # http://www.dotnetawesome.com/2015/12/implement-custom-server-side-filtering-jquery-datatables.html
 @login_required
@@ -1087,7 +1113,7 @@ def api_db():
                 else:
                     search_column = "pbmc.Country"
                     map[search_column] = column_value
-        print(map)
+
         if search_value == '':
             # Pagination algorithm 1
             # if len(collection) == 0:
@@ -1134,60 +1160,38 @@ def api_db():
 
             # Skip and limit
             tmp = mongo.single_cell_meta_country.find(json.loads(search_value)).skip(skips).limit(rowperpage)
-            total_records = mongo.command("collstats","single_cell_meta_country")['count']
+            total_records = mongo.single_cell_meta_country.count_documents(json.loads(search_value))
 
  
 
         if map:
             print("Column-specific (multi) search value provided")
-            if len(collection_searched) == 0:
-                print("using search id")
-                construct = []
-                re_match = re.compile(r'^\d{1,10}\.?\d{0,10}$')
-                for k in map:
-                    if (k in ["meta_age_category", "meta_sample_id2","meta_dataset","level2","meta_severity","meta_patient_id","pbmc.Country"]):
-                        l = []
-                        for ki in map[k]:
-                            if re_match.findall(ki):
-                                # if string only contains numbers, we need to convert it to integer to search
-                                # age contains strings and integers, but the front-end will always process them to strings
-                                if ki.isdigit():
-                                    l.append(int(ki))
-                                else:
-                                    l.append(int(float(ki)))
-                            else:
-                                l.append(ki)
-                        q = {k: {"$in": l}}
-                        print(q)
-                        construct.append(q)
-                    else:
-                        print(map[k])
+            construct = query_builder(map)
+            print("Saving construct to session query obj")
+            session["query"] = construct
+            print(session["query"])
+            # Pagination algorithm 1
+            # if len(collection_searched) == 0:
+            #     ids = [x["_id"] for x in mongo.single_cell_meta_country.find({"$and": construct}, {"_id": 1})]
+            #     # Update the last user query by user id. 
+            #     collection_searched.extend(ids)
+            #     #collection_searched_query.extend(construct)
+            #     tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
+            #     total_records = len(collection_searched)
 
-                print(construct)
-                print("Saving construct to session query obj")
-                session["query"] = construct
-                print(session["query"])
-                # Pagination algorithm 1
-                # ids = [x["_id"] for x in mongo.single_cell_meta_country.find({"$and": construct}, {"_id": 1})]
-                # # Update the last user query by user id. 
-                # collection_searched.extend(ids)
-                # #collection_searched_query.extend(construct)
-                # tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
-                # total_records = len(collection_searched)
+            # else:
+            #     tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
+            #     total_records = len(collection_searched)
+            #     # clear search result once new search input is clicked. 
+            #     collection_searched.clear()
+            
+            # Pagination algorithm 2
+            # Calculate number of documents to skip
+            skips = rowperpage * (page_no - 1)
 
-                # Pagination algorithm 2
-                # Calculate number of documents to skip
-                skips = rowperpage * (page_no - 1)
-
-                # Skip and limit
-                tmp = mongo.single_cell_meta_country.find({"$and": construct}, {"_id": 1}).skip(skips).limit(rowperpage)
-                total_records = mongo.command("collstats","single_cell_meta_country")['count']
-
-            else:
-                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
-                total_records = len(collection_searched)
-                # clear search result once new search input is clicked.
-                collection_searched.clear()
+            # Skip and limit
+            tmp = mongo.single_cell_meta_country.find({"$and": construct}).skip(skips).limit(rowperpage)
+            total_records = mongo.single_cell_meta_country.count_documents({"$and": construct}) 
 
         total_records_filter = total_records
         if total_records_filter == 0:
