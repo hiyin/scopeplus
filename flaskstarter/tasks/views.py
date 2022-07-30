@@ -1057,6 +1057,72 @@ def query_builder(map):
     print(construct)
     return construct
 
+# Pagination algorithm by skiplimit return ajax data source and total records for datatable data pagination
+def paginate_skiplimit(page_size, page_no, search_type, search_params):
+    # Calculate number of documents to skip
+    print("Using Pagination by mongodb skip-limit")
+    skips = page_size * (page_no - 1)
+  
+    # search type 1 - no search: by default search value is empty ''
+    if search_type == "default":
+        tmp = mongo.single_cell_meta_country.find().skip(skips).limit(page_size)
+        total_records = mongo.command("collstats","single_cell_meta_country")['count']    
+
+    # search type 2 - global search: search value is mongo raw query 
+    elif search_type == "global":
+        tmp = mongo.single_cell_meta_country.find(json.loads(search_params)).skip(skips).limit(page_size)
+        total_records = mongo.single_cell_meta_country.count_documents(json.loads(search_params))
+    # search type 3 - multi-column filter
+    elif search_type == "column":
+        tmp = mongo.single_cell_meta_country.find({"$and": search_params}).skip(skips).limit(page_size)
+        total_records = mongo.single_cell_meta_country.count_documents({"$and": search_params}) 
+
+    return tmp, total_records
+            
+# Pagination algorithm by ObjectId
+from bson.objectid import ObjectId
+def paginate_lastid(page_size, search_type, search_params, last_id=None):
+        """Function returns `page_size` number of documents after last_id
+        and the new last_id.
+        """
+        if last_id is None:
+            # When it is first page
+            print("When it is 1st page")
+            tmp = mongo.single_cell_meta_country.find().limit(page_size)
+            total_records = mongo.command("collstats","single_cell_meta_country")['count']   
+        else:
+            print("When it is 2nd and from on page")
+             # search type 1 - no search: by default search value is empty ''
+            if search_type == "default":
+                
+                tmp = mongo.single_cell_meta_country.find({'_id': {'$gt': ObjectId(last_id)}}).limit(page_size)
+                total_records = mongo.command("collstats","single_cell_meta_country")['count']    
+
+            # search type 2 - global search: search value is mongo raw query 
+            elif search_type == "global":
+                tmp = mongo.single_cell_meta_country.find(json.loads(search_params), {'_id': {'$gt': ObjectId(last_id)}}).limit(page_size)
+                total_records = mongo.single_cell_meta_country.count_documents(json.loads(search_params))
+            # search type 3 - multi-column filter
+            elif search_type == "column":
+                tmp = mongo.single_cell_meta_country.find({"$and": search_params}, {'_id': {'$gt': ObjectId(last_id)}}).limit(page_size)
+                total_records = mongo.single_cell_meta_country.count_documents({"$and": search_params}) 
+
+        # Get the data      
+        data = [x for x in tmp]
+
+        if not data:
+            # No documents left
+            return None, None
+
+        # Since documents are naturally ordered with _id, last document will
+        # have max id.
+        last_id = data[-1]['_id']
+        print(data[:2])
+        print(last_id)
+        print(total_records)
+
+        # Return data and last_id
+        return data, last_id, total_records           
 
 # http://www.dotnetawesome.com/2015/12/implement-custom-server-side-filtering-jquery-datatables.html
 @login_required
@@ -1130,12 +1196,16 @@ def api_db():
 
             # Pagination algorithm 2
             # Calculate number of documents to skip
-            print("Using Pagination by mongodb skip-limit")
-            skips = rowperpage * (page_no - 1)
+            tmp, total_records = paginate_skiplimit(rowperpage, page_no, "default", search_value) 
 
-            # Skip and limit
-            tmp = mongo.single_cell_meta_country.find().skip(skips).limit(rowperpage)
-            total_records = mongo.command("collstats","single_cell_meta_country")['count']    
+            # print("Using pagination by last_id algorithm")
+            # if page_no == 1:
+            #     tmp, last_id, total_records = paginate_lastid(rowperpage, "default", search_value, last_id=None)
+            #     session["last_id"] = str(last_id)
+            #     print(session["last_id"])
+            # else:    
+            #     tmp, last_id, total_records = paginate_lastid(rowperpage, "default", search_value, session["last_id"])
+            #     session["last_id"] = str(last_id)
 
         else:
             print("global search value provided")
@@ -1156,11 +1226,7 @@ def api_db():
             # Pagination algorithm 2
             # Calculate number of documents to skip
             print("Using Pagination by mongodb skip-limit")
-            skips = rowperpage * (page_no - 1)
-
-            # Skip and limit
-            tmp = mongo.single_cell_meta_country.find(json.loads(search_value)).skip(skips).limit(rowperpage)
-            total_records = mongo.single_cell_meta_country.count_documents(json.loads(search_value))
+            tmp, total_records = paginate_skiplimit(rowperpage, page_no, "global", search_value) 
 
  
 
@@ -1187,11 +1253,10 @@ def api_db():
             
             # Pagination algorithm 2
             # Calculate number of documents to skip
-            skips = rowperpage * (page_no - 1)
-
-            # Skip and limit
-            tmp = mongo.single_cell_meta_country.find({"$and": construct}).skip(skips).limit(rowperpage)
-            total_records = mongo.single_cell_meta_country.count_documents({"$and": construct}) 
+            tmp, total_records = paginate_skiplimit(rowperpage, page_no, "column", construct)
+            
+            checkpoint_time = time.time()
+            print("finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
         total_records_filter = total_records
         if total_records_filter == 0:

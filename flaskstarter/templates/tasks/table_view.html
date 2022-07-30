@@ -352,38 +352,29 @@ $(document).ready(function() {
         document.getElementById('scfform').submit();
 
     });
-
+    var startTime;
+    var endTime;
+    var diff;
 
     window.addEventListener('load', function() {
         console.log('All datatable records loaded');
         console.log(Date($.now()));
     });
 
-    $('#empTable').on('preXhr.dt', function ( e, settings, data ) {
-        console.log("Ajax fired");
-        console.log($.now());
+    $('#empTable').on('page.dt', function () {
+        console.log("Page start change");
+        startTime = new Date();
+        //console.log(startTime);
     });
     
-    $('#empTable').on('page.dt', function() {
-        console.log("Page changed");
-        console.log($.now());
+    $('#empTable').on('draw.dt', function() {
+        console.log("Page finish change");
+        //console.log($.now());
+        endTime = new Date();
+        diff = (endTime - startTime);
+        console.log(diff);
     });
 
-    var startTime;
-    var endTime;
-    var diff;
-    $('#empTable')
-    .on( 'preDraw', function () {
-        
-        startTime = +new Date();
-        console.log(startTime);
-    } )
-    .on( 'draw.dt', function () {
-        endTime = +new Date();
-        diff = endTime - startTime;
-        console.log( 'Page change took: '+(diff)+'mS' );
-        //console.log($.now());
-    } );
 
 
  </script>
