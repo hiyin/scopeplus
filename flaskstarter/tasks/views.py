@@ -353,7 +353,7 @@ def show_scfeature():
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
         df_melt=df_d.melt(id_vars=['meta_dataset','meta_severity'],value_name="propotion",var_name="cell_type")
         #df_melt.to_csv(user_tmp[-1]+"/proportion_melt.tsv", sep="\t")
-        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",
+        fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",template="plotly_white",
         color_discrete_sequence=sns.color_palette("tab20").as_hex())
         fig.update_xaxes(matches=None)
         fig.update_layout(
@@ -543,7 +543,7 @@ def process_boxplot(input_data,cell_type,plot_type="gene",feature=None,title="Ti
     data = data[data["variable"].str.contains(feature) ]
 
     fig = px.box(data,  x="variable", y="value",color="condition",color_discrete_sequence=
-            ['#3D9970','#FF851B','#FF4136'],
+            ['#3D9970','#FF851B','#FF4136'],template="plotly_white",
             category_orders={'condition': ['Healthy','Mild/Moderate','Severe/Critical']},
             )
     fig.update_layout(
@@ -603,7 +603,7 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None,tmp_folder=".")
         #df_plot[gene_color] = df_plot[gene_color].fillna(value=0)
         #fig2 = px.violin(df_plot, y=gene_color, x=cell_color, box=False, points=False)
         #df_plot[gene_color] = np.clip(df_plot[gene_color],np.percentile(df_plot[gene_color], 5),np.percentile(df_plot[gene_color], 95))
-        fig2 = px.box(df_plot, y=gene_color, x=cell_color,color=cell_color,color_discrete_sequence=
+        fig2 = px.box(df_plot, y=gene_color, x=cell_color,color=cell_color,template="plotly_white",color_discrete_sequence=
             ["#F8A19F","#8E321C","#F6222E","#F1CE63","#B6992D","#59A14F","#499894","#4E79A7",
             "#A6AAFE","#5930FB","#500EE2","#7427B9","#931ADD","#A04DB9","#C585AF","#B8418A","#AD0267","#7A325C","#cccccc","#b2b2b2"])
 
@@ -611,7 +611,7 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None,tmp_folder=".")
         autosize=False, width=900, height=600)
         graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
         fig = px.scatter(
-            df_plot, x="umap_0", y="umap_1",color=gene_color,color_continuous_scale="Viridis")
+            df_plot, x="umap_0", y="umap_1",color=gene_color,template="plotly_white",color_continuous_scale="Viridis")
         fig.update_layout(
                 autosize=False, width=900, height=600)
         graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -619,7 +619,7 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None,tmp_folder=".")
 
     else:
         fig = px.scatter(
-            df_plot, x="umap_0", y="umap_1",color=cell_color,color_discrete_sequence=
+            df_plot, x="umap_0", y="umap_1",color=cell_color,template="plotly_white",color_discrete_sequence=
             ["#F8A19F","#8E321C","#F6222E","#F1CE63","#B6992D","#59A14F","#499894","#4E79A7",
             "#A6AAFE","#5930FB","#500EE2","#7427B9","#931ADD","#A04DB9","#C585AF","#B8418A","#AD0267","#7A325C","#cccccc","#b2b2b2"]
             ,color_continuous_scale="Viridis")

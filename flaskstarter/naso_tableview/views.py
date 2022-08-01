@@ -58,7 +58,7 @@ def plot_umap(cell_color='scClassify_prediction'):
     df_plot = df.merge(df_meta, left_index=True, right_index=True)
 
     fig = px.scatter(
-        df_plot, x="umap_0", y="umap_1",color=cell_color)
+        df_plot, x="umap_0", y="umap_1",color=cell_color,template="plotly_white")
     fig.update_layout(
         autosize=False, width=900, height=600
     )
