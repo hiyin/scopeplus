@@ -658,6 +658,7 @@ def download_scClassify():
 
 # here
 @tasks.route('/table_view', methods=['POST', 'GET'])
+@login_required
 def table_view():
     fsampleid = get_field("meta_sample_id2")
     fage = get_field("meta_age_category")

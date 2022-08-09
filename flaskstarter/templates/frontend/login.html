@@ -10,6 +10,9 @@
     <h3>Sign In</h3>
         {{ render_form(url_for('frontend.login'), form)}}
         <a href="{{url_for('frontend.reset_password')}}" class="auth-link">Forgot Password?</a>
+       </br>
+        <p class="mb-4 text-sm mx-auto"> Don't have an account? <a href="{{url_for('frontend.signup')}}" class="text-info text-gradient font-weight-bold">Sign UP</a> </p>
+
   </div>
 </div>
 {% endblock %}
