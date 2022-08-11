@@ -7,6 +7,8 @@
 {% block body %}
 {% include 'layouts/banner.html' %}
 <script src="https://use.fontawesome.com/bbc48b41d3.js"></script>
+<div id="loading",style="display:none;"></div>
+<div id="loadingbox",style="display:none;">Loading</div>
 <div style="margin:20px;padding:20px;">
    <div class="row justify-content-center">
         <h2>Explore scRNA-seq Data</h2>
@@ -147,9 +149,8 @@
     </form> -->
     <button class="btn btn-primary" name="show_plot" type="submit" style="display:inline-block" onclick="window.location.href='{{ url_for( 'tasks.show_plot') }}';"> Show UMAP Plot </button>
 
-
     <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary" name="download_matrix" type="submit"> Download matrix </button>
+      <button class="btn btn-primary" name="download_matrix" type="submit" onclick="loading();"> Download matrix </button>
     </form>
     </div>
 
@@ -167,12 +168,9 @@
     .page-link {
     color: black !important;
     }
-
-
 </style>
 <script>
 // $.fn.DataTable.ext.pager.numbers_length = 20;
-
 
 $(document).ready(function() {
     $("#globalsearch").hide();
@@ -378,6 +376,14 @@ $(document).ready(function() {
 
 
  </script>
+
+<!-- Show loading box -->
+<script type="text/javascript">// <![CDATA[
+    function loading(){
+        $("#loading").show();
+        $("#loadingbox").show();
+    }
+  // ]]></script>
  
 
 {% include 'layouts/citation.html' %}

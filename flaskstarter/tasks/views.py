@@ -3,10 +3,10 @@
 
 from ast import If
 from operator import index
-from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session
+from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session, Response
 from flask_login import login_required, current_user
 from ..extensions import db, mongo,scfeature
-
+import sys
 from flaskstarter.covid2k_meta import covid2k_metaModel
 from flaskstarter.tasks.forms import UmapForm
 from plotly.subplots import make_subplots
@@ -32,7 +32,7 @@ from os.path import exists,basename
 import dash_bio
 from sklearn import preprocessing
 import seaborn as sns
-
+from tqdm import tqdm   
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
@@ -45,7 +45,7 @@ collection_searched = []
 user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
 #user_timestamp = "test"
 user_tmp = [TMP_FOLDER + "/" + user_timestamp]
-print(user_tmp)
+#print(user_tmp)
 os.makedirs(user_tmp[-1])
 
 
@@ -789,23 +789,24 @@ def write_umap(path, towrite):
     return fn
 
 def write_10x_mtx(path,gene_dict,barcode_dict,counts, towrite):
-
-    fn = path + '/matrix.mtx.gz'
-    print('writing matrix.mtx.gz to' + fn)
-
+    fn = path + '/matrix.mtx'
+    print('writing matrix.mtx to' + fn)
     ##text=List of strings to be written to file
-    with gzip.open(fn,'wb') as file:
-        file.write("%%MatrixMarket matrix coordinate real general".encode())
-        file.write('\n'.encode())
-        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(counts)]).encode())
-        file.write('\n'.encode())
-        for line in towrite:
+    with open(fn, 'w') as file:
+        file.write("%%MatrixMarket matrix coordinate real general")
+        file.write('\n')
+        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(counts)]))
+        file.write('\n')
+        for line in tqdm(towrite, total=counts):
             file.write(" ".join([
                 str(gene_dict[line['gene_name']]),
                 str(barcode_dict[line['barcode']]),
                 str(line['expression']),
-            ]).encode())
-            file.write('\n'.encode())
+            ]))
+            file.write('\n')
+
+       
+
 
 def is_same_query(meta_path,collection_searched):
     try:
@@ -920,23 +921,12 @@ def download_matrix():
     os.makedirs(tmp_folder, exist_ok=True)
 
     # No query is search, then we use default use case:
-    if(len(collection_searched)==0):
+    if(len(session["query"])==0):
         #if(not (exists(tmp_folder + '/ids.csv'))):
         return send_file(TMP_FOLDER+'/default/matrix.zip', as_attachment=True)
     else:
-        # If query is presented, remove the result old queries
-        if((exists(tmp_folder + '/meta.tsv'))):
-            flag_same_query = is_same_query(tmp_folder + '/meta.tsv',collection_searched=collection_searched)
-            # Different from the old query
-            if(flag_same_query == False):
-                print("Remove files because the old query is deprecared")
-                remove_files(tmp_folder)
-            else:
-                print("Keep files because the old query is the same")
-        # No old queries
-        else:
-            remove_files(tmp_folder)
-
+        # If query is presented, remove the result old queries regardlessly for secure download
+        remove_files(tmp_folder)
         # meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
         #meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
         #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
@@ -989,11 +979,14 @@ def download_matrix():
         print("query finished --- %s seconds ---" % (time.time() - start_time2))
 
         start_time2 = time.time()
-        #query_counts = mtx.size()
         #mtx = list(mtx)
         #doc_count = mongo.matrix.count_documents({'barcode': {'$in': lookups}})
         # temporary check of length of matrix returned
-        doc_count = 1
+        # doc_count = 1
+        count = list(mongo.single_cell_meta_country.aggregate(pipeline + [{ "$count": "total" }]))
+        print(count)
+        doc_count = count[0]["total"]
+        print(doc_count)
 
         print("list finished --- %s seconds ---" % (time.time() - start_time2))
 
@@ -1016,19 +1009,25 @@ def download_matrix():
             #write_file_byid(tmp_folder, meta)
             # todo: this line will error if try download_mtx in show_plot page after gene is selected. as barcodes are not generated
             dict_barcode = get_dict(tmp_folder + "/ids.csv", sep=",", save_path=tmp_folder + "/barcodes.tsv.gz")
+        
+        # Print start time for writing matrix
+        start_time_wrtie = time.time()
         write_10x_mtx(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
+        print("Write 10x finished --- %s seconds ---" % (time.time() - start_time_wrtie))
 
     if(not (exists(tmp_folder + '/matrix.zip'))):
         list_files = [
-            tmp_folder + '/matrix.mtx.gz',
+            tmp_folder + '/matrix.mtx',
             tmp_folder + '/genes.tsv.gz',
             tmp_folder + '/barcodes.tsv.gz',
             tmp_folder + '/meta.tsv'
         ]
+        checkpoint_time = time.time()
         with zipfile.ZipFile(tmp_folder + '/matrix.zip', 'w') as zipMe:        
             for file in list_files:
                 if(exists(file)):
                     zipMe.write(file,arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
+        print("zipping finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
     return send_file(tmp_folder + '/matrix.zip', as_attachment=True)
 
@@ -1307,3 +1306,4 @@ def get_study_field(field_name):
     key = mongo.pbmc_all_study_meta.distinct(field_name)
     print("%s has %d uniq fields" % (field_name, len(key)))
     return key
+
