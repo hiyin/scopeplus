@@ -149,8 +149,8 @@
     </form> -->
     <button class="btn btn-primary" name="show_plot" type="submit" style="display:inline-block" onclick="window.location.href='{{ url_for( 'tasks.show_plot') }}';"> Show UMAP Plot </button>
 
-    <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary" name="download_matrix" type="submit" onclick="loading();"> Download matrix </button>
+    <form id="downloadForm" action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
+      <button class="btn btn-primary" name="download_matrix" type="submit"> Download matrix </button>
     </form>
     </div>
 
@@ -171,7 +171,10 @@
 </style>
 <script>
 // $.fn.DataTable.ext.pager.numbers_length = 20;
-
+// document.getElementById('downloadForm').onsubmit = function(event){
+//     alert("Please be patient while your file is downloading...");
+//     //continue to process the form
+// } 
 $(document).ready(function() {
     $("#globalsearch").hide();
 
