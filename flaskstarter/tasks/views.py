@@ -4,6 +4,7 @@
 from ast import If
 from operator import index
 from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session, make_response
+import uuid
 from flask_login import login_required, current_user
 from ..extensions import db, mongo,scfeature
 import sys
@@ -68,7 +69,7 @@ def upload_file():
 
     return redirect(url_for('tasks.contribute'))
 
-@login_required
+# @login_required
 @tasks.route('/show_plot', methods=['GET', 'POST'])
 def show_plot():     
 
@@ -94,7 +95,8 @@ def show_plot():
     # Create tmpfolder is not exist
     query_timestamp = session.get("query_timestamp")
     print("Checking user information")
-    user_id = str(current_user.id)
+    # user_id = str(current_user.id)
+    user_id = session["user_id"]
     print(user_id)
     tmp_folder = os.path.join(user_tmp[-1],user_id,query_timestamp)
     os.makedirs(tmp_folder, exist_ok=True)
@@ -658,7 +660,7 @@ def download_scClassify():
 
 # here
 @tasks.route('/table_view', methods=['POST', 'GET'])
-@login_required
+# @login_required
 def table_view():
     fsampleid = get_field("meta_sample_id2")
     fage = get_field("meta_age_category")
@@ -839,6 +841,7 @@ def remove_files(path):
             shutil.os.remove(f)
 
 def store_queryinfo(session,force=True):
+    session.permanent = False
     query_timestamp = session.get("query_timestamp")
     if(force==True):
         print("Pop old query timestamp")
@@ -848,18 +851,20 @@ def store_queryinfo(session,force=True):
         if((query_timestamp==None)):
             user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
             session["query_timestamp"] = user_timestamp
+        
     return session
 
 
 # Download big file
-@login_required
+# @login_required
 @tasks.route('/download_meta',methods=['POST'])
 def download_meta():
     print("Debugging BSON document exceeded error...use query string instead: ")
     #meta = list(mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}}))
     #meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
     user_timestamp = session.get("query_timestamp")
-    user_id = str(current_user.id)
+    user_id = session["user_id"]
+    # user_id = str(current_user.id)
     tmp_folder = os.path.join(user_tmp[-1],user_id,user_timestamp)
     session["tmp_folder"] = tmp_folder
     os.makedirs(tmp_folder, exist_ok=True)
@@ -915,13 +920,13 @@ def download_scfeature():
 #     umap = mongo.umap.find({'id': {'$in': lookups}})
 #     write_umap(user_tmp[-1], umap)
 #     return send_file(user_tmp[-1] + '/umap.csv', as_attachment=True)
-@login_required
+# @login_required
 @tasks.route('/download_matrix',methods=['POST'])
 def download_matrix():
 
     user_timestamp = session.get("query_timestamp")
-    user_id = str(current_user.id)
-
+    user_id = session["user_id"]
+    # user_id = str(current_user.id)
     tmp_folder = os.path.join(user_tmp[-1],user_id,user_timestamp)
     session["tmp_folder"] = tmp_folder
     os.makedirs(tmp_folder, exist_ok=True)
@@ -1136,9 +1141,8 @@ def paginate_lastid(page_size, search_type, search_params, last_id=None):
         return data, last_id, total_records           
 
 # http://www.dotnetawesome.com/2015/12/implement-custom-server-side-filtering-jquery-datatables.html
-@login_required
+# @login_required
 @tasks.route('/api_db', methods=['GET', 'POST'])
-#@login_required
 def api_db():
     data = []
     if request.method == 'POST':
@@ -1156,9 +1160,9 @@ def api_db():
 
         print("draw: %s | row: %s | page size: %s | page num: %s | global search value: '%s'" % (draw, row, rowperpage, page_no, search_value))
         print("Checking user information")
-        print(str(current_user.id))
         store_queryinfo(session)
-        session["user_id"] = str(current_user.id)
+        # session["user_id"] = str(current_user.id)
+        session["user_id"] = shortuuid.uuid()
         print(session["user_id"])
         start = (page_no - 1)*rowperpage
         end = start + rowperpage

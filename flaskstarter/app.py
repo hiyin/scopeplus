@@ -51,6 +51,7 @@ def create_app(config=None, app_name=None, blueprints=None):
                 instance_relative_config=True)
 
     # Add 0627 by junyi
+    # app.config['LOGIN_DISABLED'] = True
     app.config['SECRET_KEY'] = os.urandom(24)
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
