@@ -3,7 +3,7 @@
 
 from ast import If
 from operator import index
-from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session, Response
+from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session, make_response
 from flask_login import login_required, current_user
 from ..extensions import db, mongo,scfeature
 import sys
@@ -788,22 +788,28 @@ def write_umap(path, towrite):
             file.write('\n')
     return fn
 
-def write_10x_mtx(path,gene_dict,barcode_dict,counts, towrite):
+def write_10x_mtx(path,gene_dict, barcode_dict,counts, towrite):
     fn = path + '/matrix.mtx'
     print('writing matrix.mtx to' + fn)
     ##text=List of strings to be written to file
+    counter = 0
     with open(fn, 'w') as file:
         file.write("%%MatrixMarket matrix coordinate real general")
         file.write('\n')
+        # gene_dict length
         file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(counts)]))
         file.write('\n')
-        for line in tqdm(towrite, total=counts):
-            file.write(" ".join([
+        # for line in tqdm(towrite, total=counts):
+        for line in towrite:
+            counter +=1
+            # gene = mongo.genes.find_one({"gene_name":line["gene_name"]},{"gene_id":1, "_id":0})
+            file.write(" ".join([             
                 str(gene_dict[line['gene_name']]),
                 str(barcode_dict[line['barcode']]),
                 str(line['expression']),
             ]))
             file.write('\n')
+    return counter        
 
        
 
@@ -982,10 +988,10 @@ def download_matrix():
         #mtx = list(mtx)
         #doc_count = mongo.matrix.count_documents({'barcode': {'$in': lookups}})
         # temporary check of length of matrix returned
-        # doc_count = 1
-        count = list(mongo.single_cell_meta_country.aggregate(pipeline + [{ "$count": "total" }]))
-        print(count)
-        doc_count = count[0]["total"]
+        doc_count = 1
+        # count = list(mongo.single_cell_meta_country.aggregate(pipeline + [{ "$count": "total" }]))
+        # print(count)
+        # doc_count = count[0]["total"]
         print(doc_count)
 
         print("list finished --- %s seconds ---" % (time.time() - start_time2))
@@ -995,8 +1001,11 @@ def download_matrix():
             # Transfrom the gene/barcode name to the corresponding number
             df_read = pd.read_csv(path, sep=sep, header=header)
             row_num = [i for i in range(1, len(df_read)+1)]
+            #print(row_num)
             row_name = list(df_read.iloc[:, 0].values)
+            #print(row_name)
             result_dict = dict(zip(row_name, row_num))
+            #print(result_dict)
             if(not(save_path is None)):
                 df_read.to_csv(save_path, sep="\t", header=False, index=False, compression='gzip')
             return result_dict
@@ -1012,8 +1021,10 @@ def download_matrix():
         
         # Print start time for writing matrix
         start_time_wrtie = time.time()
-        write_10x_mtx(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
-        print("Write 10x finished --- %s seconds ---" % (time.time() - start_time_wrtie))
+        counter = write_10x_mtx(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
+        print("Write 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))
+        print("lines written: ")
+        print(counter)
 
     if(not (exists(tmp_folder + '/matrix.zip'))):
         list_files = [

@@ -7,8 +7,6 @@
 {% block body %}
 {% include 'layouts/banner.html' %}
 <script src="https://use.fontawesome.com/bbc48b41d3.js"></script>
-<div id="loading",style="display:none;"></div>
-<div id="loadingbox",style="display:none;">Loading</div>
 <div style="margin:20px;padding:20px;">
    <div class="row justify-content-center">
         <h2>Explore scRNA-seq Data</h2>
@@ -149,10 +147,16 @@
     </form> -->
     <button class="btn btn-primary" name="show_plot" type="submit" style="display:inline-block" onclick="window.location.href='{{ url_for( 'tasks.show_plot') }}';"> Show UMAP Plot </button>
 
-    <form id="downloadForm" action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
+    <form class="download" id="downloadForm" action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
       <button class="btn btn-primary" name="download_matrix" type="submit"> Download matrix </button>
     </form>
+
+    <div id="message" style="display: none">
+        <div id="message-screen-mask" class="ui-widget-overlay ui-front"></div>
+        <div id="message-text" class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-front ui-draggable ui-resizable waitmessage">Please wait...</div>
     </div>
+    </div>
+
 
   </div>
 {% endblock %}
@@ -175,7 +179,31 @@
 //     alert("Please be patient while your file is downloading...");
 //     //continue to process the form
 // } 
+
 $(document).ready(function() {
+
+
+
+    
+
+    $(function(){$('.download').click(function() { ShowDownloadMessage(); }); })
+
+    function ShowDownloadMessage()
+    {
+        $('#message-text').text('Your file is downloading. Please wait...');
+        $('#message').show();
+        window.addEventListener('focus', HideDownloadMessage, false);
+    }
+
+    function HideDownloadMessage(){
+        window.removeEventListener('focus', HideDownloadMessage, false);                   
+        $('#message').hide();
+    }
+
+
+
+
+
     $("#globalsearch").hide();
 
     $("#btnAdvance").click(function() {
@@ -376,18 +404,9 @@ $(document).ready(function() {
         console.log(diff);
     });
 
-
+   
 
  </script>
-
-<!-- Show loading box -->
-<script type="text/javascript">// <![CDATA[
-    function loading(){
-        $("#loading").show();
-        $("#loadingbox").show();
-    }
-  // ]]></script>
- 
 
 {% include 'layouts/citation.html' %}
 {% endblock %}
