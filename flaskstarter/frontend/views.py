@@ -79,10 +79,9 @@ df = df.dropna(subset=['Country Code'])
 @frontend.route('/', methods=["GET", "POST"])
 def index():
     data = df.to_dict()
-    print(data)
     fdataset = get_all_study_meta()
     res = get_celltype_count()
-    pprint.pprint(res)
+    #pprint.pprint(res)
     if current_user.is_authenticated:
         return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res)
     return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res)
@@ -118,9 +117,13 @@ def login():
 
     form = LoginForm(login=request.args.get('login', None),
                      next=request.args.get('next', None))
+    print("Debug login")   
+    print(request)                 
 
     if form.validate_on_submit():
         user, authenticated = Users.authenticate(form.login.data, form.password.data)
+        print(request.form)
+        print(request.args)            
 
         if user and authenticated:
 
