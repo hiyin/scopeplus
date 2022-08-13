@@ -155,6 +155,14 @@
         <div id="message-screen-mask" class="ui-widget-overlay ui-front"></div>
         <div id="message-text" class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-front ui-draggable ui-resizable waitmessage">Please wait...</div>
     </div>
+    <p class="thanks" style="display: none ;">
+		<strong style="background-color: yellow ;">
+			Thank you for your download!
+		</strong>
+	</p>
+
+
+
     </div>
 
 
@@ -175,30 +183,64 @@
 </style>
 <script>
 // $.fn.DataTable.ext.pager.numbers_length = 20;
-// document.getElementById('downloadForm').onsubmit = function(event){
-//     alert("Please be patient while your file is downloading...");
-//     //continue to process the form
-// } 
-
 $(document).ready(function() {
-
-
-
-    
-
-    $(function(){$('.download').click(function() { ShowDownloadMessage(); }); })
+    // $(function(){$('.download').click(function() { ShowDownloadMessage(); }); })
 
     function ShowDownloadMessage()
     {
         $('#message-text').text('Your file is downloading. Please wait...');
         $('#message').show();
-        window.addEventListener('focus', HideDownloadMessage, false);
+        // window.addEventListener('focus', HideDownloadMessage, false);
     }
 
     function HideDownloadMessage(){
-        window.removeEventListener('focus', HideDownloadMessage, false);                   
-        $('#message').hide();
+        // window.removeEventListener('focus', HideDownloadMessage, false);
+        $('#message-text').text('Your file completed download!');                   
+        $('#message').show();
     }
+
+    $( '.download' ).click(
+			function( event ) {
+				var target = event.target;
+				// When tracking the download, we're going to have
+				// the server echo back a cookie that will be set
+				// when the download Response has been received.
+				var downloadID = ( new Date() ).getTime();
+				// Update the URL that is *currently being requested*
+				// to contain the downloadID. This will then be response
+				// cookie header.
+				target.href += ( "?downloadID=" + downloadID );
+				// The local cookie cache is defined in the browser
+				// as one large string; we need to search for the
+				// name-value pattern with the above ID.
+				var cookiePattern = new RegExp( ( "downloadID"), "i" );
+				// Now, we need to start watching the local Cookies to
+				// see when the download ID has been updated by the
+				// response headers.
+				var cookieTimer = setInterval( checkCookies, 500 );
+				// I check the local cookies for an update.
+				function checkCookies() {
+					// If the local cookies have been updated, clear
+					// the timer and say thanks!
+                    console.log(document.cookie.search( cookiePattern));
+					if ( document.cookie.search( cookiePattern ) >= 0 ) {
+                        console.log("Find cookie")
+						clearInterval( cookieTimer );
+						$( "p.thanks" ).show();
+                        HideDownloadMessage();
+						return(
+							console.log( "Download complete!!Remove downloadID cookie!" )
+						);
+					}
+                    ShowDownloadMessage();
+					console.log(
+						"File still downloading...",
+						new Date().getTime()
+					);
+				}
+			}
+		);
+
 
 
 

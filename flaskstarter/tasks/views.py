@@ -39,7 +39,6 @@ tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 
 # set in-memory storage for collection of ids for meta data table display
-collection = []
 collection_searched = []
 
 # sub folders to manage different flask instances: not a good place to put, should be in API endpoint?
@@ -93,7 +92,7 @@ def show_plot():
         print("Error loading genes.tsv" )
 
     # Create tmpfolder is not exist
-    query_timestamp = session.get("query_timestamp")
+    query_timestamp = session.get("sess_timestamp")
     print("Checking user information")
     # user_id = str(current_user.id)
     user_id = session["user_id"]
@@ -103,33 +102,15 @@ def show_plot():
     print("Checking collection_searched_query if empty and logged-in user id?")
     print(session["user_id"])
     print(session["query"])
-    # Add a flag to check if the local folder cached the ids
-    # flag_idmissing = 0    
     # Search box is empty
     if(len(session["query"])==0):
-        # No ids.csv file is presented:
-        # if(not (exists(tmp_folder + '/ids.csv'))):
-        #     print("Error finding ids.tsv" )
-        #     # shutil.copy2(TMP_FOLDER+'/default/umap.csv', user_tmp[-1] + '/umap.csv') # complete target filename given
-        #     # shutil.copy2(TMP_FOLDER+'/default/meta.tsv', user_tmp[-1] + '/meta.tsv') # complete target filename given
-        #     # Change to show default case
-        #     flag_idmissing = 1
-
         # ID is presented, no meta data:
         if(not (exists(tmp_folder + '/meta.tsv'))):
-            #f = tmp_folder + "/ids.csv"
-            #_byid = pd.read_csv(f).values.tolist()
-            #lookups = list(np.squeeze(_byid))
-            #meta = mongo.single_cell_meta_country.find({'id': {'$in': lookups}})
             meta = mongo.single_cell_meta_country.find({})
             write_file_meta(tmp_folder, meta)
         
         # If ID is presented, no umap:
         elif(not (exists(tmp_folder + '/umap.csv'))):
-            #f = tmp_folder + "/ids.csv"
-            #_byid = pd.read_csv(f).values.tolist()
-            #lookups = list(np.squeeze(_byid))
-            #umap = mongo.umap.find({'id': {'$in': lookups}})
 
             pipeline = [
                 {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
@@ -145,8 +126,6 @@ def show_plot():
     # If search box not empty, write id meta umap
     else:
         print("Search value provided, write id, meta...")
-        #meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
-
         if isinstance(session["query"], dict):
             print(session["query"])
             meta = mongo.single_cell_meta_country.find(session["query"])
@@ -204,18 +183,9 @@ def show_plot():
                 # Gene table is not cached or the query is differen from the previous
                 if((not exists(tmp_folder + '/'+cell_gene+'.tsv')) or 
                 (flag_same_query == False)):
-
-                    # Lookup from the database
-                    # if(flag_idmissing==0):
-                    #     _byid = pd.read_csv(tmp_folder  + "/ids.csv").values.tolist()
-                    # else:
-                    #     _byid = pd.read_csv(TMP_FOLDER+'/default/ids.csv').values.tolist()
-                        
-                    #lookups = list(np.squeeze(_byid))
                     print("Querying matrix collection...")
                     checkpoint_time = time.time()
                     # use join table - aggregation with matrix table - get gene info
-
                     if isinstance(session["query"], dict):
                         print("Getting instance of dict")
                         pipeline = [
@@ -354,7 +324,6 @@ def show_scfeature():
         df_propotion.to_csv(user_tmp[-1]+"/df_proportion_raw_"+dataset+".csv")
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
         df_melt=df_d.melt(id_vars=['meta_dataset','meta_severity'],value_name="propotion",var_name="cell_type")
-        #df_melt.to_csv(user_tmp[-1]+"/proportion_melt.tsv", sep="\t")
         fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",template="plotly_white",
         color_discrete_sequence=sns.color_palette("tab20").as_hex())
         fig.update_xaxes(matches=None)
@@ -417,7 +386,6 @@ def show_scfeature():
             graphJSON4 = None
         else:
             select_type = cell_type
-            #df_pathway_mean.to_csv(user_tmp[-1]+"/df_test"+select_type+".csv")
             fig4 = process_dendrogram(df_pathway_mean,select_type,plot_type="pathway",title="Pathway mean scores in dataset" + dataset)
             graphJSON4 = json.dumps(fig4, cls=plotly.utils.PlotlyJSONEncoder)
 
@@ -842,15 +810,15 @@ def remove_files(path):
 
 def store_queryinfo(session,force=True):
     session.permanent = False
-    query_timestamp = session.get("query_timestamp")
+    sess_timestamp = session.get("sess_timestamp")
     if(force==True):
-        print("Pop old query timestamp")
-        user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
-        session["query_timestamp"] = user_timestamp
+        print("Pop old session timestamp")
+        new_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
+        session["sess_timestamp"] = new_timestamp
     else:
-        if((query_timestamp==None)):
-            user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
-            session["query_timestamp"] = user_timestamp
+        if((sess_timestamp==None)):
+            new_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
+            session["sess_timestamp"] = new_timestamp
         
     return session
 
@@ -859,10 +827,7 @@ def store_queryinfo(session,force=True):
 # @login_required
 @tasks.route('/download_meta',methods=['POST'])
 def download_meta():
-    print("Debugging BSON document exceeded error...use query string instead: ")
-    #meta = list(mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}}))
-    #meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
-    user_timestamp = session.get("query_timestamp")
+    user_timestamp = session.get("sess_timestamp")
     user_id = session["user_id"]
     # user_id = str(current_user.id)
     tmp_folder = os.path.join(user_tmp[-1],user_id,user_timestamp)
@@ -880,19 +845,11 @@ def download_meta():
     print('writing ids to csv file only once, firstly load the data')
     #write_file_byid(tmp_folder, meta) # ids.csv is used in download_matrix barcode_dict
     write_file_meta(tmp_folder, meta)
-    #return send_file(user_tmp[-1] + '/ids.csv', as_attachment=True)
     return send_file(os.path.join(tmp_folder,'meta.tsv'), as_attachment=True)
 
 # Download big file
 @tasks.route('/download_scfeature',methods=['POST'])
 def download_scfeature():
-
-    
-    # list_files = [
-    #     user_tmp[-1]+"/df_gene_prop_celltype.csv",
-    #     user_tmp[-1]+"/df_pathway_mean.csv",
-    #     user_tmp[-1]+"/df_proportion_raw.csv"
-    # ]
     list_files = glob.glob( user_tmp[-1]+"/*_gene_prop_celltype*.csv")+\
     glob.glob( user_tmp[-1]+"/*_pathway_mean*.csv")+\
     glob.glob( user_tmp[-1]+"/*_proportion_raw*.csv")
@@ -906,25 +863,11 @@ def download_scfeature():
     return send_file(user_tmp[-1] + '/scfeature.zip', as_attachment=True)
 
 
-
-# @tasks.route('/download_umap', methods=['POST'])
-# def download_umap():
-#     f = user_tmp[-1] + "/ids.csv"
-#     if not os.path.isfile(f):
-#         id = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
-#         write_file_byid(user_tmp[-1], id)
-#         print(f)
-
-#     _byid = pd.read_csv(f).values.tolist()
-#     lookups = list(np.squeeze(_byid))
-#     umap = mongo.umap.find({'id': {'$in': lookups}})
-#     write_umap(user_tmp[-1], umap)
-#     return send_file(user_tmp[-1] + '/umap.csv', as_attachment=True)
 # @login_required
 @tasks.route('/download_matrix',methods=['POST'])
 def download_matrix():
 
-    user_timestamp = session.get("query_timestamp")
+    user_timestamp = session.get("sess_timestamp")
     user_id = session["user_id"]
     # user_id = str(current_user.id)
     tmp_folder = os.path.join(user_tmp[-1],user_id,user_timestamp)
@@ -933,14 +876,10 @@ def download_matrix():
 
     # No query is search, then we use default use case:
     if(len(session["query"])==0):
-        #if(not (exists(tmp_folder + '/ids.csv'))):
         return send_file(TMP_FOLDER+'/default/matrix.zip', as_attachment=True)
     else:
         # If query is presented, remove the result old queries regardlessly for secure download
         remove_files(tmp_folder)
-        # meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
-        #meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
-        #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
         if isinstance(session["query"], dict):
             meta = mongo.single_cell_meta_country.find(session["query"]) 
         elif isinstance(session["query"], list):
@@ -949,15 +888,10 @@ def download_matrix():
                 meta = mongo.single_cell_meta_country.find(session["query"][0])
             else:
                 meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
-        #write_file_meta(tmp_folder, meta)
         write_id_meta(tmp_folder, meta)
     # Down load 10x matrix if not exist
     if(not (exists(tmp_folder + '/matrix.mtx.gz'))):
-        # _byid = pd.read_csv(tmp_folder + "/ids.csv").values.tolist()
-        # lookups = list(np.squeeze(_byid))
-        print("debugging")
         start_time2 = time.time()
-        # mtx = mongo.matrix.find({'barcode': {'$in': lookups}})
         if isinstance(session["query"], dict):
             print("Getting instance of dict")
             pipeline = [
@@ -1045,7 +979,10 @@ def download_matrix():
                     zipMe.write(file,arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
         print("zipping finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
-    return send_file(tmp_folder + '/matrix.zip', as_attachment=True)
+    response = make_response(send_file(tmp_folder + '/matrix.zip', as_attachment=True))
+    print("setting cookies")
+    response.set_cookie(key='downloadID', value=user_id,max_age=1)
+    return response
 
 # Constructor for column-filter after multi-select
 def query_builder(map):
@@ -1196,20 +1133,7 @@ def api_db():
                     map[search_column] = column_value
 
         if search_value == '':
-            # Pagination algorithm 1
-            # if len(collection) == 0:
-            #     ids = [x["_id"] for x in mongo.single_cell_meta_country.find({}, {"_id": 1})]
-            #     collection.extend(ids)
-            #     tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection[start:end]}})
-            #     total_records = len(collection)
-
-            # else:
-            #     # refresh searchValue's stored ids when clicked "clear"
-            #     collection_searched.clear()
-            #     tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection[start:end]}})
-            #     total_records = len(collection)
-
-            # Pagination algorithm 2
+            # Pagination algorithm 
             # Calculate number of documents to skip
             tmp, total_records = paginate_skiplimit(rowperpage, page_no, "default", search_value) 
 
@@ -1226,19 +1150,7 @@ def api_db():
             print("global search value provided")
             session["query"] = json.loads(search_value)
             print(session["query"])
-            # Pagination algorithm 1
-            # print("Using Pagination by mongodb ObjectIndex")
-            # if len(collection_searched) == 0:
-            #     ids = [x["_id"] for x in mongo.single_cell_meta_country.find(json.loads(search_value), {"_id": 1})]
-            #     collection_searched.extend(ids)
-            #     tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
-            #     total_records = len(collection_searched)
-
-            # else:
-            #     tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
-            #     total_records = len(collection_searched)
-
-            # Pagination algorithm 2
+            # Pagination algorithm
             # Calculate number of documents to skip
             print("Using Pagination by mongodb skip-limit")
             tmp, total_records = paginate_skiplimit(rowperpage, page_no, "global", search_value) 
@@ -1251,22 +1163,7 @@ def api_db():
             print("Saving construct to session query obj")
             session["query"] = construct
             print(session["query"])
-            # Pagination algorithm 1
-            # if len(collection_searched) == 0:
-            #     ids = [x["_id"] for x in mongo.single_cell_meta_country.find({"$and": construct}, {"_id": 1})]
-            #     # Update the last user query by user id. 
-            #     collection_searched.extend(ids)
-            #     #collection_searched_query.extend(construct)
-            #     tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
-            #     total_records = len(collection_searched)
-
-            # else:
-            #     tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
-            #     total_records = len(collection_searched)
-            #     # clear search result once new search input is clicked. 
-            #     collection_searched.clear()
-            
-            # Pagination algorithm 2
+            # Pagination algorithm
             # Calculate number of documents to skip
             tmp, total_records = paginate_skiplimit(rowperpage, page_no, "column", construct)
             
