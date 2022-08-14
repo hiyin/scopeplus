@@ -348,11 +348,10 @@ body {
     font-family: 'Inter';
     font-style: normal;
     font-weight: 700;
-    font-size: 64px;
-    line-height: 77px;
+    font-size: 46px;
     text-transform: capitalize;
     text-align: left;
-    margin-bottom: 30px;
+    margin-bottom: 20px;
     color: #045547;
 }
 
