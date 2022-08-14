@@ -93,6 +93,10 @@ def index():
 
 #     return render_template('tasks/landing.html', _active_home=True)
 
+@frontend.route('/tutorial', methods=['GET', 'POST'])
+def tutorial():
+    return render_template('frontend/tutorial.html')
+
 @frontend.route('/contact-us', methods=['GET', 'POST'])
 def contact_us():
     form = ContactUsForm()

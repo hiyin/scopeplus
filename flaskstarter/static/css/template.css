@@ -390,6 +390,18 @@ body {
     color: #045547;
 }
 
+.boldauto36 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 36px;
+    line-height: 44px;
+    text-transform: capitalize;
+    text-align: left;
+    margin-bottom: 15px;
+    color: #045547;
+}
+
 .regularH160 {
     font-family: 'Inter';
     font-style: normal;

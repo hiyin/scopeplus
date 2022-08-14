@@ -7,32 +7,37 @@
     <li class="nav-item">
       <a class="nav-link" href="{{ url_for('tasks.table_view') }}">Explore</a>
     </li>
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Insights</a>
-        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownPages">
-          <a class="dropdown-item" href="{{ url_for('tasks.show_plot')}}">Cell type proportion</a>
-          <a class="dropdown-item" href="{{ url_for('tasks.show_plot')}}">Cell type specific gene expression</a>
-          <a class="dropdown-item" href="{{ url_for('tasks.show_plot')}}">Cell type specific pathway expression</a>
-        </div>
+    <li class="nav-item dropdown" hidden>
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPages" data-toggle="dropdown" aria-haspopup="true"
+        aria-expanded="false">Insights</a>
+      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownPages">
+        <a class="dropdown-item" href="{{ url_for('tasks.show_plot')}}">Cell type proportion</a>
+        <a class="dropdown-item" href="{{ url_for('tasks.show_plot')}}">Cell type specific gene expression</a>
+        <a class="dropdown-item" href="{{ url_for('tasks.show_plot')}}">Cell type specific pathway expression</a>
+      </div>
     </li>
     <li class="nav-item">
       <a class="nav-link" href="{{ url_for('tasks.contribute') }}">Contribute</a>
     </li>
     <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('frontend.tutorial') }}">Tutorial</a>
+    </li>
+    <li class="nav-item">
       <a class="nav-link" href="{{ url_for('frontend.contact_us') }}">Contact Us</a>
     </li>
     <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">{{current_user.name}}</a>
-        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownPages">
-          {% if current_user.is_admin() %}
-          <a class="dropdown-item" href="/admin/">View Dashboard</a>
-          <hr>
-          {% endif %}
-          <a class="dropdown-item" href="{{ url_for('settings.profile') }}">Update Profile</a>
-          <a class="dropdown-item" href="{{ url_for('settings.password') }}">Change Password</a>
-          <hr>
-          <a class="dropdown-item" href="{{ url_for('frontend.logout') }}">Logout</a>
-        </div>
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPages" data-toggle="dropdown" aria-haspopup="true"
+        aria-expanded="false">{{current_user.name}}</a>
+      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownPages">
+        {% if current_user.is_admin() %}
+        <a class="dropdown-item" href="/admin/">View Dashboard</a>
+        <hr>
+        {% endif %}
+        <a class="dropdown-item" href="{{ url_for('settings.profile') }}">Update Profile</a>
+        <a class="dropdown-item" href="{{ url_for('settings.password') }}">Change Password</a>
+        <hr>
+        <a class="dropdown-item" href="{{ url_for('frontend.logout') }}">Logout</a>
+      </div>
     </li>
   </ul>
 </div>
@@ -46,13 +51,17 @@
     <li class="nav-item">
       <a class="nav-link" href="{{ url_for('tasks.table_view') }}">Explore</a>
     </li>
-    <li class="nav-item dropdown">
-      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPages" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Insights</a>
-        <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownPages">
-          <a class="dropdown-item" href="{{ url_for('tasks.show_plot')}}">Cell type proportion</a>
-          <a class="dropdown-item" href="{{ url_for('tasks.show_plot')}}">Cell type specific gene expression</a>
-          <a class="dropdown-item" href="{{ url_for('tasks.show_plot')}}">Cell type specific pathway expression</a>
-        </div>
+    <li class="nav-item dropdown" hidden>
+      <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownPages" data-toggle="dropdown" aria-haspopup="true"
+        aria-expanded="false">Insights</a>
+      <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownPages">
+        <a class="dropdown-item" href="{{ url_for('tasks.show_plot')}}">Cell type proportion</a>
+        <a class="dropdown-item" href="{{ url_for('tasks.show_plot')}}">Cell type specific gene expression</a>
+        <a class="dropdown-item" href="{{ url_for('tasks.show_plot')}}">Cell type specific pathway expression</a>
+      </div>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="{{ url_for('frontend.tutorial') }}">Tutorial</a>
     </li>
     <li class="nav-item">
       <a class="nav-link" href="{{ url_for('frontend.contact_us') }}">Contact Us</a>
