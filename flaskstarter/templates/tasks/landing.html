@@ -5,27 +5,46 @@
 <div class="container">
   <div class="row">
     <div class="col-8">
-      <div id="map" style="height: 50vh"></div>
+      <div id="map" style="height: 45vh"></div>
     </div>
-    <div class="col-4 p-5">
-      <div class="intro-h">Dataset Distribution</div>
+    <div class="col-4">
+      <div class="boldauto64">Dataset Distribution</div>
+      <div class="regularH160">Our dataset covers data of Single-Cell Immunology Of SARS-CoV-2 Infection from China,
+        Europe, America and ... You may click the region on the map to check the data.</div>
+      <div class="d-flex">
+        <a class="exploreButton" href="{{ url_for('tasks.table_view') }}">
+          <div class="mediumauto22">Explore dataset</div>
+        </a>
+      </div>
     </div>
+  </div>
 
+</div>
+
+<div class="section01" style="padding-top: 120px;">
+  <div class="container">
+    <div class="row">
+      <div class="col-4" style="padding-top: 50px;">
+        <div class="boldauto64">Cell Type Distribution</div>
+        <div class="regularH160">We have gathered data of multivarious cell types, including CD4 T, CD14 Mono, Nk, etc.
+          You may explore more and generate scFeature/ UMAP graph on our insight page.</div>
+        <div class="d-flex">
+          <a class="exploreButton" href="{{ url_for('tasks.table_view') }}">
+            <div class="mediumauto22">Explore dataset</div>
+          </a>
+        </div>
+      </div>
+      <div class="col-8">
+        <div id="typeChart" style="height: 70vh"></div>
+      </div>
+    </div>
   </div>
 </div>
 
-<div class="section01" style="padding: 100">
+<div class="section02" style="padding-bottom: 0px;">
   <div class="container">
     <div class="row justify-content-center">
-      <div class="intro-h">Cell Type Distribution</div>
-      <div id="typeChart" style="width: 100vw; height: 100vh"></div>
-    </div>
-  </div>
-</div>
-
-<div class="section02">
-  <div class="container">
-    <div class="row justify-content-center">
+      <div class="boldauto64" style="padding-bottom: 40px;">scRNA-seq dataset</div>
       <table id="distro_data" class="table table-striped">
         <thead>
           <tr>
@@ -202,7 +221,10 @@
   polygonSeries.tooltip.label.interactionsEnabled = true;
   polygonSeries.tooltip.keepTargetHover = true;
   polygonSeries.tooltip.getFillFromObject = false;
-  polygonSeries.tooltip.background.fill = am4core.color("rgba(110, 166, 157, 0.9)");
+  polygonSeries.tooltip.background.fill = am4core.color("#ffffff");
+  // polygonSeries.tooltip.background.stroke = am4core.color("#045547");
+  polygonSeries.tooltip.autoTextColor = false;
+  polygonSeries.tooltip.label.fill = am4core.color("#045547");
 
   // heatRules
   polygonSeries.heatRules.push({
@@ -332,9 +354,10 @@
   series.tooltip.label.interactionsEnabled = true;
   series.tooltip.keepTargetHover = true;
   series.tooltip.getFillFromObject = false;
-  series.tooltip.background.fill = am4core.color("rgba(110, 166, 157, 0.9)");
+  series.tooltip.background.fill = am4core.color("#FFFFFF");
   series.columns.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://147.8.194.29:5000/tasks/table_view?main=%7B%22level2%22%3A+%22{type}%22%7D">Explore</a>';
-  
+  series.tooltip.autoTextColor = false;
+  series.tooltip.label.fill = am4core.color("#045547");
 }); // end am4core.ready()
 
 

@@ -1,4 +1,11 @@
 /*layout*/
+
+.container {
+    max-width: 1920px;
+    padding-left: 150px;
+    padding-right: 150px;
+}
+
 #navbarResponsive {
     padding-top: 45px;
 }
@@ -345,14 +352,16 @@ body {
 }
 
 .intro-h {
-    font-family: 'Inter';
+    font-family: Roboto;
     font-style: normal;
-    font-weight: 700;
-    font-size: 46px;
-    text-transform: capitalize;
-    text-align: left;
-    margin-bottom: 20px;
-    color: #045547;
+    font-weight: normal;
+    font-size: 22px;
+    line-height: 170%;
+    text-align: center;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: #757779;
+    margin-bottom: 30px;
 }
 
 .intro-c {
@@ -367,6 +376,54 @@ body {
     padding-left: 10%;
     padding-right: 10%;
     margin-bottom: 100px;
+}
+
+.boldauto64 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 48px;
+    line-height: 58px;
+    text-transform: capitalize;
+    text-align: left;
+    margin-bottom: 15px;
+    color: #045547;
+}
+
+.regularH160 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 160%;
+    color: #000000;
+}
+
+.exploreButton {
+    width: 197px;
+    height: 50px;
+    background: #045547;
+    box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
+    border-radius: 8px;
+    -webkit-appearance: button;
+    -moz-appearance: button;
+    appearance: button;
+    text-decoration: none;
+    text-align: center;
+    margin-top: 20px;
+    vertical-align: middle;
+    padding-top: 11.5px;
+}
+
+.mediumauto22 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 27px;
+    text-indent: 0.166506px;
+    color: #FFFFFF;
+    vertical-align: middle;
 }
 
 .intro-tb td {
