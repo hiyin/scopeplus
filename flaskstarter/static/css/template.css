@@ -345,16 +345,15 @@ body {
 }
 
 .intro-h {
-    font-family: Roboto;
+    font-family: 'Inter';
     font-style: normal;
-    font-weight: normal;
-    font-size: 22px;
-    line-height: 170%;
-    text-align: center;
-    letter-spacing: 0.22em;
-    text-transform: uppercase;
-    color: #757779;
+    font-weight: 700;
+    font-size: 64px;
+    line-height: 77px;
+    text-transform: capitalize;
+    text-align: left;
     margin-bottom: 30px;
+    color: #045547;
 }
 
 .intro-c {
@@ -539,18 +538,25 @@ body {
     left: 50%;
     z-index: 999999;
     transform: translate(-50%, -50%);
-    border: 16px solid #f3f3f3; /* Light grey */
-    border-top: 16px solid #037966; /* Blue */    
+    border: 16px solid #f3f3f3;
+    /* Light grey */
+    border-top: 16px solid #037966;
+    /* Blue */
     border-radius: 50%;
     width: 120px;
     height: 120px;
     animation: spin 2s linear infinite;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
 
 #loadingbox {
     display: none;
@@ -562,7 +568,7 @@ body {
     background: #ffffffEE;
     width: 220px;
     height: 200px;
-    border-radius: 5%;    
+    border-radius: 5%;
     text-align: center;
     font-family: 'Inter';
     font-style: normal;

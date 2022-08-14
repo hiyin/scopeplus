@@ -3,51 +3,66 @@
 'layouts/banner.html' %}
 
 <div class="container">
-  <div class="row justify-content-center">
-    <div class="intro-h">Dataset Distribution</div>
-    <div id="map" style="width: 100vw; height: 100vh"></div>
-
-    <div class="intro-h" style="padding-top: 100px">Cell Type Distribution</div>
-    <div id="typeChart" style="width: 100vw; height: 100vh"></div>
-
-    <table id="distro_data" class="table table-striped">
-      <thead>
-        <tr>
-          <th>Id</th>
-          <th>Dataset</th>
-          <th>Tissue</th>
-          <th>Protocol</th>
-          <th>Technology</th>
-          <th>Number of samples</th>
-          <th>Number of cells</th>
-          <th>Country</th>
-          <th>Published_Date</th>
-          <th>Journal</th>
-          <th>Link</th>
-        </tr>
-      </thead>
-      <tbody>
-      {% for item in fdataset %}
-      <tr>
-        <td>{{item.id}}</td>
-        <td>{{item.meta_dataset}}</td>
-        <td>{{item.meta_tissue}}</td>
-        <td>{{item.meta_protocol}}</td>
-        <td>{{item.meta_technology}}</td>
-        <td>{{item.number_of_samples}}</td>
-        <td>{{item.number_of_cells}}</td>
-        <td>{{item.Country}}</td>
-        <td>{{item.Published_Date}}</td>
-        <td>{{item.Journal}}</td>
-        <td><a href='{{url_for("tasks.table_view", main={"meta_dataset": item.meta_dataset}|tojson)}}'>Link</a></td></tr>
-
-      {% endfor %}
-      </tbody>
-    </table>  
+  <div class="row">
+    <div class="col-8">
+      <div id="map" style="height: 50vh"></div>
+    </div>
+    <div class="col-4 p-5">
+      <div class="intro-h">Dataset Distribution</div>
+    </div>
 
   </div>
 </div>
 
+<div class="section01" style="padding: 100">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="intro-h">Cell Type Distribution</div>
+      <div id="typeChart" style="width: 100vw; height: 100vh"></div>
+    </div>
+  </div>
+</div>
+
+<div class="section02">
+  <div class="container">
+    <div class="row justify-content-center">
+      <table id="distro_data" class="table table-striped">
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Dataset</th>
+            <th>Tissue</th>
+            <th>Protocol</th>
+            <th>Technology</th>
+            <th>Number of samples</th>
+            <th>Number of cells</th>
+            <th>Country</th>
+            <th>Published_Date</th>
+            <th>Journal</th>
+            <th>Link</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for item in fdataset %}
+          <tr>
+            <td>{{item.id}}</td>
+            <td>{{item.meta_dataset}}</td>
+            <td>{{item.meta_tissue}}</td>
+            <td>{{item.meta_protocol}}</td>
+            <td>{{item.meta_technology}}</td>
+            <td>{{item.number_of_samples}}</td>
+            <td>{{item.number_of_cells}}</td>
+            <td>{{item.Country}}</td>
+            <td>{{item.Published_Date}}</td>
+            <td>{{item.Journal}}</td>
+            <td><a href='{{url_for("tasks.table_view", main={"meta_dataset": item.meta_dataset}|tojson)}}'>Link</a></td>
+          </tr>
+
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 
@@ -66,27 +81,15 @@
       <table class="intro-tb">
         <tr>
           <td>
-            <img
-              src="{{url_for('static', filename='newspaper.png')}}"
-              width="140"
-              height="140"
-            />
+            <img src="{{url_for('static', filename='newspaper.png')}}" width="140" height="140" />
           </td>
           <td></td>
           <td>
-            <img
-              src="{{url_for('static', filename='explore.png')}}"
-              width="140"
-              height="140"
-            />
+            <img src="{{url_for('static', filename='explore.png')}}" width="140" height="140" />
           </td>
           <td></td>
           <td>
-            <img
-              src="{{url_for('static', filename='folder.png')}}"
-              width="140"
-              height="140"
-            />
+            <img src="{{url_for('static', filename='folder.png')}}" width="140" height="140" />
           </td>
         </tr>
         <tr>
@@ -107,7 +110,7 @@
   </div>
 </div>
 
-<div class="section02">
+<div class="section02" hidden>
   <div class="container flex-column">
     <div class="intro-h">D²4H Single-cell Data Share Life Cycle</div>
     <div class="intro-c">
@@ -119,39 +122,19 @@
       <table class="intro-tb">
         <tr>
           <td>
-            <img
-              src="{{url_for('static', filename='folder-3.png')}}"
-              width="140"
-              height="140"
-            />
+            <img src="{{url_for('static', filename='folder-3.png')}}" width="140" height="140" />
           </td>
           <td>
-            <img
-              src="{{url_for('static', filename='Pointer.png')}}"
-              width="95"
-              height="95"
-            />
+            <img src="{{url_for('static', filename='Pointer.png')}}" width="95" height="95" />
           </td>
           <td>
-            <img
-              src="{{url_for('static', filename='microscope.png')}}"
-              width="140"
-              height="140"
-            />
+            <img src="{{url_for('static', filename='microscope.png')}}" width="140" height="140" />
           </td>
           <td>
-            <img
-              src="{{url_for('static', filename='Pointer.png')}}"
-              width="95"
-              height="95"
-            />
+            <img src="{{url_for('static', filename='Pointer.png')}}" width="95" height="95" />
           </td>
           <td>
-            <img
-              src="{{url_for('static', filename='folder-2.png')}}"
-              width="140"
-              height="140"
-            />
+            <img src="{{url_for('static', filename='folder-2.png')}}" width="140" height="140" />
           </td>
         </tr>
         <tr>
@@ -181,192 +164,183 @@
 
 <script>
 
-   // Create map instance
-   const chart = am4core.create("map", am4maps.MapChart);
+  // Create map instance
+  const chart = am4core.create("map", am4maps.MapChart);
 
-   // Set map definition
-   chart.geodata = am4geodata_worldLow;
+  // Set map definition
+  chart.geodata = am4geodata_worldLow;
 
-   // Set projection
-   chart.projection = new am4maps.projections.Miller();
+  // Set projection
+  chart.projection = new am4maps.projections.Miller();
 
-   chart.deltaLongitude = -160;
+  chart.deltaLongitude = -160;
 
-   const title = chart.titles.create();
+  // Create map polygon series
+  const polygonSeries = chart.series.push(new am4maps.MapPolygonSeries());
 
-   title.text = "Dataset distribution by Region";
-   title.fontFamily = "Inter";
-   title.fontSize = 25;
-   title.fill = am4core.color("#275950");
-   title.align = "left";
-   title.paddingTop = 40;
-   title.paddingLeft = 30;
+  // Exclude Antartica
+  polygonSeries.exclude = ["AQ"];
 
-   // Create map polygon series
-   const polygonSeries = chart.series.push(new am4maps.MapPolygonSeries());
+  // Make map load polygon (like country names) data from GeoJSON
+  polygonSeries.useGeodata = true;
 
-   // Exclude Antartica
-   polygonSeries.exclude = ["AQ"];
-
-   // Make map load polygon (like country names) data from GeoJSON
-   polygonSeries.useGeodata = true;
-
-   // Configure series
-   const polygonTemplate = polygonSeries.mapPolygons.template;
-   // %22 is "", %5D is ] %5B is [
-   polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="http://147.8.194.29:5000/tasks/table_view?main=%7B%22pbmc.Country%22%3A+%7B%22$in%22%3A+%5B%22{dataset}%22%5D%7D%7D">Explore</a>';
-   polygonTemplate.fill = am4core.color("rgba(110, 166, 157, 0.5)");
-   //polygonTemplate.tooltipText = '<b>{name}: {value}</b>';
+  // Configure series
+  const polygonTemplate = polygonSeries.mapPolygons.template;
+  // %22 is "", %5D is ] %5B is [
+  polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="http://147.8.194.29:5000/tasks/table_view?main=%7B%22pbmc.Country%22%3A+%7B%22$in%22%3A+%5B%22{dataset}%22%5D%7D%7D">Explore</a>';
+  polygonTemplate.fill = am4core.color("rgba(110, 166, 157, 0.5)");
+  //polygonTemplate.tooltipText = '<b>{name}: {value}</b>';
 
 
-   // Create hover state and set alternative fill color
-   const hs = polygonTemplate.states.create("hover");
-   hs.properties.fill = am4core.color("#489587");
+  // Create hover state and set alternative fill color
+  const hs = polygonTemplate.states.create("hover");
+  hs.properties.fill = am4core.color("#489587");
 
-   // Set up tooltips
-   polygonSeries.calculateVisualCenter = true;
-   polygonTemplate.tooltipPosition = "fixed";
-   polygonSeries.tooltip.label.interactionsEnabled = true;
-   polygonSeries.tooltip.keepTargetHover = true;
-   polygonSeries.tooltip.getFillFromObject = false;
-   polygonSeries.tooltip.background.fill = am4core.color("rgba(110, 166, 157, 0.9)");
+  // Set up tooltips
+  polygonSeries.calculateVisualCenter = true;
+  polygonTemplate.tooltipPosition = "fixed";
+  polygonSeries.tooltip.label.interactionsEnabled = true;
+  polygonSeries.tooltip.keepTargetHover = true;
+  polygonSeries.tooltip.getFillFromObject = false;
+  polygonSeries.tooltip.background.fill = am4core.color("rgba(110, 166, 157, 0.9)");
 
-   // heatRules
-   polygonSeries.heatRules.push({
-     "target": polygonSeries.mapPolygons.template,
-     "property": "fill",
-     "min": am4core.color("#1CC5DC"),
-     "max": am4core.color("#AA2EE6"),
-     "dataField": "value",
-   });
+  // heatRules
+  polygonSeries.heatRules.push({
+    "target": polygonSeries.mapPolygons.template,
+    "property": "fill",
+    "min": am4core.color("#1CC5DC"),
+    "max": am4core.color("#AA2EE6"),
+    "dataField": "value",
+  });
 
-   // value
-     const data = {{ data|tojson }}
-     const objs = []
+  // value
+  const data = {{ data| tojson }}
+  const objs = []
 
-for ( let country in data["Country Code"]) {
-       let obj = {id: data["Country Code"][country], value: 1, dataset: ""};
-       if (objs.length > 0) {
-        for (let j = 0; j < objs.length; j++) {
-          if (objs[j].id == obj.id) {
-            let k = objs[j].value;
-            objs[j].value = k + 1;
-            break;
-          } else if (j == objs.length - 1) {
-            console.log(data["Country Code"][country])
-            if (data["Country Code"][country] == "US") {
-              obj.dataset = "US"
-            } else if (data["Country Code"][country] == "GB") {
-              obj.dataset = "UK"
-            } else if (data["Country Code"][country] == "DE") {
-              obj.dataset = "Germany"
-            } else if (data["Country Code"][country] == "IL") {
-              obj.dataset = "Israel"
-            } else if (data["Country Code"][country] == "KR") {
-              obj.dataset = "South Korea"
-            } else if (data["Country Code"][country] == "CN") {
-              obj.dataset = "China"
-            } else if (data["Country Code"][country] == "NL") {
-              obj.dataset = "Netherlands"
-            } else if (data["Country Code"][country] == "FR") {
-              obj.dataset = "France"
-            } else if (data["Country Code"][country] == "CA") {
-              obj.dataset = "Canada"
-            }
-            objs.push(obj);
-            break;
+  for (let country in data["Country Code"]) {
+    let obj = { id: data["Country Code"][country], value: 1, dataset: "" };
+    if (objs.length > 0) {
+      for (let j = 0; j < objs.length; j++) {
+        if (objs[j].id == obj.id) {
+          let k = objs[j].value;
+          objs[j].value = k + 1;
+          break;
+        } else if (j == objs.length - 1) {
+          console.log(data["Country Code"][country])
+          if (data["Country Code"][country] == "US") {
+            obj.dataset = "US"
+          } else if (data["Country Code"][country] == "GB") {
+            obj.dataset = "UK"
+          } else if (data["Country Code"][country] == "DE") {
+            obj.dataset = "Germany"
+          } else if (data["Country Code"][country] == "IL") {
+            obj.dataset = "Israel"
+          } else if (data["Country Code"][country] == "KR") {
+            obj.dataset = "South Korea"
+          } else if (data["Country Code"][country] == "CN") {
+            obj.dataset = "China"
+          } else if (data["Country Code"][country] == "NL") {
+            obj.dataset = "Netherlands"
+          } else if (data["Country Code"][country] == "FR") {
+            obj.dataset = "France"
+          } else if (data["Country Code"][country] == "CA") {
+            obj.dataset = "Canada"
           }
+          objs.push(obj);
+          break;
         }
-      } else {
-        console.log(data["Country Code"][country])
-        if (data["Country Code"][country] == "US") {
-          obj.dataset = "US"
-        } else if (data["Country Code"][country] == "GB") {
-          obj.dataset = "UK"
-        } else if (data["Country Code"][country] == "DE") {
-          obj.dataset = "Germany"
-        } else if (data["Country Code"][country] == "IL") {
-          obj.dataset = "Israel"
-        } else if (data["Country Code"][country] == "KR") {
-          obj.dataset = "South Korea"
-        } else if (data["Country Code"][country] == "CN") {
-          obj.dataset = "China"
-        } else if (data["Country Code"][country] == "NL") {
-          obj.dataset = "Netherlands"
-        } else if (data["Country Code"][country] == "FR") {
-          obj.dataset = "France"
-        } else if (data["Country Code"][country] == "CA") {
-          obj.dataset = "Canada"
-        }
-        objs.push(obj)
       }
+    } else {
+      console.log(data["Country Code"][country])
+      if (data["Country Code"][country] == "US") {
+        obj.dataset = "US"
+      } else if (data["Country Code"][country] == "GB") {
+        obj.dataset = "UK"
+      } else if (data["Country Code"][country] == "DE") {
+        obj.dataset = "Germany"
+      } else if (data["Country Code"][country] == "IL") {
+        obj.dataset = "Israel"
+      } else if (data["Country Code"][country] == "KR") {
+        obj.dataset = "South Korea"
+      } else if (data["Country Code"][country] == "CN") {
+        obj.dataset = "China"
+      } else if (data["Country Code"][country] == "NL") {
+        obj.dataset = "Netherlands"
+      } else if (data["Country Code"][country] == "FR") {
+        obj.dataset = "France"
+      } else if (data["Country Code"][country] == "CA") {
+        obj.dataset = "Canada"
+      }
+      objs.push(obj)
+    }
 
-      
 
-}
 
-   polygonSeries.data = objs;
+  }
+
+  polygonSeries.data = objs;
 </script>
 
 <script>
 
-am4core.ready(function() {
+  am4core.ready(function () {
 
-  // Themes begin
-  am4core.useTheme(am4themes_animated);
-  // Themes end
-  
-  var chart = am4core.create("typeChart", am4charts.XYChart);
-  chart.padding(40, 40, 40, 40);
-  
-  var categoryAxis = chart.yAxes.push(new am4charts.CategoryAxis());
-  categoryAxis.renderer.grid.template.location = 0;
-  categoryAxis.dataFields.category = "type";
-  categoryAxis.renderer.minGridDistance = 1;
-  categoryAxis.renderer.inversed = true;
-  categoryAxis.renderer.grid.template.disabled = true;
+    // Themes begin
+    am4core.useTheme(am4themes_animated);
+    // Themes end
 
-  var valueAxis = chart.xAxes.push(new am4charts.ValueAxis());
-  valueAxis.min = 0;
-  
-  var series = chart.series.push(new am4charts.ColumnSeries());
-  series.dataFields.categoryY = "type";
-  series.dataFields.valueX = "pieces";
-  //series.columns.template.hoverOnFocus = true;
-  
-  series.columns.template.strokeOpacity = 0;
-  series.columns.template.column.cornerRadiusBottomRight = 5;
-  series.columns.template.column.cornerRadiusTopRight = 5;
+    var chart = am4core.create("typeChart", am4charts.XYChart);
+    chart.padding(40, 40, 40, 40);
 
-  
-  // as by default columns of the same series are of the same color, we add adapter which takes colors from chart.colors color set
-  series.columns.template.adapter.add("fill", function(fill, target){
-    return chart.colors.getIndex(target.dataItem.index);
-  });
-  categoryAxis.sortBySeries = series;
+    var categoryAxis = chart.yAxes.push(new am4charts.CategoryAxis());
+    categoryAxis.renderer.grid.template.location = 0;
+    categoryAxis.dataFields.category = "type";
+    categoryAxis.renderer.minGridDistance = 1;
+    categoryAxis.renderer.inversed = true;
+    categoryAxis.renderer.grid.template.disabled = true;
 
-  // Add data
-const pieData = {{ fcelltype|tojson }};
-const pieObjs = []
+    var valueAxis = chart.xAxes.push(new am4charts.ValueAxis());
+    valueAxis.min = 0;
 
-for ( let celltype in pieData) {
-  let pieObj = {"type": pieData[celltype]._id, "pieces": pieData[celltype].count}
-  pieObjs.push(pieObj);
-}
+    var series = chart.series.push(new am4charts.ColumnSeries());
+    series.dataFields.categoryY = "type";
+    series.dataFields.valueX = "pieces";
+    //series.columns.template.hoverOnFocus = true;
 
- chart.data=pieObjs;
- series.tooltip.label.interactionsEnabled = true;
- series.tooltip.keepTargetHover = true;
- series.tooltip.getFillFromObject = false;
- series.tooltip.background.fill = am4core.color("rgba(110, 166, 157, 0.9)");
- series.columns.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://147.8.194.29:5000/tasks/table_view?main=%7B%22level2%22%3A+%22{type}%22%7D">Explore</a>';
+    series.columns.template.strokeOpacity = 0;
+    series.columns.template.column.cornerRadiusBottomRight = 5;
+    series.columns.template.column.cornerRadiusTopRight = 5;
+
+
+    // as by default columns of the same series are of the same color, we add adapter which takes colors from chart.colors color set
+    series.columns.template.adapter.add("fill", function (fill, target) {
+      return chart.colors.getIndex(target.dataItem.index);
+    });
+    categoryAxis.sortBySeries = series;
+
+    // Add data
+    const pieData = {{ fcelltype| tojson
+  }};
+  const pieObjs = []
+
+  for (let celltype in pieData) {
+    let pieObj = { "type": pieData[celltype]._id, "pieces": pieData[celltype].count }
+    pieObjs.push(pieObj);
+  }
+
+  chart.data = pieObjs;
+  series.tooltip.label.interactionsEnabled = true;
+  series.tooltip.keepTargetHover = true;
+  series.tooltip.getFillFromObject = false;
+  series.tooltip.background.fill = am4core.color("rgba(110, 166, 157, 0.9)");
+  series.columns.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://147.8.194.29:5000/tasks/table_view?main=%7B%22level2%22%3A+%22{type}%22%7D">Explore</a>';
   
 }); // end am4core.ready()
 
 
-$(document).ready( function () {
+  $(document).ready(function () {
     $('#distro_data').DataTable();
-} );
+  });
 
 </script>
 

@@ -758,28 +758,25 @@ def write_umap(path, towrite):
             file.write('\n')
     return fn
 
-def write_10x_mtx(path,gene_dict, barcode_dict,counts, towrite):
+def write_10x_mtx(path,gene_dict, barcode_dict, doc_count, towrite):
     fn = path + '/matrix.mtx'
     print('writing matrix.mtx to' + fn)
     ##text=List of strings to be written to file
-    counter = 0
     with open(fn, 'w') as file:
         file.write("%%MatrixMarket matrix coordinate real general")
         file.write('\n')
         # gene_dict length
-        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(counts)]))
+        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(doc_count)]))
         file.write('\n')
-        # for line in tqdm(towrite, total=counts):
-        for line in towrite:
-            counter +=1
+        for line in tqdm(towrite, total=doc_count):
+        #for line in towrite:
             # gene = mongo.genes.find_one({"gene_name":line["gene_name"]},{"gene_id":1, "_id":0})
             file.write(" ".join([             
                 str(gene_dict[line['gene_name']]),
                 str(barcode_dict[line['barcode']]),
                 str(line['expression']),
             ]))
-            file.write('\n')
-    return counter        
+            file.write('\n')  
 
        
 
@@ -919,21 +916,21 @@ def download_matrix():
                 {"$replaceRoot": { "newRoot": "$matrix" } }
             ]
 
-        mtx = mongo.single_cell_meta_country.aggregate(pipeline)
+        mtx = mongo.single_cell_meta_country.aggregate(pipeline, allowDiskUse=True)
 
         print("query finished --- %s seconds ---" % (time.time() - start_time2))
 
         start_time2 = time.time()
-        #mtx = list(mtx)
-        #doc_count = mongo.matrix.count_documents({'barcode': {'$in': lookups}})
         # temporary check of length of matrix returned
+        #doc_count = 1
+        #{$setWindowFields: {output: {totalCount: {$count: {}}}}}
+        #mtx = mongo.single_cell_meta_country.aggregate(pipeline + [{"$setWindowFields": {"output": {"totalCount": {"$count": {}}}}}],allowDiskUse=True)
+        #doc_count = next(x["totalCount"] for x in mtx if x)
+        #print(doc_count)
+        explain = mongo.command('aggregate', "matrix", pipeline=pipeline, explain=True)
+        print(explain)
         doc_count = 1
-        # count = list(mongo.single_cell_meta_country.aggregate(pipeline + [{ "$count": "total" }]))
-        # print(count)
-        # doc_count = count[0]["total"]
-        print(doc_count)
-
-        print("list finished --- %s seconds ---" % (time.time() - start_time2))
+        print("explain finished --- %s seconds ---" % (time.time() - start_time2))
 
         ## Parse the barcode and gene based on name 
         def get_dict(path, sep="\t", header=None, save_path=None):
@@ -960,10 +957,8 @@ def download_matrix():
         
         # Print start time for writing matrix
         start_time_wrtie = time.time()
-        counter = write_10x_mtx(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
+        write_10x_mtx(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
         print("Write 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))
-        print("lines written: ")
-        print(counter)
 
     if(not (exists(tmp_folder + '/matrix.zip'))):
         list_files = [
