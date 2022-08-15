@@ -10,6 +10,72 @@
     margin: 0px;
 }
 
+/*font*/
+
+.boldauto64 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 48px;
+    line-height: 58px;
+    text-transform: capitalize;
+    text-align: left;
+    margin-bottom: 15px;
+    color: #045547;
+}
+
+.boldauto36 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 36px;
+    line-height: 44px;
+    text-transform: capitalize;
+    text-align: left;
+    margin-bottom: 50px;
+    color: #045547;
+}
+
+.mediumauto22 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 27px;
+    text-indent: 0.166506px;
+    color: #FFFFFF;
+    vertical-align: middle;
+}
+
+.regularH160 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 160%;
+    color: #000000;
+}
+
+.boldH160 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 160%;
+    color: #000000;
+}
+
+.regularauto16 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+    color: #607673;
+}
+
+/*nav*/
+
 #navbarResponsive {
     padding-top: 45px;
 }
@@ -389,39 +455,6 @@ body {
     margin-bottom: 100px;
 }
 
-.boldauto64 {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 700;
-    font-size: 48px;
-    line-height: 58px;
-    text-transform: capitalize;
-    text-align: left;
-    margin-bottom: 15px;
-    color: #045547;
-}
-
-.boldauto36 {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 700;
-    font-size: 36px;
-    line-height: 44px;
-    text-transform: capitalize;
-    text-align: left;
-    margin-bottom: 50px;
-    color: #045547;
-}
-
-.regularH160 {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 400;
-    font-size: 18px;
-    line-height: 160%;
-    color: #000000;
-}
-
 .exploreButton {
     width: 197px;
     height: 50px;
@@ -436,17 +469,6 @@ body {
     margin-top: 20px;
     vertical-align: middle;
     padding-top: 11.5px;
-}
-
-.mediumauto22 {
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 500;
-    font-size: 22px;
-    line-height: 27px;
-    text-indent: 0.166506px;
-    color: #FFFFFF;
-    vertical-align: middle;
 }
 
 .intro-tb td {
@@ -675,3 +697,37 @@ body {
     width: 100%;
     padding: 15px 0px 0px 0px;
 }
+
+/*
+.collapsible {
+    overflow: hidden;
+}
+
+.collapsible label {
+    position: relative;
+    font-weight: 600;
+    background: #ffffff;
+    box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.1), 0 4px 11px 0 rgba(0, 0, 0, 0.08);
+    color: #1c1c6b;
+    display: block;
+    margin-bottom: 10px;
+    cursor: pointer;
+    padding: 15px 0px;
+    border-radius: 4px;
+}
+
+.collapsible label:after {
+    content: "";
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    width: 18px;
+    height: 18px;
+    background: url(../Vector.svg) no-repeat 0 0;
+}
+
+.collapsible-text {
+    overflow: hidden;
+}
+
+*/

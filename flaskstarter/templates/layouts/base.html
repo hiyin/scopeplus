@@ -20,7 +20,8 @@
 
   <link rel="stylesheet" href="{{ url_for('static', filename='css/template.css') }}">
 
-  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/1.1.1/css/bootstrap-multiselect.css">
+  <link rel="stylesheet" type="text/css"
+    href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/1.1.1/css/bootstrap-multiselect.css">
 
 
 </head>
@@ -28,10 +29,12 @@
 <body>
 
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white static-top">
+  <nav class="navbar navbar-expand-lg navbar-light static-top" style="background: #F7F8F8;">
     <div class="container">
-      <a class="navbar-brand" href="{{ url_for('tasks.table_view') }}"><img src="{{url_for('static', filename='D24H_Logo.png')}}" width="273" height="129"/></a>
-      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+      <a class="navbar-brand" href="{{ url_for('tasks.table_view') }}"><img
+          src="{{url_for('static', filename='D24H_Logo.png')}}" width="273" height="129" /></a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive"
+        aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       {% include 'layouts/header.html'%}
@@ -43,19 +46,24 @@
 
   {% endblock %}
   <!-- Bootstrap core JavaScript -->
-  <script type="text/javascript" charset="utf8" src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js></script>
+  <script type="text/javascript" charset="utf8"
+    src=https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js></script>
   <script src="{{ url_for('static', filename='bootstrap.bundle.min.js')}}"></script>
 
 
-  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
-  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap4.min.js"></script>
+  <script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/1.12.1/js/jquery.dataTables.min.js"></script>
+  <script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/1.12.1/js/dataTables.bootstrap4.min.js"></script>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-multiselect/1.1.1/js/bootstrap-multiselect.js"></script>
 
-  <script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/plug-ins/1.12.1/pagination/input.js"></script>
+  <script type="text/javascript" charset="utf8"
+    src="https://cdn.datatables.net/plug-ins/1.12.1/pagination/input.js"></script>
 
   {% block scripts %}{% endblock %}
 
 </body>
-   {% include 'layouts/footer.html' %}
+{% include 'layouts/footer.html' %}
+
 </html>
