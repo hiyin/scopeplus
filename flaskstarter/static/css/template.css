@@ -10,6 +10,12 @@
     margin: 0px;
 }
 
+button:hover,
+button:focus {
+    outline: none;
+}
+
+
 /*font*/
 
 .boldauto64 {
@@ -32,7 +38,6 @@
     line-height: 44px;
     text-transform: capitalize;
     text-align: left;
-    margin-bottom: 50px;
     color: #045547;
 }
 
@@ -71,6 +76,16 @@
     font-weight: 400;
     font-size: 16px;
     line-height: 19px;
+    color: #607673;
+}
+
+.mediumauto16 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    text-align: center;
     color: #607673;
 }
 
@@ -544,6 +559,18 @@ body {
     padding-left: 25%;
     padding-right: 25%;
     margin-bottom: 100px;
+}
+
+.uploadButton {
+    background: #1CA68C;
+    box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
+    border-radius: 8px;
+    width: 263px;
+    height: 68px;
+    padding: 20px;
+    border: 0px;
+    color: #ffffff;
+    -webkit-appearance: none;
 }
 
 /*login*/
