@@ -6,6 +6,10 @@
     padding-right: 150px;
 }
 
+.row {
+    margin: 0px;
+}
+
 #navbarResponsive {
     padding-top: 45px;
 }
@@ -342,6 +346,13 @@ body {
     overflow-y: hidden;
 }
 
+.section03 {
+    position: relative;
+    background: white;
+    padding: 100px 200px 150px;
+    overflow-y: hidden;
+}
+
 .section01 {
     margin-top: 150px;
     position: relative;
@@ -398,7 +409,7 @@ body {
     line-height: 44px;
     text-transform: capitalize;
     text-align: left;
-    margin-bottom: 15px;
+    margin-bottom: 50px;
     color: #045547;
 }
 
@@ -640,4 +651,27 @@ body {
     text-align: center;
     font-family: 'Inter';
     font-style: normal;
+}
+
+/* Tutorial */
+
+.tutorialCard {
+    background: #FFFFFF;
+    box-shadow: 0px 4px 60px rgba(84, 122, 116, 0.15);
+    border-radius: 24px;
+    width: 100%;
+}
+
+.tutorialTitle {
+    width: 100%;
+    padding: 30px 40px 30px 40px;
+}
+
+.tutorialContent {
+    width: 100%;
+}
+
+.tutorialLink {
+    width: 100%;
+    padding: 15px 0px 0px 0px;
 }
