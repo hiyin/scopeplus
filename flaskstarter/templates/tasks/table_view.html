@@ -6,186 +6,188 @@
 
 {% block body %}
 <script src="https://use.fontawesome.com/bbc48b41d3.js"></script>
-<div style="margin:20px;padding:20px;">
-    <div class="row justify-content-center">
-        <h2>Explore scRNA-seq Data</h2>
-    </div>
-    <div class="jumbotron" style="background:#fff;">
-        <h3>Filter</h3>
-        <table style="width:85%">
-            <tbody>
-                <tr>
-                    <td>
-                        <div class="input-group mb-3"><input class="form-control" type="text" id="txt_id"
-                                placeholder="Search id" /></div>
-                    </td>
-                    <!-- <td>                    
-                        <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
-                            <button class="btn btn-primary" name="show_scfeature2" type="submit"> Show scFeature plot </button>
-                        </form>
-                    </td>     -->
-                </tr>
-                <tr>
-                    <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post"
-                        style="display:inline-block"></form>
-
-                    <td style="width:16%">
-                        <select id="opt_sampleid" class="multibox" multiple="multiple" name="name_tbv_sample"
-                            form="scfform">
-                            <option label=" "></option>
-                            {% for val in fsampleid %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td style="width:16%">
-                        <select id="opt_age" class="multibox" multiple="multiple" name="name_tbv_age" form="scfform">
-                            <option label=" "></option>
-                            {% for val in fage %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td style="width:16%">
-                        <!-- Change by junyi 2022 0620-->
-                        <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype"
-                            form="scfform">
-                            <option label=" "></option>
-                            {% for val in fprediction %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td style="width:16%">
-                        <select id="opt_donor" class="multibox" multiple="multiple" name="name_tbv_donor"
-                            form="scfform">
-                            <option label=" "></option>
-                            {% for val in fdonor %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td style="width:16%">
-                        <select id="opt_status" class="multibox" multiple="multiple" name="name_tbv_status"
-                            form="scfform">
-                            <option label=" "></option>
-                            {% for val in fstatus %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <!-- Change by junyi 2022 0620-->
-                    <td style="width:16%">
-                        <select id="opt_dataset" class="multibox" multiple="multiple" name="name_tbv_dataset"
-                            form="scfform">
-                            <option label=" "></option>
-                            {% for val in fdataset %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td style="width:16%">
-                        <select id="opt_country" class="multibox" multiple="multiple" name="name_tbv_country"
-                            form="scfform">
-                            <option label=" "></option>
-                            {% for val in fcountry %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-
-                    <td>
-                        <button id="scfbutton" class="btn btn-primary" name="show_scfeature"> Show scFeature plot
-                        </button>
-                    </td>
-                    <td>
-                        <input type="button" class="btn btn-primary" style="display:inline-block" value="Search"
-                            id="btnSearch" />
-                    </td>
-                    <td>
-                        <input type="button" class="btn btn-primary" style="display:inline-block" value="Clear"
-                            id="btnClear" />
-                    </td>
-                    <td>
-                        <button class="btn btn-primary" style="display:inline-block" id="btnAdvance">Advanced
-                            Search</button>
-                    </td>
-
-                </tr>
-
-            </tbody>
-
-        </table>
-    </div>
-
-    <div class="jumbotron" id="globalsearch" style="background:#fff">
-        <h4>
-            Global Search
-        </h4>
-        <input style="width:50%;display:inline-block" class="form-control" id="customSearchBox" />
-        <input type="button" style="display:inline-block" class="btn btn-primary" value="Search all" id="btnGSearch" />
-        <input type="button" style="display:inline-block" class="btn btn-primary" value="Clear all" id="btnGClear" />
-    </div>
-    <table id="empTable" class="table table-hover table-striped table-responsive" style="width:100%">
-        <thead>
-            <tr>
-                <th>id</th>
-                <th>sampleId</th>
-                <th>age</th>
-                <th>prediction</th>
-                <th>donor</th>
-                <th>dataset</th>
-                <th>status</th>
-                <th>country</th>
-            </tr>
-        </thead>
-    </table>
-
-    <div class="jumbotron">
-        <h4>Please choose any of the option below for data manipulation.</h4>
-
-        <!-- Edited by Junyi 0628 -->
-        <button class="btn btn-primary" name="refresh_table" type="submit" style="display:inline-block"
-            onclick="window.location.href='{{ url_for( 'frontend.index') }}';"> Return to Home </button>
-        <button class="btn btn-primary" name="refresh_table" type="submit" style="display:inline-block"
-            onclick="window.location.href='{{ url_for( 'tasks.table_view', main='')}}';"> Refresh table </button>
-
-        <form action="{{ url_for('tasks.download_meta')}}" method="post" style="display:inline-block">
-            <button class="btn btn-primary" name="download" type="submit"> Download metadata </button>
-        </form>
-
-        <!-- <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
-        <button class="btn btn-primary" name="show_scfeature" type="submit"> Show scFeature plot </button>
-      </form> -->
-
-        <!-- <form action="{{ url_for('tasks.show_plot')}}" method="get" style="display:inline-block">
-      <button class="btn btn-primary" name="show_plot" type="submit"> Show UMAP plot </button>
-    </form> -->
-        <button class="btn btn-primary" name="show_plot" type="submit" style="display:inline-block"
-            onclick="window.location.href='{{ url_for( 'tasks.show_plot') }}';"> Show UMAP Plot </button>
-
-        <form class="download" id="downloadForm" action="{{ url_for('tasks.download_matrix')}}" method="post"
-            style="display:inline-block">
-            <button class="btn btn-primary" name="download_matrix" type="submit"> Download matrix </button>
-        </form>
-
-        <div id="message" style="display: none">
-            <div id="message-screen-mask" class="ui-widget-overlay ui-front"></div>
-            <div id="message-text"
-                class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-front ui-draggable ui-resizable waitmessage">
-                Please wait...</div>
+<div class="section03" style="padding-left: 120px; padding-right: 120px;">
+    <div class="container" style="padding: 0px;">
+        <div class="row justify-content-center">
+            <div class="boldauto36" style="padding-bottom: 30px;">Explore scRNA-seq Data</div>
         </div>
-        <p class="thanks" style="display: none ;">
-            <strong style="background-color: yellow ;">
-                Thank you for your download!
-            </strong>
-        </p>
+        <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
+        </form>
+        <div class="row justify-content-start">
+            <input placeholder="Global Search" style="width:50%;display:inline-block" class="form-control"
+                id="customSearchBox" />
+            <input type="button" style="display:inline-block" class="btn btn-primary" value="Search all"
+                id="btnGSearch" />
+            <input type="button" style="display:inline-block" class="btn btn-primary" value="Clear all"
+                id="btnGClear" />
+        </div>
+        <div class="jumbotron" style="background:#fff;">
+            <table style="width:85%">
+                <tbody>
+                    <!-- <tr>
+                         <td>                    
+                            <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
+                                <button class="btn btn-primary" name="show_scfeature2" type="submit"> Show scFeature plot </button>
+                            </form>
+                        </td>     
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="input-group mb-3"><input class="form-control" type="text" id="txt_id"
+                                    placeholder="Search id" /></div>
+                        </td>
+                        <td>
+                            <button class="btn btn-primary" style="display:inline-block" id="btnAdvance">Global
+                                Search</button>
+                        </td>
+                    </tr>-->
+                    <tr>
+                        <td style="width:16%">
+                            <select id="opt_sampleid" class="multibox" multiple="multiple" name="name_tbv_sample"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fsampleid %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="width:16%">
+                            <select id="opt_age" class="multibox" multiple="multiple" name="name_tbv_age"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fage %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="width:16%">
+                            <!-- Change by junyi 2022 0620-->
+                            <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fprediction %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="width:16%">
+                            <select id="opt_donor" class="multibox" multiple="multiple" name="name_tbv_donor"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fdonor %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="width:16%">
+                            <select id="opt_status" class="multibox" multiple="multiple" name="name_tbv_status"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fstatus %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <!-- Change by junyi 2022 0620-->
+                        <td style="width:16%">
+                            <select id="opt_dataset" class="multibox" multiple="multiple" name="name_tbv_dataset"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fdataset %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="width:16%">
+                            <select id="opt_country" class="multibox" multiple="multiple" name="name_tbv_country"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fcountry %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <input type="button" class="btn btn-primary" style="display:inline-block" value="Clear"
+                                id="btnClear" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button id="scfbutton" class="btn btn-primary" name="show_scfeature"> Show scFeature plot
+                            </button>
+                        </td>
+                        <td>
+                            <input type="button" class="btn btn-primary" style="display:inline-block" value="Search"
+                                id="btnSearch" />
+                        </td>
+                    </tr>
+                </tbody>
 
+            </table>
+        </div>
 
+        <!--Table-->
 
+        <table id="empTable" class="table table-hover table-striped table-responsive" style="width:100%">
+            <thead>
+                <tr>
+                    <th>id</th>
+                    <th>sampleId</th>
+                    <th>age</th>
+                    <th>prediction</th>
+                    <th>donor</th>
+                    <th>dataset</th>
+                    <th>status</th>
+                    <th>country</th>
+                </tr>
+            </thead>
+        </table>
+
+        <div class="jumbotron">
+            <h4>Please choose any of the option below for data manipulation.</h4>
+
+            <!-- Edited by Junyi 0628 -->
+            <button class="btn btn-primary" name="refresh_table" type="submit" style="display:inline-block"
+                onclick="window.location.href='{{ url_for( 'frontend.index') }}';"> Return to Home </button>
+            <button class="btn btn-primary" name="refresh_table" type="submit" style="display:inline-block"
+                onclick="window.location.href='{{ url_for( 'tasks.table_view', main='')}}';"> Refresh table </button>
+
+            <form action="{{ url_for('tasks.download_meta')}}" method="post" style="display:inline-block">
+                <button class="btn btn-primary" name="download" type="submit"> Download metadata </button>
+            </form>
+
+            <!-- <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
+            <button class="btn btn-primary" name="show_scfeature" type="submit"> Show scFeature plot </button>
+          </form> -->
+
+            <!-- <form action="{{ url_for('tasks.show_plot')}}" method="get" style="display:inline-block">
+          <button class="btn btn-primary" name="show_plot" type="submit"> Show UMAP plot </button>
+        </form> -->
+            <button class="btn btn-primary" name="show_plot" type="submit" style="display:inline-block"
+                onclick="window.location.href='{{ url_for( 'tasks.show_plot') }}';"> Show UMAP Plot </button>
+
+            <form class="download" id="downloadForm" action="{{ url_for('tasks.download_matrix')}}" method="post"
+                style="display:inline-block">
+                <button class="btn btn-primary" name="download_matrix" type="submit"> Download matrix </button>
+            </form>
+
+            <div id="message" style="display: none">
+                <div id="message-screen-mask" class="ui-widget-overlay ui-front"></div>
+                <div id="message-text"
+                    class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-front ui-draggable ui-resizable waitmessage">
+                    Please wait...</div>
+            </div>
+            <p class="thanks" style="display: none ;">
+                <strong style="background-color: yellow ;">
+                    Thank you for your download!
+                </strong>
+            </p>
+
+        </div>
     </div>
-
-
 </div>
 {% endblock %}
 
@@ -264,12 +266,7 @@
             }
         );
 
-
-
-
-
-
-        $("#globalsearch").hide();
+        //$("#globalsearch").hide();
 
         $("#btnAdvance").click(function () {
             $("#globalsearch").toggle();
