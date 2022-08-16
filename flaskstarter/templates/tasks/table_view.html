@@ -139,26 +139,21 @@
             <!-- Edited by Junyi 0628 -->
             <button class="btn btn-primary" name="refresh_table" type="submit" style="display:inline-block"
                 onclick="window.location.href='{{ url_for( 'frontend.index') }}';"> Return to Home </button>
+
             <button class="btn btn-primary" name="refresh_table" type="submit" style="display:inline-block"
                 onclick="window.location.href='{{ url_for( 'tasks.table_view', main='')}}';"> Refresh table </button>
 
-            <form action="{{ url_for('tasks.download_meta')}}" method="post" style="display:inline-block">
-                <button class="btn btn-primary" name="download" type="submit"> Download metadata </button>
-            </form>
-
-            <!-- <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
-        <button class="btn btn-primary" name="show_scfeature" type="submit"> Show scFeature plot </button>
-      </form> -->
-
-            <!-- <form action="{{ url_for('tasks.show_plot')}}" method="get" style="display:inline-block">
-      <button class="btn btn-primary" name="show_plot" type="submit"> Show UMAP plot </button>
-    </form> -->
             <button class="btn btn-primary" name="show_plot" type="submit" style="display:inline-block"
                 onclick="window.location.href='{{ url_for( 'tasks.show_plot') }}';"> Show UMAP Plot </button>
-
-            <form class="download" id="downloadForm" action="{{ url_for('tasks.download_matrix')}}" method="post"
+                
+            <form class="download" action="{{ url_for('tasks.download_meta')}}" method="post"
                 style="display:inline-block">
-                <button class="btn btn-primary" name="download_matrix" type="submit"> Download matrix </button>
+                <button class="btn btn-primary" name="download_meta" type="submit"> Download Metadata </button>
+            </form>
+
+            <form class="download" action="{{ url_for('tasks.download_matrix')}}" method="post"
+                style="display:inline-block">
+                <button class="btn btn-primary" name="download_matrix" type="submit"> Download Matrix </button>
             </form>
 
             <div id="message" style="display: none">
@@ -239,19 +234,17 @@
                     // the timer and say thanks!
                     console.log(document.cookie.search(cookiePattern));
                     if (document.cookie.search(cookiePattern) >= 0) {
-                        console.log("Find cookie")
                         clearInterval(cookieTimer);
-                        $("p.thanks").show();
                         HideDownloadMessage();
                         return (
                             console.log("Download complete!!Remove downloadID cookie!")
                         );
                     }
                     ShowDownloadMessage();
-                    console.log(
-                        "File still downloading...",
-                        new Date().getTime()
-                    );
+                    //console.log(
+                    //    "File still downloading...",
+                    //    new Date().getTime()
+                    //);
                 }
             }
         );
