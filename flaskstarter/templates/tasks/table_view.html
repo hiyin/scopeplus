@@ -86,6 +86,8 @@
         </div>
 
         <div class="row justify-content-end" style="margin-top: 24px;">
+            <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
+            </form>
             <div><button id="scfbutton" class="lightButton" name="show_scfeature"
                     style="display:inline-block ; margin-right: 16px;"> Show scFeature plot
                 </button></div>
@@ -138,8 +140,7 @@
                     </td>     -->
                     </tr>
                     <tr>
-                        <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post"
-                            style="display:inline-block"></form>
+
                     </tr>
                     <td>
                         <button class="btn btn-primary" style="display:inline-block" id="btnAdvance">Advanced
@@ -166,7 +167,7 @@
             </thead>
         </table>
 
-        <div class="jumbotron">
+        <div class="jumbotron" hidden>
             <h4>Please choose any of the option below for data manipulation.</h4>
 
             <!-- Edited by Junyi 0628 -->
