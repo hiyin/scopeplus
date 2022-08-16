@@ -8,117 +8,130 @@
 <script src="https://use.fontawesome.com/bbc48b41d3.js"></script>
 <div class="section03" style="padding-left: 120px; padding-right: 120px;">
     <div class="container" style="padding: 0px;">
-        <div class="row justify-content-start">
+        <div class="row justify-content-center">
             <div class="boldauto36" style="padding-bottom: 30px;">Explore scRNA-seq Data</div>
         </div>
-        <div class="row" id="globalsearch">
-            <input style="width: 50%; height: 48px; display:inline-block" class="form-control" id="customSearchBox"
-                placeholder="Global Search" />
-            <input type="button" style="display:inline-block;margin-left: 16px;" class="searchButton" value="Search all"
+        <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
+        </form>
+        <div class="row justify-content-start">
+            <input placeholder="Global Search" style="width:50%;display:inline-block" class="form-control"
+                id="customSearchBox" />
+            <input type="button" style="display:inline-block" class="btn btn-primary" value="Search all"
                 id="btnGSearch" />
-            <input type="button" style="display:inline-block;margin-left: 16px;" class="searchButton" value="Clear"
+            <input type="button" style="display:inline-block" class="btn btn-primary" value="Clear all"
                 id="btnGClear" />
         </div>
-        <div class="row justify-content-between" style="margin-top: 24px; max-width: 1200px;">
-            <div><select id="opt_sampleid" class="multibox" multiple="multiple" name="name_tbv_sample" form="scfform">
-                    <option label=" "></option>
-                    {% for val in fsampleid %}
-                    <option value="{{val}}">{{val}}</option>
-                    {% endfor %}
-                </select></div>
-            <div>
-                <select id="opt_age" class="multibox" multiple="multiple" name="name_tbv_age" form="scfform">
-                    <option label=" "></option>
-                    {% for val in fage %}
-                    <option value="{{val}}">{{val}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <!-- Change by junyi 2022 0620-->
-                <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype"
-                    form="scfform">
-                    <option label=" "></option>
-                    {% for val in fprediction %}
-                    <option value="{{val}}">{{val}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <select id="opt_donor" class="multibox" multiple="multiple" name="name_tbv_donor" form="scfform">
-                    <option label=" "></option>
-                    {% for val in fdonor %}
-                    <option value="{{val}}">{{val}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <select id="opt_status" class="multibox" multiple="multiple" name="name_tbv_status" form="scfform">
-                    <option label=" "></option>
-                    {% for val in fstatus %}
-                    <option value="{{val}}">{{val}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <select id="opt_dataset" class="multibox" multiple="multiple" name="name_tbv_dataset" form="scfform">
-                    <option label=" "></option>
-                    {% for val in fdataset %}
-                    <option value="{{val}}">{{val}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div>
-                <select id="opt_country" class="multibox" multiple="multiple" name="name_tbv_country" form="scfform">
-                    <option label=" "></option>
-                    {% for val in fcountry %}
-                    <option value="{{val}}">{{val}}</option>
-                    {% endfor %}
-                </select>
-            </div>
-        </div>
-
-        <div class="row justify-content-start" style="margin-top: 24px;">
-            <div><input type="button" class="searchButton " style="display:inline-block;" value="Search"
-                    id="btnSearch" /></div>
-            <div><input type="button" class="searchButton" style="display:inline-block; margin-left: 16px;"
-                    value="Clear" id="btnClear" /></div>
-        </div>
-
-        <div class="row justify-content-end" style="margin-top: 24px;">
-            <div><button id="scfbutton" class="searchButton" name="show_scfeature"> Show scFeature plot
-                </button></div>
-        </div>
-
-        <div class="row" style="margin-top: 24px;" hidden>
-            <table style="width:100%">
+        <div class="jumbotron" style="background:#fff;">
+            <table style="width:85%">
                 <tbody>
+                    <!-- <tr>
+                         <td>                    
+                            <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
+                                <button class="btn btn-primary" name="show_scfeature2" type="submit"> Show scFeature plot </button>
+                            </form>
+                        </td>     
+                    </tr>
                     <tr>
                         <td>
                             <div class="input-group mb-3"><input class="form-control" type="text" id="txt_id"
                                     placeholder="Search id" /></div>
                         </td>
-                        <!-- <td>                    
-                        <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
-                            <button class="btn btn-primary" name="show_scfeature2" type="submit"> Show scFeature plot </button>
-                        </form>
-                    </td>     -->
+                        <td>
+                            <button class="btn btn-primary" style="display:inline-block" id="btnAdvance">Global
+                                Search</button>
+                        </td>
+                    </tr>-->
+                    <tr>
+                        <td style="width:16%">
+                            <select id="opt_sampleid" class="multibox" multiple="multiple" name="name_tbv_sample"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fsampleid %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="width:16%">
+                            <select id="opt_age" class="multibox" multiple="multiple" name="name_tbv_age"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fage %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="width:16%">
+                            <!-- Change by junyi 2022 0620-->
+                            <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fprediction %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="width:16%">
+                            <select id="opt_donor" class="multibox" multiple="multiple" name="name_tbv_donor"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fdonor %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="width:16%">
+                            <select id="opt_status" class="multibox" multiple="multiple" name="name_tbv_status"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fstatus %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <!-- Change by junyi 2022 0620-->
+                        <td style="width:16%">
+                            <select id="opt_dataset" class="multibox" multiple="multiple" name="name_tbv_dataset"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fdataset %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
+                        <td style="width:16%">
+                            <select id="opt_country" class="multibox" multiple="multiple" name="name_tbv_country"
+                                form="scfform">
+                                <option label=" "></option>
+                                {% for val in fcountry %}
+                                <option value="{{val}}">{{val}}</option>
+                                {% endfor %}
+                            </select>
+                        </td>
                     </tr>
                     <tr>
-                        <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post"
-                            style="display:inline-block"></form>
-                    </tr>
                         <td>
-                            <button class="btn btn-primary" style="display:inline-block" id="btnAdvance">Advanced
-                                Search</button>
+                            <input type="button" class="btn btn-primary" style="display:inline-block" value="Clear"
+                                id="btnClear" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <button id="scfbutton" class="btn btn-primary" name="show_scfeature"> Show scFeature plot
+                            </button>
+                        </td>
+                        <td>
+                            <input type="button" class="btn btn-primary" style="display:inline-block" value="Search"
+                                id="btnSearch" />
                         </td>
                     </tr>
                 </tbody>
+
             </table>
         </div>
 
+        <!--Table-->
 
-        <table id="empTable" class="table table-hover table-striped table-responsive" style="width:100%; padding:0px;">
+        <table id="empTable" class="table table-hover table-striped table-responsive" style="width:100%">
             <thead>
                 <tr>
                     <th>id</th>
@@ -147,12 +160,12 @@
             </form>
 
             <!-- <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
-        <button class="btn btn-primary" name="show_scfeature" type="submit"> Show scFeature plot </button>
-      </form> -->
+            <button class="btn btn-primary" name="show_scfeature" type="submit"> Show scFeature plot </button>
+          </form> -->
 
             <!-- <form action="{{ url_for('tasks.show_plot')}}" method="get" style="display:inline-block">
-      <button class="btn btn-primary" name="show_plot" type="submit"> Show UMAP plot </button>
-    </form> -->
+          <button class="btn btn-primary" name="show_plot" type="submit"> Show UMAP plot </button>
+        </form> -->
             <button class="btn btn-primary" name="show_plot" type="submit" style="display:inline-block"
                 onclick="window.location.href='{{ url_for( 'tasks.show_plot') }}';"> Show UMAP Plot </button>
 
@@ -173,10 +186,7 @@
                 </strong>
             </p>
 
-
-
         </div>
-
     </div>
 </div>
 {% endblock %}
@@ -255,11 +265,6 @@
                 }
             }
         );
-
-
-
-
-
 
         //$("#globalsearch").hide();
 
