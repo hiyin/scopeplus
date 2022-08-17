@@ -797,3 +797,45 @@ body {
 }
 
 */
+
+/* Table */
+
+#empTable_paginate {
+    display: flex;
+    justify-content: end;
+    margin-top: 80px;
+    color: #045547;
+}
+
+.paginate_button {
+    padding: 0px 15px;
+}
+
+.paginate_total {
+    margin-right: 15px;
+    margin-left: 5px;
+}
+
+#empTable_paginate input {
+    border: 1px solid #889995;
+    border-radius: 8px;
+    width: 78px;
+    text-align: center;
+    margin: 0px 10px 0px 5px;
+}
+
+#empTable_paginate .last,
+.first {
+    background-color: #045547;
+    color: #ffffff;
+}
+
+#empTable_paginate .previous,
+.next {
+    background-color: #EEF4F3;
+    color: #045547;
+}
+
+#empTable_paginate .previous {
+    margin-right: 15px;
+}
