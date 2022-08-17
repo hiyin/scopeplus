@@ -3,7 +3,8 @@
 
 from ast import If
 from operator import index
-from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session, make_response
+from bson.json_util import dumps, loads, default
+from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session, make_response, current_app
 import uuid
 from flask_login import login_required, current_user
 from ..extensions import db, mongo,scfeature
@@ -33,8 +34,8 @@ from os.path import exists,basename
 import dash_bio
 from sklearn import preprocessing
 import seaborn as sns
-from tqdm import tqdm   
-
+from tqdm import tqdm
+from celery import shared_task
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 
@@ -758,6 +759,7 @@ def write_umap(path, towrite):
             file.write('\n')
     return fn
 
+@shared_task()
 def write_10x_mtx(path,gene_dict, barcode_dict, doc_count, towrite):
     fn = path + '/matrix.mtx'
     print('writing matrix.mtx to' + fn)
@@ -768,7 +770,10 @@ def write_10x_mtx(path,gene_dict, barcode_dict, doc_count, towrite):
         # gene_dict length
         file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(doc_count)]))
         file.write('\n')
+        #print(towrite[1])
         for line in tqdm(towrite, total=doc_count):
+            line = loads(line)
+            #print(line)
         #for line in towrite:
             # gene = mongo.genes.find_one({"gene_name":line["gene_name"]},{"gene_id":1, "_id":0})
             file.write(" ".join([             
@@ -860,25 +865,32 @@ def download_scfeature():
     return send_file(user_tmp[-1] + '/scfeature.zip', as_attachment=True)
 
 
-# @login_required
-@tasks.route('/download_matrix',methods=['POST'])
-def download_matrix():
 
+
+
+# @login_required
+#@shared_task()
+#def generate_matrix(tmp_folder):
+#    app = current_app._get_current_object()
+#    #with current_app.test_request_context():
+
+
+@tasks.route('/download_matrix', methods=['POST'])
+def download_matrix():
     user_timestamp = session.get("sess_timestamp")
     user_id = session["user_id"]
     # user_id = str(current_user.id)
-    tmp_folder = os.path.join(user_tmp[-1],user_id,user_timestamp)
+    tmp_folder = os.path.join(user_tmp[-1], user_id, user_timestamp)
     session["tmp_folder"] = tmp_folder
     os.makedirs(tmp_folder, exist_ok=True)
-
     # No query is search, then we use default use case:
-    if(len(session["query"])==0):
-        return send_file(TMP_FOLDER+'/default/matrix.zip', as_attachment=True)
+    if (len(session["query"]) == 0):
+        return send_file(TMP_FOLDER + '/default/matrix.zip', as_attachment=True)
     else:
         # If query is presented, remove the result old queries regardlessly for secure download
         remove_files(tmp_folder)
         if isinstance(session["query"], dict):
-            meta = mongo.single_cell_meta_country.find(session["query"]) 
+            meta = mongo.single_cell_meta_country.find(session["query"])
         elif isinstance(session["query"], list):
             if len(session["query"]) == 1:
                 print(session["query"])
@@ -887,80 +899,83 @@ def download_matrix():
                 meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
         write_id_meta(tmp_folder, meta)
     # Down load 10x matrix if not exist
-    if(not (exists(tmp_folder + '/matrix.mtx.gz'))):
+    if (not (exists(tmp_folder + '/matrix.mtx.gz'))):
         start_time2 = time.time()
         if isinstance(session["query"], dict):
             print("Getting instance of dict")
             pipeline = [
-                {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
-                {"$match": session["query"] }, 
-                {"$project": { "matrix": 1, "_id": 0 } }, 
-                {"$unwind": '$matrix' }, 
-                {"$replaceRoot": { "newRoot": "$matrix" } }
+                {"$lookup": {"from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'}},
+                {"$match": session["query"]},
+                {"$project": {"matrix": 1, "_id": 0}},
+                {"$unwind": '$matrix'},
+                {"$replaceRoot": {"newRoot": "$matrix"}}
             ]
         elif isinstance(session["query"], list) and len(session["query"]) == 1:
             print("Getting instance of list and getting  first element")
             pipeline = [
-                {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
-                {"$match": session["query"][0] }, 
-                {"$project": { "matrix": 1, "_id": 0 } }, 
-                {"$unwind": '$matrix' }, 
-                {"$replaceRoot": { "newRoot": "$matrix" } }
-            ]        
+                {"$lookup": {"from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'}},
+                {"$match": session["query"][0]},
+                {"$project": {"matrix": 1, "_id": 0}},
+                {"$unwind": '$matrix'},
+                {"$replaceRoot": {"newRoot": "$matrix"}}
+            ]
         else:
             pipeline = [
-                {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
-                {"$match": {"$and": session["query"] }  }, 
-                {"$project": { "matrix": 1, "_id": 0 } }, 
-                {"$unwind": '$matrix' }, 
-                {"$replaceRoot": { "newRoot": "$matrix" } }
+                {"$lookup": {"from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'}},
+                {"$match": {"$and": session["query"]}},
+                {"$project": {"matrix": 1, "_id": 0}},
+                {"$unwind": '$matrix'},
+                {"$replaceRoot": {"newRoot": "$matrix"}}
             ]
 
-        mtx = mongo.single_cell_meta_country.aggregate(pipeline, allowDiskUse=True)
+        mtx = mongo.single_cell_meta_country.aggregate(pipeline + [{"$project": {"_id": 0}}], allowDiskUse=True)
 
         print("query finished --- %s seconds ---" % (time.time() - start_time2))
 
         start_time2 = time.time()
         # temporary check of length of matrix returned
-        #doc_count = 1
-        #{$setWindowFields: {output: {totalCount: {$count: {}}}}}
-        #mtx = mongo.single_cell_meta_country.aggregate(pipeline + [{"$setWindowFields": {"output": {"totalCount": {"$count": {}}}}}],allowDiskUse=True)
-        #doc_count = next(x["totalCount"] for x in mtx if x)
-        #print(doc_count)
-        explain = mongo.command('aggregate', "matrix", pipeline=pipeline, explain=True)
-        print(explain)
+        # doc_count = 1
+        # {$setWindowFields: {output: {totalCount: {$count: {}}}}}
+        # mtx = mongo.single_cell_meta_country.aggregate(pipeline + [{"$setWindowFields": {"output": {"totalCount": {"$count": {}}}}}],allowDiskUse=True)
+        # doc_count = next(x["totalCount"] for x in mtx if x)
+        # print(doc_count)
+
         doc_count = 1
         print("explain finished --- %s seconds ---" % (time.time() - start_time2))
 
-        ## Parse the barcode and gene based on name 
+        ## Parse the barcode and gene based on name
         def get_dict(path, sep="\t", header=None, save_path=None):
             # Transfrom the gene/barcode name to the corresponding number
             df_read = pd.read_csv(path, sep=sep, header=header)
-            row_num = [i for i in range(1, len(df_read)+1)]
-            #print(row_num)
+            row_num = [i for i in range(1, len(df_read) + 1)]
+            # print(row_num)
             row_name = list(df_read.iloc[:, 0].values)
-            #print(row_name)
+            # print(row_name)
             result_dict = dict(zip(row_name, row_num))
-            #print(result_dict)
-            if(not(save_path is None)):
+            # print(result_dict)
+            if (not (save_path is None)):
                 df_read.to_csv(save_path, sep="\t", header=False, index=False, compression='gzip')
             return result_dict
 
         # Save gene name
-        if(not (exists(tmp_folder + '/genes.tsv.gz'))):
+        if (not (exists(tmp_folder + '/genes.tsv.gz'))):
             dict_gene = get_dict(TMP_FOLDER + "/genes.tsv", save_path=tmp_folder + "/genes.tsv.gz")
         # Save barcodes
-        if(not (exists(tmp_folder + '/barcodes.tsv.gz'))):
-            #write_file_byid(tmp_folder, meta)
+        if (not (exists(tmp_folder + '/barcodes.tsv.gz'))):
+            # write_file_byid(tmp_folder, meta)
             # todo: this line will error if try download_mtx in show_plot page after gene is selected. as barcodes are not generated
             dict_barcode = get_dict(tmp_folder + "/ids.csv", sep=",", save_path=tmp_folder + "/barcodes.tsv.gz")
-        
+
         # Print start time for writing matrix
         start_time_wrtie = time.time()
-        write_10x_mtx(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
+
+        serialized_results = [dumps(result, default=default, separators=(',', ':')) for result in mtx]
+        print(serialized_results[:2])
+
+        write_10x_mtx.delay(tmp_folder, dict_gene, dict_barcode, doc_count, serialized_results)
         print("Write 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))
 
-    if(not (exists(tmp_folder + '/matrix.zip'))):
+    if (not (exists(tmp_folder + '/matrix.zip'))):
         list_files = [
             tmp_folder + '/matrix.mtx',
             tmp_folder + '/genes.tsv.gz',
@@ -968,16 +983,17 @@ def download_matrix():
             tmp_folder + '/meta.tsv'
         ]
         checkpoint_time = time.time()
-        with zipfile.ZipFile(tmp_folder + '/matrix.zip', 'w') as zipMe:        
+        with zipfile.ZipFile(tmp_folder + '/matrix.zip', 'w') as zipMe:
             for file in list_files:
-                if(exists(file)):
-                    zipMe.write(file,arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
+                if (exists(file)):
+                    zipMe.write(file, arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
         print("zipping finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
-    response = make_response(send_file(tmp_folder + '/matrix.zip', as_attachment=True))
-    print("setting cookies")
-    response.set_cookie(key='downloadID', value=user_id,max_age=1)
-    return response
+    #response = make_response(send_file(tmp_folder + '/matrix.zip', as_attachment=True))
+    #print("setting cookies")
+    #response.set_cookie(key='downloadID', value=user_id, max_age=1)
+    #return response
+    return "Download Task submitted!"
 
 # Constructor for column-filter after multi-select
 def query_builder(map):
