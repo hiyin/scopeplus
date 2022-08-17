@@ -34,11 +34,16 @@ import dash_bio
 from sklearn import preprocessing
 import seaborn as sns
 from tqdm import tqdm   
+# 0816 Add by junyi
+from concurrent.futures import ThreadPoolExecutor
+import threading
+# 0816 Add by junyi
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 
 # set in-memory storage for collection of ids for meta data table display
+matrixid = []
 collection_searched = []
 
 # sub folders to manage different flask instances: not a good place to put, should be in API endpoint?
@@ -758,7 +763,8 @@ def write_umap(path, towrite):
             file.write('\n')
     return fn
 
-def write_10x_mtx(path,gene_dict, barcode_dict, doc_count, towrite):
+# 0816 deprecated by junyi
+def write_10x_mtx_old(path,gene_dict, barcode_dict, doc_count, towrite):
     fn = path + '/matrix.mtx'
     print('writing matrix.mtx to' + fn)
     ##text=List of strings to be written to file
@@ -777,9 +783,89 @@ def write_10x_mtx(path,gene_dict, barcode_dict, doc_count, towrite):
                 str(line['expression']),
             ]))
             file.write('\n')  
+# 0816 deprecated by junyi
 
-       
+# 0816 added by junyi
+def write_10x_mtx(path,gene_dict, barcode_dict, doc_count, towrite):
+    fn = path + '/matrix.mtx'
+    print('writing matrix.mtx to' + fn)
+    ##text=List of strings to be written to file
 
+    def write_file_line(path, data,gene_dict,barcode_dict):
+        try:
+            file = open(path, "a")
+            while True:
+                line = next(data,None)
+                file.write(" ".join([             
+                    str(gene_dict[line['gene_name']]),
+                    str(barcode_dict[line['barcode']]),
+                    str(line['expression']),"\n",
+                ]))
+        except StopIteration:
+            print("Finish writing file")
+            file.close()
+        except Exception as e:
+            file.write(str(e))
+            file.write(str(len(gene_dict)))
+            file.write(str(len(barcode_dict)))
+            file.close()
+        finally:
+            file.close()
+
+
+    with open(fn, 'w') as file:
+        file.write("%%MatrixMarket matrix coordinate real general")
+        file.write('\n')
+        # gene_dict length
+        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(doc_count)]))
+        file.write('\n')
+    
+    try:
+        data_buff = []
+        file = open(fn, "a")
+        while True:
+            line = next(towrite,None)
+            data_buff.append(" ".join([             
+                    str(line['gene_name']),
+                    str(line['barcode']),
+                    str(line['expression']),
+                ]))
+            data_buff.append("\n")
+            # file.write(" ".join([             
+            #     str(line['gene_name']),
+            #     str(line['barcode']),
+            #     str(line['expression']),
+            # ]))
+            # file.write('\n') 
+            if len(data_buff) >= 10000:
+                file.writelines(data_buff)
+                data_buff = []
+
+    except StopIteration:
+        print("Finish writing file")
+        file.writelines(data_buff)
+        data_buff = []
+
+        file.close()
+    except Exception as e:
+        file.write(str(e))
+        data_buff = []
+
+        print("Error writing file")
+        file.close()
+    finally:
+        data_buff = []
+        file.close()
+
+    # Nthreads = 8
+    # for t in range(Nthreads):
+    # thread1 = threading.Thread(target=write_file_line, args=[fn+str(1), towrite,gene_dict,barcode_dict])
+    # thread2 = threading.Thread(target=write_file_line, args=[fn+str(2), towrite,gene_dict,barcode_dict])
+    # thread1.start()
+    # thread2.start()
+    # thread1.join()
+    # thread2.join()
+# 0816 added by junyi
 
 def is_same_query(meta_path,collection_searched):
     try:
@@ -916,7 +1002,13 @@ def download_matrix():
                 {"$replaceRoot": { "newRoot": "$matrix" } }
             ]
 
-        mtx = mongo.single_cell_meta_country.aggregate(pipeline, allowDiskUse=True)
+        mtx = mongo.single_cell_meta_country.aggregate(pipeline, allowDiskUse=False)
+
+        with open(tmp_folder + '/query.txt', 'a') as file:
+            file.write(str(session["query"]))
+            file.write('\n')
+    
+
 
         print("query finished --- %s seconds ---" % (time.time() - start_time2))
 
@@ -927,10 +1019,10 @@ def download_matrix():
         #mtx = mongo.single_cell_meta_country.aggregate(pipeline + [{"$setWindowFields": {"output": {"totalCount": {"$count": {}}}}}],allowDiskUse=True)
         #doc_count = next(x["totalCount"] for x in mtx if x)
         #print(doc_count)
-        explain = mongo.command('aggregate', "matrix", pipeline=pipeline, explain=True)
-        print(explain)
+        #explain = mongo.command('aggregate', "matrix", pipeline=pipeline, explain=True)
+        #print(explain)
         doc_count = 1
-        print("explain finished --- %s seconds ---" % (time.time() - start_time2))
+        print("list finished --- %s seconds ---" % (time.time() - start_time2))
 
         ## Parse the barcode and gene based on name 
         def get_dict(path, sep="\t", header=None, save_path=None):
