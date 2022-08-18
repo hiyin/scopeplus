@@ -2,7 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from ast import If
+from binascii import crc32
+from curses import curs_set
+from itertools import count
 from operator import index
+from tkinter import E
 from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session, make_response
 import uuid
 from flask_login import login_required, current_user
@@ -784,32 +788,135 @@ def write_10x_mtx_old(path,gene_dict, barcode_dict, doc_count, towrite):
             ]))
             file.write('\n')  
 # 0816 deprecated by junyi
+def write_10x_mtx_small(path,gene_dict, barcode_dict, query):
+    fn = path + '/matrix.mtx'
+    print('writing matrix.mtx to' + fn)
+    if isinstance(query, dict):
+        print("Getting instance of dict")
+        pipeline = [
+            {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
+            {"$match": query }, 
+            {"$project": { "matrix": 1, "_id": 0 } }, 
+            {"$unwind": '$matrix' }, 
+            {"$replaceRoot": { "newRoot": "$matrix" } }
+        ]
+    elif isinstance(query, list) and len(query) == 1:
+        print("Getting instance of list and getting  first element")
+        pipeline = [
+            {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
+            {"$match": query[0] }, 
+            {"$project": { "matrix": 1, "_id": 0 } }, 
+            {"$unwind": '$matrix' }, 
+            {"$replaceRoot": { "newRoot": "$matrix" } }
+        ]        
+    else:
+        pipeline = [
+            {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
+            {"$match": {"$and": query }  }, 
+            {"$project": { "matrix": 1, "_id": 0 } }, 
+            {"$unwind": '$matrix' }, 
+            {"$replaceRoot": { "newRoot": "$matrix" } }
+        ]
+    mtx = mongo.single_cell_meta_country.aggregate(pipeline, allowDiskUse=True)
+    records = 0
+    ##text=List of strings to be written to file
+    with open(fn+str("data"), 'w') as file:
+        for line in mtx:
+            file.write(" ".join([             
+                str(gene_dict[line['gene_name']]),
+                str(barcode_dict[line['barcode']]),
+                str(line['expression']),
+            ]))
+            file.write('\n')
+            records =records+1
+
+    with open(fn+str("header"), 'w') as file:
+        file.write("%%MatrixMarket matrix coordinate real general")
+        file.write('\n')
+        # gene_dict length
+        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(records)]))
+        file.write('\n')
+
+    destination = open(fn,'w')
+    shutil.copyfileobj(open(fn+str("header"),'r'), destination)
+    shutil.copyfileobj(open(fn+str("data"),'r'), destination)
+    destination.close()
 
 # 0816 added by junyi
-def write_10x_mtx(path,gene_dict, barcode_dict, doc_count, towrite):
+def write_10x_mtx(path,gene_dict, barcode_dict, doc_count,query):
     fn = path + '/matrix.mtx'
     print('writing matrix.mtx to' + fn)
     ##text=List of strings to be written to file
 
-    def write_file_line(path, data,gene_dict,barcode_dict):
+    def generate_cursor(query,skip,limit):
+        if isinstance(query, dict):
+            print("Getting instance of dict")
+            pipeline = [
+                {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
+                {"$match": query }, 
+                {"$project": { "matrix": 1, "_id": 0 } }, 
+                {"$unwind": '$matrix' }, 
+                {"$replaceRoot": { "newRoot": "$matrix" } },
+                {"$skip": skip},
+                {"$limit": limit}
+            ]
+        elif isinstance(query, list) and len(query) == 1:
+            print("Getting instance of list and getting  first element")
+            pipeline = [
+                {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
+                {"$match": query[0] }, 
+                {"$project": { "matrix": 1, "_id": 0 } }, 
+                {"$unwind": '$matrix' }, 
+                {"$replaceRoot": { "newRoot": "$matrix" } },
+                {"$skip": skip},
+                {"$limit": limit}
+
+            ]        
+        else:
+            pipeline = [
+                {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
+                {"$match": {"$and": query }  }, 
+                {"$project": { "matrix": 1, "_id": 0 } }, 
+                {"$unwind": '$matrix' }, 
+                {"$replaceRoot": { "newRoot": "$matrix" } },
+                {"$skip": skip},
+                {"$limit": limit}
+            ]
+        cursor = mongo.single_cell_meta_country.aggregate(pipeline, allowDiskUse=True)
+        return cursor
+
+    def write_file_line(output_path,data,gene_dict,barcode_dict):
         try:
-            file = open(path, "a")
+            data_buff = []
+            file = open(output_path, "a")
+            counts = 0
             while True:
                 line = next(data,None)
-                file.write(" ".join([             
-                    str(gene_dict[line['gene_name']]),
-                    str(barcode_dict[line['barcode']]),
-                    str(line['expression']),"\n",
-                ]))
+                if(line!=None):
+                    data_buff.append(" ".join([             
+                            str(gene_dict[line['gene_name']]),
+                            str(barcode_dict[line['barcode']]),
+                            str(line['expression']),
+                        ])+"\n")	
+                    counts = counts + 1
+                if len(data_buff) >= 10000:
+                    file.writelines(data_buff)
+                    data_buff = []
         except StopIteration:
-            print("Finish writing file")
+            print("Finish writing file",str(counts))
+            file.writelines(data_buff)
+            data_buff = []
             file.close()
         except Exception as e:
-            file.write(str(e))
-            file.write(str(len(gene_dict)))
-            file.write(str(len(barcode_dict)))
+            print("Error writing file",str(counts),str(line))
+            file.writelines(data_buff)
+            data_buff = []
             file.close()
+            raise e
+
         finally:
+            file.writelines(data_buff)
+            data_buff = []
             file.close()
 
 
@@ -820,51 +927,38 @@ def write_10x_mtx(path,gene_dict, barcode_dict, doc_count, towrite):
         file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(doc_count)]))
         file.write('\n')
     
-    try:
-        data_buff = []
-        file = open(fn, "a")
-        while True:
-            line = next(towrite,None)
-            data_buff.append(" ".join([             
-                    str(line['gene_name']),
-                    str(line['barcode']),
-                    str(line['expression']),
-                ]))
-            data_buff.append("\n")
-            # file.write(" ".join([             
-            #     str(line['gene_name']),
-            #     str(line['barcode']),
-            #     str(line['expression']),
-            # ]))
-            # file.write('\n') 
-            if len(data_buff) >= 10000:
-                file.writelines(data_buff)
-                data_buff = []
+    counts = 0
 
-    except StopIteration:
-        print("Finish writing file")
-        file.writelines(data_buff)
-        data_buff = []
+    c1 = generate_cursor(query,0,2500000)
+    c2 = generate_cursor(query,2500000,2500000)
+    c3 = generate_cursor(query,5000000,2500000)
 
-        file.close()
-    except Exception as e:
-        file.write(str(e))
-        data_buff = []
+    thread1 = threading.Thread(target=write_file_line, args=[fn+str(1), c1,gene_dict,barcode_dict])
+    thread2 = threading.Thread(target=write_file_line, args=[fn+str(2), c2,gene_dict,barcode_dict])
+    thread3 = threading.Thread(target=write_file_line, args=[fn+str(3), c3,gene_dict,barcode_dict])
 
-        print("Error writing file")
-        file.close()
-    finally:
-        data_buff = []
-        file.close()
+    thread1.start()
+    thread2.start()
+    thread3.start()
+
+    thread1.join()  
+    thread2.join()
+    thread3.join()
+
 
     # Nthreads = 8
+    # threads = []
     # for t in range(Nthreads):
-    # thread1 = threading.Thread(target=write_file_line, args=[fn+str(1), towrite,gene_dict,barcode_dict])
-    # thread2 = threading.Thread(target=write_file_line, args=[fn+str(2), towrite,gene_dict,barcode_dict])
-    # thread1.start()
-    # thread2.start()
-    # thread1.join()
-    # thread2.join()
+    #     if(t!=7):
+    #         cursor = generate_cursor(query,0+t*50000,1+t*50000)
+    #     else:
+    #         cursor = generate_cursor(query,0+t*50000,1+t*50000)
+        
+    #     thread1 = threading.Thread(target=write_file_line, args=[fn+str(t), cursor,gene_dict,barcode_dict])
+    #     thread1.start()
+    #     thread1.join()
+    #     threads.append(thread1)
+
 # 0816 added by junyi
 
 def is_same_query(meta_path,collection_searched):
@@ -973,42 +1067,21 @@ def download_matrix():
                 meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
         write_id_meta(tmp_folder, meta)
     # Down load 10x matrix if not exist
+
+    df_meta = pd.read_csv(tmp_folder+'/meta.tsv', index_col=1,sep="\t")
+    cell_nums = df_meta.shape[0]
+    estimated_expression = cell_nums * 3600
+
     if(not (exists(tmp_folder + '/matrix.mtx.gz'))):
         start_time2 = time.time()
-        if isinstance(session["query"], dict):
-            print("Getting instance of dict")
-            pipeline = [
-                {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
-                {"$match": session["query"] }, 
-                {"$project": { "matrix": 1, "_id": 0 } }, 
-                {"$unwind": '$matrix' }, 
-                {"$replaceRoot": { "newRoot": "$matrix" } }
-            ]
-        elif isinstance(session["query"], list) and len(session["query"]) == 1:
-            print("Getting instance of list and getting  first element")
-            pipeline = [
-                {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
-                {"$match": session["query"][0] }, 
-                {"$project": { "matrix": 1, "_id": 0 } }, 
-                {"$unwind": '$matrix' }, 
-                {"$replaceRoot": { "newRoot": "$matrix" } }
-            ]        
-        else:
-            pipeline = [
-                {"$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'} }, 
-                {"$match": {"$and": session["query"] }  }, 
-                {"$project": { "matrix": 1, "_id": 0 } }, 
-                {"$unwind": '$matrix' }, 
-                {"$replaceRoot": { "newRoot": "$matrix" } }
-            ]
 
-        mtx = mongo.single_cell_meta_country.aggregate(pipeline, allowDiskUse=False)
+        ##### 0818 commented by junyi #####
+        # Move to small file download and file download
+        ##### 0818 commented by junyi #####
 
         with open(tmp_folder + '/query.txt', 'a') as file:
             file.write(str(session["query"]))
             file.write('\n')
-    
-
 
         print("query finished --- %s seconds ---" % (time.time() - start_time2))
 
@@ -1049,7 +1122,14 @@ def download_matrix():
         
         # Print start time for writing matrix
         start_time_wrtie = time.time()
-        write_10x_mtx(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
+        # 0818 commented by junyi
+        if(cell_nums<1000):
+            write_10x_mtx_small(tmp_folder, dict_gene, dict_barcode,session["query"])
+        else:
+            write_10x_mtx(tmp_folder, dict_gene, dict_barcode, doc_count, session["query"])
+        #write_10x_mtx_old(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
+
+        # 0818 commented by junyi
         print("Write 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))
 
     if(not (exists(tmp_folder + '/matrix.zip'))):
