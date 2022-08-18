@@ -7,7 +7,8 @@ from bson.json_util import dumps, loads, default
 from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session, make_response, current_app
 import uuid
 from flask_login import login_required, current_user
-from ..extensions import db, mongo,scfeature
+from flask_mail import Message
+from ..extensions import db, mongo,scfeature, mail
 import sys
 from flaskstarter.covid2k_meta import covid2k_metaModel
 from flaskstarter.tasks.forms import UmapForm
@@ -36,6 +37,9 @@ from sklearn import preprocessing
 import seaborn as sns
 from tqdm import tqdm
 from celery import shared_task
+import boto3
+from botocore.client import Config
+
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 
@@ -759,21 +763,63 @@ def write_umap(path, towrite):
             file.write('\n')
     return fn
 
+def zip_10x_mtx(tmp_folder):
+    if (not (exists(tmp_folder + '/matrix.zip'))):
+        list_files = [
+            tmp_folder + '/matrix.mtx',
+            tmp_folder + '/genes.tsv.gz',
+            tmp_folder + '/barcodes.tsv.gz',
+            tmp_folder + '/meta.tsv'
+        ]
+        checkpoint_time = time.time()
+        with zipfile.ZipFile(tmp_folder + '/matrix.zip', 'w') as zipMe:
+            for file in list_files:
+                if (exists(file)):
+                    zipMe.write(file, arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
+        print("zipping finished --- %s seconds ---" % (time.time() - checkpoint_time))
+
+
+
+
+def upload_to_aws(zipfile_path):
+    # Let's use Amazon S3
+    print("uploading to AWS...")
+    s3 = boto3.client('s3', region_name='ap-east-1', endpoint_url='https://s3.ap-east-1.amazonaws.com',  config=Config(signature_version='s3v4'))
+    prefix = os.path.dirname(zipfile_path).replace("/", "-").lstrip("-") + "-"
+    awsfilename = prefix + os.path.basename(zipfile_path)
+    s3.upload_file(zipfile_path, "covid19-cell-atlas-portal", awsfilename)
+
+
+    url = s3.generate_presigned_url(
+        ClientMethod='get_object',
+        Params={
+            'Bucket': 'covid19-cell-atlas-portal',
+            'Key': awsfilename
+        }
+    )
+    return url
+
+def send_s3_link(url):
+    print("sending email")
+    msg = Message('Hello from the other side!', sender='yin.angela1@gmail.com', recipients=['yin.danqing1@gmail.com'])
+    msg.body = "Hey, sending you this email from my Flask app, lmk if it works\nPlease download the data in this link:\n" + url
+    mail.send(msg)
+
+
+
 @shared_task()
-def write_10x_mtx(path,gene_dict, barcode_dict, doc_count, towrite):
-    fn = path + '/matrix.mtx'
-    print('writing matrix.mtx to' + fn)
+def write_10x_mtx(tmp_folder, gene_dict, barcode_dict, doc_count, towrite):
+    file_abs_path = tmp_folder + '/matrix.mtx'
+    print('writing matrix.mtx to' + file_abs_path)
     ##text=List of strings to be written to file
-    with open(fn, 'w') as file:
+    with open(file_abs_path, 'w') as file:
         file.write("%%MatrixMarket matrix coordinate real general")
         file.write('\n')
         # gene_dict length
         file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(doc_count)]))
         file.write('\n')
-        #print(towrite[1])
         for line in tqdm(towrite, total=doc_count):
             line = loads(line)
-            #print(line)
         #for line in towrite:
             # gene = mongo.genes.find_one({"gene_name":line["gene_name"]},{"gene_id":1, "_id":0})
             file.write(" ".join([             
@@ -781,7 +827,16 @@ def write_10x_mtx(path,gene_dict, barcode_dict, doc_count, towrite):
                 str(barcode_dict[line['barcode']]),
                 str(line['expression']),
             ]))
-            file.write('\n')  
+            file.write('\n')
+    # zip after file is generated
+    zip_10x_mtx(tmp_folder)
+    # upload to aws
+    url = upload_to_aws(tmp_folder + '/matrix.zip')
+    # send s3 link
+    send_s3_link(url)
+
+
+
 
        
 
@@ -865,16 +920,6 @@ def download_scfeature():
     return send_file(user_tmp[-1] + '/scfeature.zip', as_attachment=True)
 
 
-
-
-
-# @login_required
-#@shared_task()
-#def generate_matrix(tmp_folder):
-#    app = current_app._get_current_object()
-#    #with current_app.test_request_context():
-
-
 @tasks.route('/download_matrix', methods=['POST'])
 def download_matrix():
     user_timestamp = session.get("sess_timestamp")
@@ -932,16 +977,13 @@ def download_matrix():
 
         print("query finished --- %s seconds ---" % (time.time() - start_time2))
 
-        start_time2 = time.time()
         # temporary check of length of matrix returned
         # doc_count = 1
         # {$setWindowFields: {output: {totalCount: {$count: {}}}}}
         # mtx = mongo.single_cell_meta_country.aggregate(pipeline + [{"$setWindowFields": {"output": {"totalCount": {"$count": {}}}}}],allowDiskUse=True)
         # doc_count = next(x["totalCount"] for x in mtx if x)
         # print(doc_count)
-
         doc_count = 1
-        print("explain finished --- %s seconds ---" % (time.time() - start_time2))
 
         ## Parse the barcode and gene based on name
         def get_dict(path, sep="\t", header=None, save_path=None):
@@ -973,21 +1015,7 @@ def download_matrix():
         print(serialized_results[:2])
 
         write_10x_mtx.delay(tmp_folder, dict_gene, dict_barcode, doc_count, serialized_results)
-        print("Write 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))
-
-    if (not (exists(tmp_folder + '/matrix.zip'))):
-        list_files = [
-            tmp_folder + '/matrix.mtx',
-            tmp_folder + '/genes.tsv.gz',
-            tmp_folder + '/barcodes.tsv.gz',
-            tmp_folder + '/meta.tsv'
-        ]
-        checkpoint_time = time.time()
-        with zipfile.ZipFile(tmp_folder + '/matrix.zip', 'w') as zipMe:
-            for file in list_files:
-                if (exists(file)):
-                    zipMe.write(file, arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
-        print("zipping finished --- %s seconds ---" % (time.time() - checkpoint_time))
+        print("Write and zip 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))
 
     #response = make_response(send_file(tmp_folder + '/matrix.zip', as_attachment=True))
     #print("setting cookies")
