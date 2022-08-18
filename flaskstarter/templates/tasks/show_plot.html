@@ -9,39 +9,43 @@
 <div id="loading" ,style="display:none;"></div>
 <div id="loadingbox" ,style="display:none;">Loading</div>
 
-<div class="container">
-  <div class="row justify-content-center">
-    <h2>UMAP Plot</h2>
+<div class="section03">
+  <div class="container" style="margin:0px; padding: 0px;">
+    <div class="row justify-content-center">
+      <div class="boldauto36">UMAP Plot</div>
+    </div>
+    <td>Gene Option</td>
+    <td>
+      <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
+        <input list="opt_gene" name="name_opt_gene">
+        <datalist id="opt_gene">
+          {% for val in genes %}
+          <option value="{{val}}">{{val}}</option>
+          {% endfor %}
+        </datalist>
+        <button id="idbtnSelectgene" name="btnSelectgene" type="submit" onclick="loading();" class="searchButton">
+          Search </button>
+      </form>
+    </td>
+
+    <td>Color Option</td>
+    <td>
+      <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
+        <select id="opt_col" name="name_opt_col">
+          <option label=" "></option>
+          {% for val in colors %}
+          <option value="{{val}}">{{val}}</option>
+          {% endfor %}
+        </select>
+        <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Select </button>
+      </form>
+    </td>
+    <div id="chart" class="chart"></div>
+    <div id="chart2" class="chart"></div>
+
   </div>
-  <td>Gene Option</td>
-  <td>
-    <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
-      <input list="opt_gene" name="name_opt_gene">
-      <datalist id="opt_gene">
-        {% for val in genes %}
-        <option value="{{val}}">{{val}}</option>
-        {% endfor %}
-      </datalist>
-      <button id="idbtnSelectgene" name="btnSelectgene" type="submit" onclick="loading();"> Search </button>
-    </form>
-  </td>
-
-  <td>Color Option</td>
-  <td>
-    <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
-      <select id="opt_col" name="name_opt_col">
-        <option label=" "></option>
-        {% for val in colors %}
-        <option value="{{val}}">{{val}}</option>
-        {% endfor %}
-      </select>
-      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Select </button>
-    </form>
-  </td>
-  <div id="chart" class="chart"></div>
-  <div id="chart2" class="chart"></div>
-
 </div>
+
 
 <div class="jumbotron">
   <h4>Please choose any of the option below for data manipulation.</h4>
