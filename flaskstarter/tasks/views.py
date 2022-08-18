@@ -3,10 +3,11 @@
 
 from ast import If
 from operator import index
-from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session
+from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session, make_response
+import uuid
 from flask_login import login_required, current_user
 from ..extensions import db, mongo,scfeature
-
+import sys
 from flaskstarter.covid2k_meta import covid2k_metaModel
 from flaskstarter.tasks.forms import UmapForm
 from plotly.subplots import make_subplots
@@ -32,20 +33,24 @@ from os.path import exists,basename
 import dash_bio
 from sklearn import preprocessing
 import seaborn as sns
-
+from tqdm import tqdm   
+# 0816 Add by junyi
+from concurrent.futures import ThreadPoolExecutor
+import threading
+# 0816 Add by junyi
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 
 # set in-memory storage for collection of ids for meta data table display
-collection = []
+matrixid = []
 collection_searched = []
 
 # sub folders to manage different flask instances: not a good place to put, should be in API endpoint?
 user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
 #user_timestamp = "test"
 user_tmp = [TMP_FOLDER + "/" + user_timestamp]
-print(user_tmp)
+#print(user_tmp)
 os.makedirs(user_tmp[-1])
 
 
@@ -68,7 +73,7 @@ def upload_file():
 
     return redirect(url_for('tasks.contribute'))
 
-@login_required
+# @login_required
 @tasks.route('/show_plot', methods=['GET', 'POST'])
 def show_plot():     
 
@@ -92,42 +97,25 @@ def show_plot():
         print("Error loading genes.tsv" )
 
     # Create tmpfolder is not exist
-    query_timestamp = session.get("query_timestamp")
+    query_timestamp = session.get("sess_timestamp")
     print("Checking user information")
-    user_id = str(current_user.id)
+    # user_id = str(current_user.id)
+    user_id = session["user_id"]
     print(user_id)
     tmp_folder = os.path.join(user_tmp[-1],user_id,query_timestamp)
     os.makedirs(tmp_folder, exist_ok=True)
     print("Checking collection_searched_query if empty and logged-in user id?")
     print(session["user_id"])
     print(session["query"])
-    # Add a flag to check if the local folder cached the ids
-    # flag_idmissing = 0    
     # Search box is empty
     if(len(session["query"])==0):
-        # No ids.csv file is presented:
-        # if(not (exists(tmp_folder + '/ids.csv'))):
-        #     print("Error finding ids.tsv" )
-        #     # shutil.copy2(TMP_FOLDER+'/default/umap.csv', user_tmp[-1] + '/umap.csv') # complete target filename given
-        #     # shutil.copy2(TMP_FOLDER+'/default/meta.tsv', user_tmp[-1] + '/meta.tsv') # complete target filename given
-        #     # Change to show default case
-        #     flag_idmissing = 1
-
         # ID is presented, no meta data:
         if(not (exists(tmp_folder + '/meta.tsv'))):
-            #f = tmp_folder + "/ids.csv"
-            #_byid = pd.read_csv(f).values.tolist()
-            #lookups = list(np.squeeze(_byid))
-            #meta = mongo.single_cell_meta_country.find({'id': {'$in': lookups}})
             meta = mongo.single_cell_meta_country.find({})
             write_file_meta(tmp_folder, meta)
         
         # If ID is presented, no umap:
         elif(not (exists(tmp_folder + '/umap.csv'))):
-            #f = tmp_folder + "/ids.csv"
-            #_byid = pd.read_csv(f).values.tolist()
-            #lookups = list(np.squeeze(_byid))
-            #umap = mongo.umap.find({'id': {'$in': lookups}})
 
             pipeline = [
                 {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
@@ -143,8 +131,6 @@ def show_plot():
     # If search box not empty, write id meta umap
     else:
         print("Search value provided, write id, meta...")
-        #meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
-
         if isinstance(session["query"], dict):
             print(session["query"])
             meta = mongo.single_cell_meta_country.find(session["query"])
@@ -202,18 +188,9 @@ def show_plot():
                 # Gene table is not cached or the query is differen from the previous
                 if((not exists(tmp_folder + '/'+cell_gene+'.tsv')) or 
                 (flag_same_query == False)):
-
-                    # Lookup from the database
-                    # if(flag_idmissing==0):
-                    #     _byid = pd.read_csv(tmp_folder  + "/ids.csv").values.tolist()
-                    # else:
-                    #     _byid = pd.read_csv(TMP_FOLDER+'/default/ids.csv').values.tolist()
-                        
-                    #lookups = list(np.squeeze(_byid))
                     print("Querying matrix collection...")
                     checkpoint_time = time.time()
                     # use join table - aggregation with matrix table - get gene info
-
                     if isinstance(session["query"], dict):
                         print("Getting instance of dict")
                         pipeline = [
@@ -352,7 +329,10 @@ def show_scfeature():
         df_propotion.to_csv(user_tmp[-1]+"/df_proportion_raw_"+dataset+".csv")
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
         df_melt=df_d.melt(id_vars=['meta_dataset','meta_severity'],value_name="propotion",var_name="cell_type")
+<<<<<<< HEAD
         #df_melt.to_csv(user_tmp[-1]+"/proportion_melt.tsv", sep="\t")
+=======
+>>>>>>> newfrontend
         fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",template="plotly_white",
         color_discrete_sequence=sns.color_palette("tab20").as_hex())
         fig.update_xaxes(matches=None)
@@ -415,7 +395,6 @@ def show_scfeature():
             graphJSON4 = None
         else:
             select_type = cell_type
-            #df_pathway_mean.to_csv(user_tmp[-1]+"/df_test"+select_type+".csv")
             fig4 = process_dendrogram(df_pathway_mean,select_type,plot_type="pathway",title="Pathway mean scores in dataset" + dataset)
             graphJSON4 = json.dumps(fig4, cls=plotly.utils.PlotlyJSONEncoder)
 
@@ -571,7 +550,7 @@ def plot_tse():
     sln = np.stack(l)
     projections = sln
     fig = px.scatter(
-        projections, x=0, y=1)
+        projections,template="plotly_white", x=0, y=1)
     fig.update_layout(
         autosize=False, width=900, height=600
     )
@@ -581,7 +560,7 @@ def plot_tse():
 def plot_stack_bar(df):
     l = []
     fig = px.histogram(df, x="sex", y="total_bill",
-                color='smoker', barmode='group',
+                color='smoker', barmode='group',template="plotly_white",
                 height=400)
     graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
     return graphJSON
@@ -611,7 +590,11 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None,tmp_folder=".")
         autosize=False, width=900, height=600)
         graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
         fig = px.scatter(
+<<<<<<< HEAD
             df_plot, x="umap_0", y="umap_1",color=gene_color,template="plotly_white",color_continuous_scale="Viridis")
+=======
+            df_plot, x="umap_0", y="umap_1",template="plotly_white",color=gene_color,color_continuous_scale="Viridis")
+>>>>>>> newfrontend
         fig.update_layout(
                 autosize=False, width=900, height=600)
         graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
@@ -619,7 +602,11 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None,tmp_folder=".")
 
     else:
         fig = px.scatter(
+<<<<<<< HEAD
             df_plot, x="umap_0", y="umap_1",color=cell_color,template="plotly_white",color_discrete_sequence=
+=======
+            df_plot, x="umap_0", y="umap_1",template="plotly_white",color=cell_color,color_discrete_sequence=
+>>>>>>> newfrontend
             ["#F8A19F","#8E321C","#F6222E","#F1CE63","#B6992D","#59A14F","#499894","#4E79A7",
             "#A6AAFE","#5930FB","#500EE2","#7427B9","#931ADD","#A04DB9","#C585AF","#B8418A","#AD0267","#7A325C","#cccccc","#b2b2b2"]
             ,color_continuous_scale="Viridis")
@@ -658,6 +645,7 @@ def download_scClassify():
 
 # here
 @tasks.route('/table_view', methods=['POST', 'GET'])
+# @login_required
 def table_view():
     fsampleid = get_field("meta_sample_id2")
     fage = get_field("meta_age_category")
@@ -787,24 +775,109 @@ def write_umap(path, towrite):
             file.write('\n')
     return fn
 
-def write_10x_mtx(path,gene_dict,barcode_dict,counts, towrite):
-
-    fn = path + '/matrix.mtx.gz'
-    print('writing matrix.mtx.gz to' + fn)
-
+# 0816 deprecated by junyi
+def write_10x_mtx_old(path,gene_dict, barcode_dict, doc_count, towrite):
+    fn = path + '/matrix.mtx'
+    print('writing matrix.mtx to' + fn)
     ##text=List of strings to be written to file
-    with gzip.open(fn,'wb') as file:
-        file.write("%%MatrixMarket matrix coordinate real general".encode())
-        file.write('\n'.encode())
-        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(counts)]).encode())
-        file.write('\n'.encode())
-        for line in towrite:
-            file.write(" ".join([
+    with open(fn, 'w') as file:
+        file.write("%%MatrixMarket matrix coordinate real general")
+        file.write('\n')
+        # gene_dict length
+        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(doc_count)]))
+        file.write('\n')
+        for line in tqdm(towrite, total=doc_count):
+        #for line in towrite:
+            # gene = mongo.genes.find_one({"gene_name":line["gene_name"]},{"gene_id":1, "_id":0})
+            file.write(" ".join([             
                 str(gene_dict[line['gene_name']]),
                 str(barcode_dict[line['barcode']]),
                 str(line['expression']),
-            ]).encode())
-            file.write('\n'.encode())
+            ]))
+            file.write('\n')  
+# 0816 deprecated by junyi
+
+# 0816 added by junyi
+def write_10x_mtx(path,gene_dict, barcode_dict, doc_count, towrite):
+    fn = path + '/matrix.mtx'
+    print('writing matrix.mtx to' + fn)
+    ##text=List of strings to be written to file
+
+    def write_file_line(path, data,gene_dict,barcode_dict):
+        try:
+            file = open(path, "a")
+            while True:
+                line = next(data,None)
+                file.write(" ".join([             
+                    str(gene_dict[line['gene_name']]),
+                    str(barcode_dict[line['barcode']]),
+                    str(line['expression']),"\n",
+                ]))
+        except StopIteration:
+            print("Finish writing file")
+            file.close()
+        except Exception as e:
+            file.write(str(e))
+            file.write(str(len(gene_dict)))
+            file.write(str(len(barcode_dict)))
+            file.close()
+        finally:
+            file.close()
+
+
+    with open(fn, 'w') as file:
+        file.write("%%MatrixMarket matrix coordinate real general")
+        file.write('\n')
+        # gene_dict length
+        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(doc_count)]))
+        file.write('\n')
+    
+    try:
+        data_buff = []
+        file = open(fn, "a")
+        while True:
+            line = next(towrite,None)
+            data_buff.append(" ".join([             
+                    str(line['gene_name']),
+                    str(line['barcode']),
+                    str(line['expression']),
+                ]))
+            data_buff.append("\n")
+            # file.write(" ".join([             
+            #     str(line['gene_name']),
+            #     str(line['barcode']),
+            #     str(line['expression']),
+            # ]))
+            # file.write('\n') 
+            if len(data_buff) >= 10000:
+                file.writelines(data_buff)
+                data_buff = []
+
+    except StopIteration:
+        print("Finish writing file")
+        file.writelines(data_buff)
+        data_buff = []
+
+        file.close()
+    except Exception as e:
+        file.write(str(e))
+        data_buff = []
+
+        print("Error writing file")
+        file.close()
+    finally:
+        data_buff = []
+        file.close()
+
+    # Nthreads = 8
+    # for t in range(Nthreads):
+    # thread1 = threading.Thread(target=write_file_line, args=[fn+str(1), towrite,gene_dict,barcode_dict])
+    # thread2 = threading.Thread(target=write_file_line, args=[fn+str(2), towrite,gene_dict,barcode_dict])
+    # thread1.start()
+    # thread2.start()
+    # thread1.join()
+    # thread2.join()
+# 0816 added by junyi
 
 def is_same_query(meta_path,collection_searched):
     try:
@@ -831,27 +904,27 @@ def remove_files(path):
             shutil.os.remove(f)
 
 def store_queryinfo(session,force=True):
-    query_timestamp = session.get("query_timestamp")
+    session.permanent = False
+    sess_timestamp = session.get("sess_timestamp")
     if(force==True):
-        print("Pop old query timestamp")
-        user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
-        session["query_timestamp"] = user_timestamp
+        print("Pop old session timestamp")
+        new_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
+        session["sess_timestamp"] = new_timestamp
     else:
-        if((query_timestamp==None)):
-            user_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
-            session["query_timestamp"] = user_timestamp
+        if((sess_timestamp==None)):
+            new_timestamp = datetime.now().strftime('%Y%m%d%H%M%S%f')
+            session["sess_timestamp"] = new_timestamp
+        
     return session
 
 
 # Download big file
-@login_required
+# @login_required
 @tasks.route('/download_meta',methods=['POST'])
 def download_meta():
-    print("Debugging BSON document exceeded error...use query string instead: ")
-    #meta = list(mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}}))
-    #meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
-    user_timestamp = session.get("query_timestamp")
-    user_id = str(current_user.id)
+    user_timestamp = session.get("sess_timestamp")
+    user_id = session["user_id"]
+    # user_id = str(current_user.id)
     tmp_folder = os.path.join(user_tmp[-1],user_id,user_timestamp)
     session["tmp_folder"] = tmp_folder
     os.makedirs(tmp_folder, exist_ok=True)
@@ -867,19 +940,11 @@ def download_meta():
     print('writing ids to csv file only once, firstly load the data')
     #write_file_byid(tmp_folder, meta) # ids.csv is used in download_matrix barcode_dict
     write_file_meta(tmp_folder, meta)
-    #return send_file(user_tmp[-1] + '/ids.csv', as_attachment=True)
     return send_file(os.path.join(tmp_folder,'meta.tsv'), as_attachment=True)
 
 # Download big file
 @tasks.route('/download_scfeature',methods=['POST'])
 def download_scfeature():
-
-    
-    # list_files = [
-    #     user_tmp[-1]+"/df_gene_prop_celltype.csv",
-    #     user_tmp[-1]+"/df_pathway_mean.csv",
-    #     user_tmp[-1]+"/df_proportion_raw.csv"
-    # ]
     list_files = glob.glob( user_tmp[-1]+"/*_gene_prop_celltype*.csv")+\
     glob.glob( user_tmp[-1]+"/*_pathway_mean*.csv")+\
     glob.glob( user_tmp[-1]+"/*_proportion_raw*.csv")
@@ -893,52 +958,23 @@ def download_scfeature():
     return send_file(user_tmp[-1] + '/scfeature.zip', as_attachment=True)
 
 
-
-# @tasks.route('/download_umap', methods=['POST'])
-# def download_umap():
-#     f = user_tmp[-1] + "/ids.csv"
-#     if not os.path.isfile(f):
-#         id = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}}, {'id': 1, '_id': 0})
-#         write_file_byid(user_tmp[-1], id)
-#         print(f)
-
-#     _byid = pd.read_csv(f).values.tolist()
-#     lookups = list(np.squeeze(_byid))
-#     umap = mongo.umap.find({'id': {'$in': lookups}})
-#     write_umap(user_tmp[-1], umap)
-#     return send_file(user_tmp[-1] + '/umap.csv', as_attachment=True)
-@login_required
+# @login_required
 @tasks.route('/download_matrix',methods=['POST'])
 def download_matrix():
 
-    user_timestamp = session.get("query_timestamp")
-    user_id = str(current_user.id)
-
+    user_timestamp = session.get("sess_timestamp")
+    user_id = session["user_id"]
+    # user_id = str(current_user.id)
     tmp_folder = os.path.join(user_tmp[-1],user_id,user_timestamp)
     session["tmp_folder"] = tmp_folder
     os.makedirs(tmp_folder, exist_ok=True)
 
     # No query is search, then we use default use case:
-    if(len(collection_searched)==0):
-        #if(not (exists(tmp_folder + '/ids.csv'))):
+    if(len(session["query"])==0):
         return send_file(TMP_FOLDER+'/default/matrix.zip', as_attachment=True)
     else:
-        # If query is presented, remove the result old queries
-        if((exists(tmp_folder + '/meta.tsv'))):
-            flag_same_query = is_same_query(tmp_folder + '/meta.tsv',collection_searched=collection_searched)
-            # Different from the old query
-            if(flag_same_query == False):
-                print("Remove files because the old query is deprecared")
-                remove_files(tmp_folder)
-            else:
-                print("Keep files because the old query is the same")
-        # No old queries
-        else:
-            remove_files(tmp_folder)
-
-        # meta = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched}})
-        #meta = mongo.single_cell_meta_country.find(collection_searched_query[-1])
-        #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+        # If query is presented, remove the result old queries regardlessly for secure download
+        remove_files(tmp_folder)
         if isinstance(session["query"], dict):
             meta = mongo.single_cell_meta_country.find(session["query"]) 
         elif isinstance(session["query"], list):
@@ -947,15 +983,10 @@ def download_matrix():
                 meta = mongo.single_cell_meta_country.find(session["query"][0])
             else:
                 meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
-        #write_file_meta(tmp_folder, meta)
         write_id_meta(tmp_folder, meta)
     # Down load 10x matrix if not exist
     if(not (exists(tmp_folder + '/matrix.mtx.gz'))):
-        # _byid = pd.read_csv(tmp_folder + "/ids.csv").values.tolist()
-        # lookups = list(np.squeeze(_byid))
-        print("debugging")
         start_time2 = time.time()
-        # mtx = mongo.matrix.find({'barcode': {'$in': lookups}})
         if isinstance(session["query"], dict):
             print("Getting instance of dict")
             pipeline = [
@@ -983,17 +1014,26 @@ def download_matrix():
                 {"$replaceRoot": { "newRoot": "$matrix" } }
             ]
 
-        mtx = mongo.single_cell_meta_country.aggregate(pipeline)
+        mtx = mongo.single_cell_meta_country.aggregate(pipeline, allowDiskUse=False)
+
+        with open(tmp_folder + '/query.txt', 'a') as file:
+            file.write(str(session["query"]))
+            file.write('\n')
+    
+
 
         print("query finished --- %s seconds ---" % (time.time() - start_time2))
 
         start_time2 = time.time()
-        #query_counts = mtx.size()
-        #mtx = list(mtx)
-        #doc_count = mongo.matrix.count_documents({'barcode': {'$in': lookups}})
         # temporary check of length of matrix returned
+        #doc_count = 1
+        #{$setWindowFields: {output: {totalCount: {$count: {}}}}}
+        #mtx = mongo.single_cell_meta_country.aggregate(pipeline + [{"$setWindowFields": {"output": {"totalCount": {"$count": {}}}}}],allowDiskUse=True)
+        #doc_count = next(x["totalCount"] for x in mtx if x)
+        #print(doc_count)
+        #explain = mongo.command('aggregate', "matrix", pipeline=pipeline, explain=True)
+        #print(explain)
         doc_count = 1
-
         print("list finished --- %s seconds ---" % (time.time() - start_time2))
 
         ## Parse the barcode and gene based on name 
@@ -1001,8 +1041,11 @@ def download_matrix():
             # Transfrom the gene/barcode name to the corresponding number
             df_read = pd.read_csv(path, sep=sep, header=header)
             row_num = [i for i in range(1, len(df_read)+1)]
+            #print(row_num)
             row_name = list(df_read.iloc[:, 0].values)
+            #print(row_name)
             result_dict = dict(zip(row_name, row_num))
+            #print(result_dict)
             if(not(save_path is None)):
                 df_read.to_csv(save_path, sep="\t", header=False, index=False, compression='gzip')
             return result_dict
@@ -1015,28 +1058,127 @@ def download_matrix():
             #write_file_byid(tmp_folder, meta)
             # todo: this line will error if try download_mtx in show_plot page after gene is selected. as barcodes are not generated
             dict_barcode = get_dict(tmp_folder + "/ids.csv", sep=",", save_path=tmp_folder + "/barcodes.tsv.gz")
+        
+        # Print start time for writing matrix
+        start_time_wrtie = time.time()
         write_10x_mtx(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
+        print("Write 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))
 
     if(not (exists(tmp_folder + '/matrix.zip'))):
         list_files = [
-            tmp_folder + '/matrix.mtx.gz',
+            tmp_folder + '/matrix.mtx',
             tmp_folder + '/genes.tsv.gz',
             tmp_folder + '/barcodes.tsv.gz',
             tmp_folder + '/meta.tsv'
         ]
+        checkpoint_time = time.time()
         with zipfile.ZipFile(tmp_folder + '/matrix.zip', 'w') as zipMe:        
             for file in list_files:
                 if(exists(file)):
                     zipMe.write(file,arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
+        print("zipping finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
-    return send_file(tmp_folder + '/matrix.zip', as_attachment=True)
+    response = make_response(send_file(tmp_folder + '/matrix.zip', as_attachment=True))
+    print("setting cookies")
+    response.set_cookie(key='downloadID', value=user_id,max_age=1)
+    return response
 
+# Constructor for column-filter after multi-select
+def query_builder(map):
+    construct = []
+    re_match = re.compile(r'^\d{1,10}\.?\d{0,10}$')
+    for k in map:
+        if (k in ["meta_age_category", "meta_sample_id2", "meta_dataset", "level2", "meta_severity", "meta_patient_id", "pbmc.Country"]):
+            l = []
+            for ki in map[k]:
+                if re_match.findall(ki):
+                    # if string only contains numbers, we need to convert it to integer to search
+                    # age contains strings and integers, but the front-end will always process them to strings
+                    if ki.isdigit():
+                        l.append(int(ki))
+                    else:
+                        l.append(int(float(ki)))
+                else:
+                    l.append(ki)
+            q = {k: {"$in": l}}
+            print(q)
+            construct.append(q)
+        else:
+            print(map[k])
 
+    print(construct)
+    return construct
+
+# Pagination algorithm by skiplimit return ajax data source and total records for datatable data pagination
+def paginate_skiplimit(page_size, page_no, search_type, search_params):
+    # Calculate number of documents to skip
+    print("Using Pagination by mongodb skip-limit")
+    skips = page_size * (page_no - 1)
+  
+    # search type 1 - no search: by default search value is empty ''
+    if search_type == "default":
+        tmp = mongo.single_cell_meta_country.find().skip(skips).limit(page_size)
+        total_records = mongo.command("collstats","single_cell_meta_country")['count']    
+
+    # search type 2 - global search: search value is mongo raw query 
+    elif search_type == "global":
+        tmp = mongo.single_cell_meta_country.find(json.loads(search_params)).skip(skips).limit(page_size)
+        total_records = mongo.single_cell_meta_country.count_documents(json.loads(search_params))
+    # search type 3 - multi-column filter
+    elif search_type == "column":
+        tmp = mongo.single_cell_meta_country.find({"$and": search_params}).skip(skips).limit(page_size)
+        total_records = mongo.single_cell_meta_country.count_documents({"$and": search_params}) 
+
+    return tmp, total_records
+            
+# Pagination algorithm by ObjectId
+from bson.objectid import ObjectId
+def paginate_lastid(page_size, search_type, search_params, last_id=None):
+        """Function returns `page_size` number of documents after last_id
+        and the new last_id.
+        """
+        if last_id is None:
+            # When it is first page
+            print("When it is 1st page")
+            tmp = mongo.single_cell_meta_country.find().limit(page_size)
+            total_records = mongo.command("collstats","single_cell_meta_country")['count']   
+        else:
+            print("When it is 2nd and from on page")
+             # search type 1 - no search: by default search value is empty ''
+            if search_type == "default":
+                
+                tmp = mongo.single_cell_meta_country.find({'_id': {'$gt': ObjectId(last_id)}}).limit(page_size)
+                total_records = mongo.command("collstats","single_cell_meta_country")['count']    
+
+            # search type 2 - global search: search value is mongo raw query 
+            elif search_type == "global":
+                tmp = mongo.single_cell_meta_country.find(json.loads(search_params), {'_id': {'$gt': ObjectId(last_id)}}).limit(page_size)
+                total_records = mongo.single_cell_meta_country.count_documents(json.loads(search_params))
+            # search type 3 - multi-column filter
+            elif search_type == "column":
+                tmp = mongo.single_cell_meta_country.find({"$and": search_params}, {'_id': {'$gt': ObjectId(last_id)}}).limit(page_size)
+                total_records = mongo.single_cell_meta_country.count_documents({"$and": search_params}) 
+
+        # Get the data      
+        data = [x for x in tmp]
+
+        if not data:
+            # No documents left
+            return None, None
+
+        # Since documents are naturally ordered with _id, last document will
+        # have max id.
+        last_id = data[-1]['_id']
+        print(data[:2])
+        print(last_id)
+        print(total_records)
+
+        # Return data and last_id
+        return data, last_id, total_records           
 
 # http://www.dotnetawesome.com/2015/12/implement-custom-server-side-filtering-jquery-datatables.html
-@login_required
+# @login_required
 @tasks.route('/api_db', methods=['GET', 'POST'])
-#@login_required
 def api_db():
     data = []
     if request.method == 'POST':
@@ -1052,11 +1194,11 @@ def api_db():
         else:
             search_value = request.form["search[value]"]
 
-        print("draw: %s | row: %s | global search value: %s" % (draw, row, search_value))
+        print("draw: %s | row: %s | page size: %s | page num: %s | global search value: '%s'" % (draw, row, rowperpage, page_no, search_value))
         print("Checking user information")
-        print(str(current_user.id))
         store_queryinfo(session)
-        session["user_id"] = str(current_user.id)
+        # session["user_id"] = str(current_user.id)
+        session["user_id"] = shortuuid.uuid()
         print(session["user_id"])
         start = (page_no - 1)*rowperpage
         end = start + rowperpage
@@ -1088,75 +1230,44 @@ def api_db():
                 else:
                     search_column = "pbmc.Country"
                     map[search_column] = column_value
-        print(map)
-        if search_value == '':
-            if len(collection) == 0:
-                ids = [x["_id"] for x in mongo.single_cell_meta_country.find({}, {"_id": 1})]
-                collection.extend(ids)
-                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection[start:end]}})
-                total_records = len(collection)
 
-            else:
-                # refresh searchValue's stored ids when clicked "clear"
-                collection_searched.clear()
-                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection[start:end]}})
-                total_records = len(collection)
+        if search_value == '':
+            # Pagination algorithm 
+            # Calculate number of documents to skip
+            tmp, total_records = paginate_skiplimit(rowperpage, page_no, "default", search_value) 
+
+            # print("Using pagination by last_id algorithm")
+            # if page_no == 1:
+            #     tmp, last_id, total_records = paginate_lastid(rowperpage, "default", search_value, last_id=None)
+            #     session["last_id"] = str(last_id)
+            #     print(session["last_id"])
+            # else:    
+            #     tmp, last_id, total_records = paginate_lastid(rowperpage, "default", search_value, session["last_id"])
+            #     session["last_id"] = str(last_id)
 
         else:
             print("global search value provided")
             session["query"] = json.loads(search_value)
             print(session["query"])
-            if len(collection_searched) == 0:
-                ids = [x["_id"] for x in mongo.single_cell_meta_country.find(json.loads(search_value), {"_id": 1})]
-                collection_searched.extend(ids)
-                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
-                total_records = len(collection_searched)
+            # Pagination algorithm
+            # Calculate number of documents to skip
+            print("Using Pagination by mongodb skip-limit")
+            tmp, total_records = paginate_skiplimit(rowperpage, page_no, "global", search_value) 
 
-            else:
-                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
-                total_records = len(collection_searched)
+ 
 
         if map:
             print("Column-specific (multi) search value provided")
-            if len(collection_searched) == 0:
-                print("using search id")
-                construct = []
-                re_match = re.compile(r'^\d{1,10}\.?\d{0,10}$')
-                for k in map:
-                    if (k in ["meta_age_category", "meta_sample_id2","meta_dataset","level2","meta_severity","meta_patient_id","pbmc.Country"]):
-                        l = []
-                        for ki in map[k]:
-                            if re_match.findall(ki):
-                                # if string only contains numbers, we need to convert it to integer to search
-                                # age contains strings and integers, but the front-end will always process them to strings
-                                if ki.isdigit():
-                                    l.append(int(ki))
-                                else:
-                                    l.append(int(float(ki)))
-                            else:
-                                l.append(ki)
-                        q = {k: {"$in": l}}
-                        print(q)
-                        construct.append(q)
-                    else:
-                        print(map[k])
-
-                print(construct)
-                print("Saving construct to session query obj")
-                session["query"] = construct
-                print(session["query"])
-                ids = [x["_id"] for x in mongo.single_cell_meta_country.find({"$and": construct}, {"_id": 1})]
-                # Update the last user query by user id. 
-                collection_searched.extend(ids)
-                #collection_searched_query.extend(construct)
-                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
-                total_records = len(collection_searched)
-
-            else:
-                tmp = mongo.single_cell_meta_country.find({'_id': {'$in': collection_searched[start:end]}})
-                total_records = len(collection_searched)
-                # clear search result once new search input is clicked.
-                collection_searched.clear()
+            construct = query_builder(map)
+            print("Saving construct to session query obj")
+            session["query"] = construct
+            print(session["query"])
+            # Pagination algorithm
+            # Calculate number of documents to skip
+            tmp, total_records = paginate_skiplimit(rowperpage, page_no, "column", construct)
+            
+            checkpoint_time = time.time()
+            print("finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
         total_records_filter = total_records
         if total_records_filter == 0:
@@ -1195,112 +1306,6 @@ def api_db():
         return jsonify(response)
 
 
-@tasks.route('/home', methods=['GET', 'POST'])
-@login_required
-def home(condition=''):
-    print('debug...')
-    print('change condition...')
-    print(condition)
-    graphJSON = {}
-
-    if not condition:
-        _all_tasks = covid2k_metaModel.query.all()
-        print(_all_tasks)
-        print('show default')
-
-    else:
-        if isinstance(condition, str):
-            if condition == 'all':
-                _all_tasks = covid2k_metaModel.query.all()
-                print(_all_tasks)
-                writefile('/tmp/flaskstarter-instance/', _all_tasks)
-                print('show all')
-            else:
-                print('show' + condition)
-                # _all_tasks = db.session.execute('SELECT * FROM covid2k_meta WHERE age LIKE 52')
-                _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.age.contains(condition)).all()
-                writefile('/tmp/flaskstarter-instance/', _all_tasks)
-                graphJSON = plot()
-        elif isinstance(condition, list):
-            _all_tasks = covid2k_metaModel.query.filter(covid2k_metaModel.donor.in_(condition)).all()
-            writefile('/tmp/flaskstarter-instance/', _all_tasks)
-            graphJSON = plot()
-            print('show donors')
-
-
-    print("reload...")
-    print(condition)
-    col_values = get_col_values()
-
-    return render_template('tasks/my_tasks.html',
-                           all_tasks=_all_tasks,
-                           graphJSON=graphJSON,
-                           _active_tasks=True)
-
-def writefile(path, towrite):
-    print('writing data' + path)
-    file = open(path + 'result.csv', 'w+', newline='\n')
-    data = [[task.X] for task in towrite]
-    with file:
-        write = csv.writer(file)
-        write.writerows(data)
-
-
-@tasks.route('/showall',methods=['POST'])
-def showall():
-    return home('all')
-
-
-@tasks.route('/age52',methods=['POST'])
-def age_filter():
-    return home('20')
-
-@tasks.route('/download',methods=['POST'])
-def download():
-    plot()
-    return send_file('/tmp/flaskstarter-instance/result.csv', as_attachment=True)
-
-
-def get_col_values():
-    #_col_values = covid2k_metaModel.query.with_entities(covid2k_metaModel.donor)
-    donors = [c.donor for c in covid2k_metaModel.query.with_entities(covid2k_metaModel.donor).distinct()]
-    print(len(donors))
-    return donors
-
-
-
-@tasks.route('/get_multiselect', methods=['POST'])
-# uses list to store returned condition for my_tasks
-def get_multiselect():
-    selected_vals = request.form.getlist('multiselect')
-    print(request.form)
-    print(selected_vals)
-
-    return home(selected_vals)
-
-
-# to move outside of web app
-def plot():
-    path = '/tmp/flaskstarter-instance/'
-    result = pd.read_csv(path + 'result.csv', header=None)
-    df = pd.read_csv(path + 'cov192kaxis.csv', index_col=0)
-    l = []
-    for i in df.index:
-        for j in result.values:
-            if i == j:
-                print(i)
-                print(df.loc[i].values)
-                l.append(df.loc[i].values)
-    sln = np.stack(l)
-    projections = sln
-    fig = px.scatter(
-        projections, x=0, y=1)
-    fig.update_layout(
-        autosize=False, width=900, height=600
-    )
-    graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-    return graphJSON
-
 def get_field(field_name):
     key = mongo.single_cell_meta_country.distinct(field_name)
     print("%s has %d uniq fields" % (field_name, len(key)))
@@ -1312,3 +1317,4 @@ def get_study_field(field_name):
     key = mongo.pbmc_all_study_meta.distinct(field_name)
     print("%s has %d uniq fields" % (field_name, len(key)))
     return key
+

@@ -52,15 +52,22 @@ def get_field_count():
         {"$project": SON([("count", 1), ("_id", 1)])}
     ]
 
+    res = list(mongo.single_cell_meta.aggregate(pipeline))
 
-    res=list(mongo.single_cell_meta.aggregate(pipeline))
     # for item in res:
     #     print(item)
     #     print(item['_id'])
     #     print(item["count"])
     return res
     
+# Replace old get field count method    
+def get_celltype_count():
+    # db.createCollection('stats_celltype_count')
+    # db.stats_celltype_count.insertMany(db.single_cell_meta_country.aggregate([{"$group": {"_id": "$level2", "count":{"$sum": 1}}}]).toArray())
+    collection_name = 'stats_celltype_count'
+    res = list(mongo.stats_celltype_count.find())
 
+    return res
 
 # Load landing page data
 filepath = os.path.abspath(os.getcwd())
@@ -73,8 +80,8 @@ df = df.dropna(subset=['Country Code'])
 def index():
     data = df.to_dict()
     fdataset = get_all_study_meta()
-    res = get_field_count()
-    pprint.pprint(res)
+    res = get_celltype_count()
+    #pprint.pprint(res)
     if current_user.is_authenticated:
         return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res)
     return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res)
@@ -85,6 +92,10 @@ def index():
 #         return redirect(url_for('tasks.table_view'))
 
 #     return render_template('tasks/landing.html', _active_home=True)
+
+@frontend.route('/tutorial', methods=['GET', 'POST'])
+def tutorial():
+    return render_template('frontend/tutorial.html')
 
 @frontend.route('/contact-us', methods=['GET', 'POST'])
 def contact_us():
@@ -110,9 +121,13 @@ def login():
 
     form = LoginForm(login=request.args.get('login', None),
                      next=request.args.get('next', None))
+    print("Debug login")   
+    print(request)                 
 
     if form.validate_on_submit():
         user, authenticated = Users.authenticate(form.login.data, form.password.data)
+        print(request.form)
+        print(request.args)            
 
         if user and authenticated:
 

@@ -1,3 +1,3 @@
 preload_app=False
-#accesslog = "/home/d24h_prog5/flasklog/gunicorn_access.log"
-#errorlog = "/home/d24h_prog5/flasklog/gunicorn_error.log"
+accesslog = "/home/d24h_prog5/flasklog/gunicorn_access_new.log"
+errorlog = "/home/d24h_prog5/flasklog/gunicorn_error_new.log"

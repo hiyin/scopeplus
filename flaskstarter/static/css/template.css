@@ -1,4 +1,99 @@
 /*layout*/
+
+.container {
+    max-width: 1920px;
+    padding-left: 150px;
+    padding-right: 150px;
+}
+
+.row {
+    margin: 0px;
+}
+
+button:hover,
+button:focus {
+    outline: none;
+}
+
+tr.spaceTop>td {
+    padding-top: 24px;
+}
+
+/*font*/
+
+.boldauto64 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 48px;
+    line-height: 58px;
+    text-transform: capitalize;
+    text-align: left;
+    margin-bottom: 15px;
+    color: #045547;
+}
+
+.boldauto36 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 36px;
+    line-height: 44px;
+    text-transform: capitalize;
+    text-align: left;
+    color: #045547;
+}
+
+.mediumauto22 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 27px;
+    text-indent: 0.166506px;
+    color: #FFFFFF;
+    vertical-align: middle;
+}
+
+.regularH160 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 18px;
+    line-height: 160%;
+    color: #000000;
+}
+
+.boldH160 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 160%;
+    color: #000000;
+}
+
+.regularauto16 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 19px;
+    color: #607673;
+}
+
+.mediumauto16 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 16px;
+    line-height: 19px;
+    text-align: center;
+    color: #607673;
+}
+
+/*nav*/
+
 #navbarResponsive {
     padding-top: 45px;
 }
@@ -101,6 +196,42 @@
     align-self: start;
     justify-items: start;
 }
+
+/*button*/
+
+.darkButton {
+    background: #045547;
+    box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
+    border-radius: 8px;
+    padding: 10px 44px;
+    border: 0px;
+    color: #ffffff;
+    -webkit-appearance: none;
+    font-size: 15px;
+}
+
+.mediumButton {
+    background: #1CA68C;
+    box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
+    border-radius: 8px;
+    padding: 10px 44px;
+    border: 0px;
+    color: #FFFFFF;
+    -webkit-appearance: none;
+    font-size: 15px;
+}
+
+.lightButton {
+    background: #E2EEE8;
+    box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
+    border-radius: 8px;
+    padding: 10px 44px;
+    border: 0px;
+    color: #045547;
+    -webkit-appearance: none;
+    font-size: 15px;
+}
+
 
 
 /*my_tasks*/
@@ -335,6 +466,13 @@ body {
     overflow-y: hidden;
 }
 
+.section03 {
+    position: relative;
+    background: white;
+    padding: 100px 200px 150px;
+    overflow-y: hidden;
+}
+
 .section01 {
     margin-top: 150px;
     position: relative;
@@ -369,6 +507,22 @@ body {
     padding-left: 10%;
     padding-right: 10%;
     margin-bottom: 100px;
+}
+
+.exploreButton {
+    width: 197px;
+    height: 50px;
+    background: #045547;
+    box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
+    border-radius: 8px;
+    -webkit-appearance: button;
+    -moz-appearance: button;
+    appearance: button;
+    text-decoration: none;
+    text-align: center;
+    margin-top: 20px;
+    vertical-align: middle;
+    padding-top: 11.5px;
 }
 
 .intro-tb td {
@@ -444,6 +598,18 @@ body {
     padding-left: 25%;
     padding-right: 25%;
     margin-bottom: 100px;
+}
+
+.uploadButton {
+    background: #1CA68C;
+    box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
+    border-radius: 8px;
+    width: 263px;
+    height: 68px;
+    padding: 20px;
+    border: 0px;
+    color: #ffffff;
+    -webkit-appearance: none;
 }
 
 /*login*/
@@ -539,18 +705,25 @@ body {
     left: 50%;
     z-index: 999999;
     transform: translate(-50%, -50%);
-    border: 16px solid #f3f3f3; /* Light grey */
-    border-top: 16px solid #037966; /* Blue */    
+    border: 16px solid #f3f3f3;
+    /* Light grey */
+    border-top: 16px solid #037966;
+    /* Blue */
     border-radius: 50%;
     width: 120px;
     height: 120px;
     animation: spin 2s linear infinite;
-  }
-  
-  @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
-  }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
 
 #loadingbox {
     display: none;
@@ -562,8 +735,107 @@ body {
     background: #ffffffEE;
     width: 220px;
     height: 200px;
-    border-radius: 5%;    
+    border-radius: 5%;
     text-align: center;
     font-family: 'Inter';
     font-style: normal;
+}
+
+/* Tutorial */
+
+.tutorialCard {
+    background: #FFFFFF;
+    box-shadow: 0px 4px 60px rgba(84, 122, 116, 0.15);
+    border-radius: 24px;
+    width: 100%;
+}
+
+.tutorialTitle {
+    width: 100%;
+    padding: 30px 40px 30px 40px;
+}
+
+.tutorialContent {
+    width: 100%;
+}
+
+.tutorialLink {
+    width: 100%;
+    padding: 15px 0px 0px 0px;
+}
+
+/*
+.collapsible {
+    overflow: hidden;
+}
+
+.collapsible label {
+    position: relative;
+    font-weight: 600;
+    background: #ffffff;
+    box-shadow: 0 5px 11px 0 rgba(0, 0, 0, 0.1), 0 4px 11px 0 rgba(0, 0, 0, 0.08);
+    color: #1c1c6b;
+    display: block;
+    margin-bottom: 10px;
+    cursor: pointer;
+    padding: 15px 0px;
+    border-radius: 4px;
+}
+
+.collapsible label:after {
+    content: "";
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    width: 18px;
+    height: 18px;
+    background: url(../Vector.svg) no-repeat 0 0;
+}
+
+.collapsible-text {
+    overflow: hidden;
+}
+
+*/
+
+/* Table */
+
+#empTable_paginate {
+    display: flex;
+    justify-content: end;
+    margin-top: 80px;
+    color: #045547;
+}
+
+.paginate_button {
+    padding: 0px 15px;
+}
+
+.paginate_total {
+    margin-right: 15px;
+    margin-left: 5px;
+}
+
+#empTable_paginate input {
+    border: 1px solid #889995;
+    border-radius: 8px;
+    width: 78px;
+    text-align: center;
+    margin: 0px 10px 0px 5px;
+}
+
+#empTable_paginate .last,
+.first {
+    background-color: #045547;
+    color: #ffffff;
+}
+
+#empTable_paginate .previous,
+.next {
+    background-color: #EEF4F3;
+    color: #045547;
+}
+
+#empTable_paginate .previous {
+    margin-right: 15px;
 }

@@ -5,46 +5,96 @@
 {% extends 'layouts/base.html' %}
 
 {% block body %}
-{% include 'layouts/banner.html' %}
 
-<div class="container">
+<div class="container" style="padding: 200px;">
   <div class="row justify-content-center">
-    <h2>Upload your data</h2>
+    <div class="container" style="padding: 0px;">
+      <div class="row justify-content-center boldauto36" style="padding-bottom: 20px;">Upload your data</div>
+      <div class="row justify-content-center mediumauto16" style="padding-bottom: 65px;">Please upload file in xls or
+        csv format.
+      </div>
+      <div class="row justify-content-center" style="padding-bottom: 60px;">
+        <form id="upload" method="POST" action="{{ url_for('tasks.upload_file')}}" enctype="multipart/form-data">
+          <div class="input-group">
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="inputGroupFile01"
+                aria-describedby="inputGroupFileAddon01" name="file">
+              <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="row justify-content-center">
+        <button type="submit" form="upload" class="uploadButton mediumauto22">Upload user files</button>
+      </div>
+    </div>
+
+
   </div>
 
-  <div class="jumbotron">
-    <form method="POST" action="{{ url_for('tasks.upload_file')}}" enctype="multipart/form-data">
-
-      <div class="input-group">
-        <div class="custom-file">
-          <input type="file" class="custom-file-input" id="inputGroupFile01"
-            aria-describedby="inputGroupFileAddon01" name="file">
-          <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
-        </div>
-        <button class="btn btn-primary">Upload user files</button>
+  <div class="section01">
+    <div class="container flex-column">
+      <div class="intro-h">D²4H Single-cell Data Share Life Cycle</div>
+      <div class="intro-c">
+        The D²4H Single-cell Data Share provides a platform for sharing
+        single-cell data. We welcome anyone to contribute on our data sharing
+        coummuniaty.
       </div>
-
-
-
-
-    </form>
+      <div class="d-flex justify-content-center">
+        <table class="intro-tb">
+          <tr>
+            <td>
+              <img src="{{url_for('static', filename='folder-3.png')}}" width="140" height="140" />
+            </td>
+            <td>
+              <img src="{{url_for('static', filename='Pointer.png')}}" width="95" height="95" />
+            </td>
+            <td>
+              <img src="{{url_for('static', filename='microscope.png')}}" width="140" height="140" />
+            </td>
+            <td>
+              <img src="{{url_for('static', filename='Pointer.png')}}" width="95" height="95" />
+            </td>
+            <td>
+              <img src="{{url_for('static', filename='folder-2.png')}}" width="140" height="140" />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <p>Users contribute single-cell data</p>
+            </td>
+            <td></td>
+            <td>
+              <p>D²4H processes the data</p>
+            </td>
+            <td></td>
+            <td>
+              <p>Users can find suitable data to download</p>
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
-    <div class="jumbotron">
-    <form method="POST" action="{{ url_for('tasks.run_scClassify')}}" enctype="multipart/form-data" style="display:inline-block">
-        <button class="btn btn-primary">Run scClassify pipeline</button>
+  </div>
+
+  <div class="jumbotron" hidden>
+    <form method="POST" action="{{ url_for('tasks.run_scClassify')}}" enctype="multipart/form-data"
+      style="display:inline-block">
+      <button class="btn btn-primary">Run scClassify pipeline</button>
     </form>
-    <form method="POST" action="{{ url_for('tasks.download_scClassify')}}" enctype="multipart/form-data" style="display:inline-block">
-        <button class="btn btn-primary">Download results</button>
+    <form method="POST" action="{{ url_for('tasks.download_scClassify')}}" enctype="multipart/form-data"
+      style="display:inline-block">
+      <button class="btn btn-primary">Download results</button>
     </form>
-    </div>
+  </div>
 
 </div>
 
 {% endblock %}
 {% block scripts %}
 <script>
-    $(document).on('change', '.custom-file-input', function (event) {
-        $(this).next('.custom-file-label').html(event.target.files[0].name);
-    })
+  $(document).on('change', '.custom-file-input', function (event) {
+    $(this).next('.custom-file-label').html(event.target.files[0].name);
+  })
 </script>
 {% endblock %}
