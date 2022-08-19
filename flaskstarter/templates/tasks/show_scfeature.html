@@ -36,46 +36,56 @@
             <option value="{{val}}">{{val}}</option>
             {% endfor %}
         </select> -->
-        <select id="opt_celltype" name="name_opt_celltype" placeholder="Cell types">
-          <option label=" "></option>
+        <select id="opt_celltype" name="name_opt_celltype" class="multiselect" multiple="multiple">
           {% for val in celltypes %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
         </select>
-        <select id="opt_feature" name="name_opt_feature" placeholder="Pathways">
-          <option label=" "></option>
+        <select id="opt_feature" name="name_opt_feature" class="multiselect" multiple="multiple">
           {% for val in features %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
         </select>
-        <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Select </button>
+        <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit" class="darkButton" style="margin-left:16px;">
+          Select </button>
       </form>
     </div>
 
+    <div class="row justify-content-end" style="padding-top: 30px">
+      <form action="{{ url_for('tasks.table_view')}}" method="get" style="display:inline-block">
+        <button class="mediumButton" name="jump_home" type="submit"> Go to homepage</button>
+      </form>
+      <form action="{{ url_for('tasks.download_scfeature')}}" method="post"
+        style="display:inline-block; margin-left:16px;">
+        <button class="mediumButton" name="download_scfeature" type="submit"> Download scFeatures </button>
+      </form>
+    </div>
 
-    <div id="chart" class="chart"></div>
-    <div id="chart4" class="chart"></div>
-    <div id="chart2" class="chart"></div>
-    <div id="chart3" class="chart"></div>
+    <div class="row justify-content-center" style="padding-top: 30px">
+      <div id="chart" class="chart"></div>
+    </div>
 
+    <div class="row justify-content-center" style="padding-top: 30px">
+      <div id="chart4" class="chart"></div>
+    </div>
 
-  </div>
+    <div class="row justify-content-center" style="padding-top: 30px">
+      <div id="chart2" class="chart"></div>
+    </div>
 
+    <div class="row justify-content-center" style="padding-top: 30px">
+      <div id="chart3" class="chart"></div>
+    </div>
 
-  <div class="jumbotron">
-    <h4>Please choose any of the option below for data manipulation.</h4>
-    <form action="{{ url_for('tasks.table_view')}}" method="get" style="display:inline-block">
-      <button class="btn btn-primary" name="jump_home" type="submit"> Go to homepage</button>
-    </form>
-    <form action="{{ url_for('tasks.download_scfeature')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary" name="download_scfeature" type="submit"> Download scFeatures </button>
-    </form>
   </div>
 
 </div>
 
+{% include 'layouts/citation.html' %}
 
 {% endblock %}
+
+
 
 {% block scripts %}
 
@@ -141,6 +151,29 @@
       x.style.display = "none";
     }
   }// ]]></script>
+
+<script>
+  $('#opt_celltype').multiselect({
+    includeSelectAllOption: false,
+    enableFiltering: true,
+    enableCaseInsensitiveFiltering: true,
+    filterPlaceholder: 'Search for something...',
+    nonSelectedText: 'Cell Type',
+    buttonWidth: '300px',
+    maxHeight: 450
+  });
+
+  $('#opt_feature').multiselect({
+    includeSelectAllOption: false,
+    enableFiltering: true,
+    enableCaseInsensitiveFiltering: true,
+    filterPlaceholder: 'Search for something...',
+    nonSelectedText: 'Pathways',
+    buttonWidth: '300px',
+    maxHeight: 450
+  });
+
+</script>
 
 
 {% endblock %}

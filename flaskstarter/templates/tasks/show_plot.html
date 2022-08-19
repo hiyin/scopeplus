@@ -16,9 +16,7 @@
     </div>
     <div class="row justify-content-center" style="padding: 30px 0px">
       <form action="{{ url_for('tasks.show_plot')}}" method="post">
-        <select id="opt_gene" name="name_opt_gene" class="multiselect dropdown-toggle custom-select"
-          multiple="multiple">
-          <option label=" "></option>
+        <select id="opt_gene" name="name_opt_gene" class="multiselect" multiple="multiple">
           {% for val in genes %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
@@ -29,8 +27,7 @@
       </form>
 
       <form action="{{ url_for('tasks.show_plot')}}" method="post" style="margin-left:16px;">
-        <select id="opt_col" name="name_opt_col" class="multiselect dropdown-toggle custom-select" multiple="multiple">
-          <option label=" "></option>
+        <select id="opt_col" name="name_opt_col" class="multiselect" multiple="multiple">
           {% for val in colors %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
@@ -62,8 +59,10 @@
 
   </div>
 </div>
-
+{% include 'layouts/citation.html' %}
 {% endblock %}
+
+
 
 {% block scripts %}
 
@@ -122,16 +121,6 @@
     buttonWidth: '300px',
     maxHeight: 450
   });
-
-  //var last_valid_selection = $('#opt_gene').value;
-  //$('.multiselect').change(function (event) {
-  //  if ($(this).val().length > 1) {
-  //    $(this).val(last_valid_selection);
-  //  }
-  //  else {
-  //    last_valid_selection = $(this).val();
-  //  }
-  //});
 
 </script>
 {% endblock %}
