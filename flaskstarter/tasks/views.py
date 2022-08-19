@@ -7,6 +7,7 @@ from curses import curs_set
 from itertools import count
 from operator import index
 from tkinter import E
+from typing import final
 from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session, make_response
 import uuid
 from flask_login import login_required, current_user
@@ -842,11 +843,15 @@ def write_10x_mtx_small(path,gene_dict, barcode_dict, query):
     shutil.copyfileobj(open(fn+str("data"),'r'), destination)
     destination.close()
 
+    if os.path.exists(fn+str("header")):
+        os.remove(fn+str("header"))
+    if os.path.exists(fn+str("data")):
+        os.remove(fn+str("data"))
+
 # 0816 added by junyi
 def write_10x_mtx(path,gene_dict, barcode_dict, doc_count,query):
     fn = path + '/matrix.mtx'
     print('writing matrix.mtx to' + fn)
-    ##text=List of strings to be written to file
 
     def generate_cursor(query,skip,limit):
         if isinstance(query, dict):
@@ -885,80 +890,92 @@ def write_10x_mtx(path,gene_dict, barcode_dict, doc_count,query):
         cursor = mongo.single_cell_meta_country.aggregate(pipeline, allowDiskUse=True)
         return cursor
 
-    def write_file_line(output_path,data,gene_dict,barcode_dict):
-        try:
-            data_buff = []
-            file = open(output_path, "a")
-            counts = 0
-            while True:
-                line = next(data,None)
-                if(line!=None):
-                    data_buff.append(" ".join([             
-                            str(gene_dict[line['gene_name']]),
-                            str(barcode_dict[line['barcode']]),
-                            str(line['expression']),
-                        ])+"\n")	
-                    counts = counts + 1
-                if len(data_buff) >= 10000:
-                    file.writelines(data_buff)
-                    data_buff = []
-        except StopIteration:
-            print("Finish writing file",str(counts))
-            file.writelines(data_buff)
-            data_buff = []
-            file.close()
-        except Exception as e:
-            print("Error writing file",str(counts),str(line))
-            file.writelines(data_buff)
-            data_buff = []
-            file.close()
-            raise e
+    def write_file_line(path,query,skip,limit,gene_dict, barcode_dict,count_dict):
+        print('writing matrix.mtx to' + path)
+        towrite = generate_cursor(query,skip,limit)
+        ##text=List of strings to be written to file
+        record = 0
+        with open(path, 'w') as file:
+            # gene_dict length
+            for line in towrite:
+            #for line in towrite:
+                # gene = mongo.genes.find_one({"gene_name":line["gene_name"]},{"gene_id":1, "_id":0})
+                file.write(" ".join([             
+                    str(gene_dict[line['gene_name']]),
+                    str(barcode_dict[line['barcode']]),
+                    str(line['expression']),
+                ]))
+                file.write('\n')
+                record = record+1
 
-        finally:
-            file.writelines(data_buff)
-            data_buff = []
-            file.close()
+        count_dict[path] = record  
+
+    Nthreads = 4
+    count_dict = {}
+    threads = []
+    
+    start_time_query= time.time()
+
+    for i in range(Nthreads):
+        if(i!=Nthreads-1):
+            skip = i*int(doc_count/Nthreads)
+            limit = int(doc_count/Nthreads)
+        else:
+            skip = i*int(doc_count/Nthreads)
+            limit = doc_count
+        path = fn+str(i)
+        t = threading.Thread(target=write_file_line, args=(path,query,skip,limit,gene_dict, barcode_dict,count_dict))
+        threads.append(t)
+        t.start()
+    start_time_write= time.time()
+
+    for t in threads:
+        t.join()
+    # c1 = generate_cursor(query,0*doc_count/Nthreads,doc_count/Nthreads)
+    # c2 = generate_cursor(query,1*doc_count/Nthreads,doc_count/Nthreads)
+    # c3 = generate_cursor(query,2*doc_count/Nthreads,doc_count/Nthreads)
+    # c4 = generate_cursor(query,3*doc_count/Nthreads,doc_count)
+
+    # print("Cursor finised in ",time.time()-start_time_query)
+
+    # thread1 = threading.Thread(target=write_file_line, args=[fn+str(0), query,0*doc_count/Nthreads,doc_count/Nthreads,gene_dict,barcode_dict,count_dict])
+    # thread2 = threading.Thread(target=write_file_line, args=[fn+str(1), query,1*doc_count/Nthreads,doc_count/Nthreads,gene_dict,barcode_dict,count_dict])
+    # thread3 = threading.Thread(target=write_file_line, args=[fn+str(2), query,2*doc_count/Nthreads,doc_count/Nthreads,gene_dict,barcode_dict,count_dict])
+    # thread4 = threading.Thread(target=write_file_line, args=[fn+str(3), query,3*doc_count/Nthreads,doc_count,gene_dict,barcode_dict,count_dict])
 
 
-    with open(fn, 'w') as file:
+    # thread1.start()
+    # thread2.start()
+    # thread3.start()
+    # thread4.start()
+
+    # thread1.join()
+    # thread2.join()
+    # thread3.join()
+    # thread4.join()
+
+    print("Writing finised in ",time.time()-start_time_write)
+
+    final_count = sum(count_dict.values())
+
+    with open(fn+str("header"), 'w') as file:
         file.write("%%MatrixMarket matrix coordinate real general")
         file.write('\n')
         # gene_dict length
-        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(doc_count)]))
+        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(final_count)]))
         file.write('\n')
-    
-    counts = 0
 
-    c1 = generate_cursor(query,0,2500000)
-    c2 = generate_cursor(query,2500000,2500000)
-    c3 = generate_cursor(query,5000000,2500000)
+    destination = open(fn,'w')
+    shutil.copyfileobj(open(fn+str("header"),'r'), destination)
+    for i in range(Nthreads):
+        shutil.copyfileobj(open(fn+str(i),'r'), destination)
+    destination.close()
 
-    thread1 = threading.Thread(target=write_file_line, args=[fn+str(1), c1,gene_dict,barcode_dict])
-    thread2 = threading.Thread(target=write_file_line, args=[fn+str(2), c2,gene_dict,barcode_dict])
-    thread3 = threading.Thread(target=write_file_line, args=[fn+str(3), c3,gene_dict,barcode_dict])
-
-    thread1.start()
-    thread2.start()
-    thread3.start()
-
-    thread1.join()  
-    thread2.join()
-    thread3.join()
-
-
-    # Nthreads = 8
-    # threads = []
-    # for t in range(Nthreads):
-    #     if(t!=7):
-    #         cursor = generate_cursor(query,0+t*50000,1+t*50000)
-    #     else:
-    #         cursor = generate_cursor(query,0+t*50000,1+t*50000)
-        
-    #     thread1 = threading.Thread(target=write_file_line, args=[fn+str(t), cursor,gene_dict,barcode_dict])
-    #     thread1.start()
-    #     thread1.join()
-    #     threads.append(thread1)
-
+    for i in range(Nthreads):
+        if os.path.exists(fn+str(i)):
+            os.remove(fn+str(i))
+    if os.path.exists(fn+str("header")):
+        os.remove(fn+str("header"))
 # 0816 added by junyi
 
 def is_same_query(meta_path,collection_searched):
@@ -1072,7 +1089,7 @@ def download_matrix():
     cell_nums = df_meta.shape[0]
     estimated_expression = cell_nums * 3600
 
-    if(not (exists(tmp_folder + '/matrix.mtx.gz'))):
+    if(not (exists(tmp_folder + '/matrix.mtx'))):
         start_time2 = time.time()
 
         ##### 0818 commented by junyi #####
@@ -1123,10 +1140,11 @@ def download_matrix():
         # Print start time for writing matrix
         start_time_wrtie = time.time()
         # 0818 commented by junyi
-        if(cell_nums<1000):
+        if(cell_nums<2000):
             write_10x_mtx_small(tmp_folder, dict_gene, dict_barcode,session["query"])
         else:
-            write_10x_mtx(tmp_folder, dict_gene, dict_barcode, doc_count, session["query"])
+            write_10x_mtx(tmp_folder, dict_gene, dict_barcode, estimated_expression, session["query"])
+
         #write_10x_mtx_old(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
 
         # 0818 commented by junyi
