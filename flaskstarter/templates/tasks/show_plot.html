@@ -16,7 +16,7 @@
     </div>
     <div class="row justify-content-center" style="padding: 30px 0px">
       <form action="{{ url_for('tasks.show_plot')}}" method="post">
-        <select id="opt_gene" name="name_opt_gene" class="multiselect" multiple="multiple">
+        <select id="opt_gene" name="name_opt_gene" class="multiselect select">
           {% for val in genes %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
@@ -27,7 +27,7 @@
       </form>
 
       <form action="{{ url_for('tasks.show_plot')}}" method="post" style="margin-left:16px;">
-        <select id="opt_col" name="name_opt_col" class="multiselect" multiple="multiple">
+        <select id="opt_col" name="name_opt_col" class="multiselect select">
           {% for val in colors %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
@@ -102,7 +102,7 @@
 // ]]></script>
 
 <script>
-  $('#opt_col').multiselect({
+  $('#opt_col').select({
     includeSelectAllOption: false,
     enableFiltering: true,
     enableCaseInsensitiveFiltering: true,
@@ -112,7 +112,7 @@
     maxHeight: 450
   });
 
-  $('#opt_gene').multiselect({
+  $('#opt_gene').select({
     includeSelectAllOption: false,
     enableFiltering: true,
     enableCaseInsensitiveFiltering: true,
