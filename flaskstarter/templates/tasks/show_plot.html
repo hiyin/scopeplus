@@ -6,8 +6,8 @@
 
 {% block body %}
 
-<div id="loading" ,style="display:none;"></div>
-<div id="loadingbox" ,style="display:none;">Loading</div>
+<div id="loading" style="display:none;"></div>
+<div id="loadingbox" style="display:none;">Loading</div>
 
 <div class="section03">
   <div class="container" style="margin:0px; padding: 0px;">
@@ -39,27 +39,29 @@
         form="form_col">
         Select </button>
     </div>
-
-    <div class="row justify-content-end" style="padding-top: 30px">
-      <form action="{{ url_for('tasks.table_view')}}" method="get" style="display:inline-block;">
-        <button class="mediumButton" name="jump_home" type="submit"> Go to homepage</button>
-      </form>
-      <form action="{{ url_for('tasks.download_matrix')}}" method="post"
-        style="display:inline-block; padding-left: 30px">
-        <button class="mediumButton" name="download_matrix" type="submit"> Download matrix </button>
-      </form>
-    </div>
-
-    <div class="row justify-content-center" style="padding-top: 30px">
-      <div id="chart" class="chart"></div>
-    </div>
-    <div class="row justify-content-center" style="padding-top: 30px">
-      <div id="chart2" class="chart"></div>
-    </div>
-
   </div>
+
+  <div class="row" style="border: 0.5px solid #B4B6B8; width: 100vw; margin-left:-200px"></div>
+
+  <div class="row justify-content-end" style="padding-top: 30px">
+    <form action="{{ url_for('tasks.table_view')}}" method="get" style="display:inline-block;">
+      <button class="mediumButton" name="jump_home" type="submit"> Go to homepage</button>
+    </form>
+    <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block; padding-left: 30px">
+      <button class="mediumButton" name="download_matrix" type="submit"> Download matrix </button>
+    </form>
+  </div>
+
+  <div class="row justify-content-center" style="padding-top: 30px">
+    <div id="chart" class="chart"></div>
+  </div>
+  <div class="row justify-content-center" style="padding-top: 30px">
+    <div id="chart2" class="chart"></div>
+  </div>
+
 </div>
-{% include 'layouts/citation.html' %}
+</div>
+
 {% endblock %}
 
 

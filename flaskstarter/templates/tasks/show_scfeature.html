@@ -60,6 +60,9 @@
         Select </button>
     </div>
 
+    <div class="row" style="border: 0.5px solid #B4B6B8; width: 100vw; margin-left:-200px"></div>
+
+
     <div class="row justify-content-end" style="padding-top: 30px">
       <form action="{{ url_for('tasks.table_view')}}" method="get" style="display:inline-block">
         <button class="mediumButton" name="jump_home" type="submit"> Go to homepage</button>
@@ -89,8 +92,6 @@
   </div>
 
 </div>
-
-{% include 'layouts/citation.html' %}
 
 {% endblock %}
 
