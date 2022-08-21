@@ -29,26 +29,35 @@
 
     <!-- <td>Dataset</td> -->
     <div class="row justify-content-center" style="padding: 30px 0px">
-      <form action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
+      <form id="form_sCf" action="{{ url_for('tasks.show_scfeature')}}" method="post" hidden>
         <!-- <select id="opt_dataset" name="name_opt_dataset">
             <option label=" "></option>
             {% for val in datasets %}
             <option value="{{val}}">{{val}}</option>
             {% endfor %}
         </select> -->
-        <select id="opt_celltype" name="name_opt_celltype" class="multiselect" multiple="multiple">
+      </form>
+      <div style="width: 200px !important; overflow:visible">
+        <select id="opt_celltype" name="name_opt_celltype" class="form-control selectpicker" title="Cell Type"
+          form="form_sCf" style="width:300px;">
           {% for val in celltypes %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
         </select>
-        <select id="opt_feature" name="name_opt_feature" class="multiselect" multiple="multiple">
+      </div>
+
+      <div style="width: 200px !important; overflow:visible !important;">
+        <select id="opt_feature" name="name_opt_feature" class="form-control selectpicker" title="Pathways"
+          form="form_sCf" style="width:300px; margin-left:16px;">
           {% for val in features %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
         </select>
-        <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit" class="darkButton" style="margin-left:16px;">
-          Select </button>
-      </form>
+      </div>
+
+      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit" class="darkButton" style="margin-left:16px;"
+        form="form_sCf">
+        Select </button>
     </div>
 
     <div class="row justify-content-end" style="padding-top: 30px">
@@ -151,29 +160,6 @@
       x.style.display = "none";
     }
   }// ]]></script>
-
-<script>
-  $('#opt_celltype').multiselect({
-    includeSelectAllOption: false,
-    enableFiltering: true,
-    enableCaseInsensitiveFiltering: true,
-    filterPlaceholder: 'Search for something...',
-    nonSelectedText: 'Cell Type',
-    buttonWidth: '300px',
-    maxHeight: 450
-  });
-
-  $('#opt_feature').multiselect({
-    includeSelectAllOption: false,
-    enableFiltering: true,
-    enableCaseInsensitiveFiltering: true,
-    filterPlaceholder: 'Search for something...',
-    nonSelectedText: 'Pathways',
-    buttonWidth: '300px',
-    maxHeight: 450
-  });
-
-</script>
 
 
 {% endblock %}

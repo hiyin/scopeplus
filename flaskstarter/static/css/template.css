@@ -107,6 +107,7 @@ input::-webkit-calendar-picker-indicator {
     color: #ffffff;
     -webkit-appearance: none;
     font-size: 15px;
+    display: inline-block;
 }
 
 .mediumButton {
@@ -118,6 +119,7 @@ input::-webkit-calendar-picker-indicator {
     color: #FFFFFF;
     -webkit-appearance: none;
     font-size: 15px;
+    display: inline-block;
 }
 
 .lightButton {
@@ -129,10 +131,17 @@ input::-webkit-calendar-picker-indicator {
     color: #045547;
     -webkit-appearance: none;
     font-size: 15px;
+    display: inline-block;
 }
 
 .multiselect-container {
     width: 300px;
+}
+
+.bootstrap-select button {
+    width: 200px !important;
+    background-color: white;
+    overflow: visible;
 }
 
 /*nav*/

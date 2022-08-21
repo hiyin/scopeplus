@@ -15,27 +15,29 @@
       <div class="boldauto36">UMAP Plot</div>
     </div>
     <div class="row justify-content-center" style="padding: 30px 0px">
-      <form action="{{ url_for('tasks.show_plot')}}" method="post">
-        <select id="opt_gene" name="name_opt_gene" class="multiselect select">
+      <form id="form_gene" action="{{ url_for('tasks.show_plot')}}" method="post">
+        <select id="opt_gene" name="name_opt_gene" class="form-control selectpicker" title="Gene option"
+          data-live-search=“true”>
           {% for val in genes %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
         </select>
-        <button id="idbtnSelectgene" name="btnSelectgene" type="submit" onclick="loading();" class="darkButton"
-          style="margin-left:16px; ">
-          Generate </button>
       </form>
+      <button id="idbtnSelectgene" name="btnSelectgene" type="submit" onclick="loading();" class="darkButton"
+        style="margin-left:16px;" form="form_gene">
+        Generate </button>
 
-      <form action="{{ url_for('tasks.show_plot')}}" method="post" style="margin-left:16px;">
-        <select id="opt_col" name="name_opt_col" class="multiselect select">
+      <form id="form_col" action="{{ url_for('tasks.show_plot')}}" method="post" style="margin-left:16px;">
+        <select id="opt_col" name="name_opt_col" class="form-control selectpicker" title="Color option"
+          data-live-search=“true”>
           {% for val in colors %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
         </select>
-        <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit" class="darkButton" style="margin-left:16px;">
-          Select </button>
       </form>
-
+      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit" class="darkButton" style="margin-left:16px;"
+        form="form_col">
+        Select </button>
     </div>
 
     <div class="row justify-content-end" style="padding-top: 30px">
@@ -54,8 +56,6 @@
     <div class="row justify-content-center" style="padding-top: 30px">
       <div id="chart2" class="chart"></div>
     </div>
-
-
 
   </div>
 </div>
@@ -101,26 +101,4 @@
   }
 // ]]></script>
 
-<script>
-  $('#opt_col').select({
-    includeSelectAllOption: false,
-    enableFiltering: true,
-    enableCaseInsensitiveFiltering: true,
-    filterPlaceholder: 'Search for something...',
-    nonSelectedText: 'Color option',
-    buttonWidth: '300px',
-    maxHeight: 450
-  });
-
-  $('#opt_gene').select({
-    includeSelectAllOption: false,
-    enableFiltering: true,
-    enableCaseInsensitiveFiltering: true,
-    filterPlaceholder: 'Search for something...',
-    nonSelectedText: 'Gene option',
-    buttonWidth: '300px',
-    maxHeight: 450
-  });
-
-</script>
 {% endblock %}
