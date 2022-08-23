@@ -12,13 +12,9 @@
       <div class="regularH160">Our dataset covers data of Single-Cell Immunology Of SARS-CoV-2 Infection from China,
         Europe, America and ... You may click the region on the map to check the data.</div>
       <div class="d-flex">
-        {% if current_user.is_authenticated %}
         <a class="exploreButton" href="{{ url_for('tasks.table_view') }}">
-          {% else %}
-          <a class="exploreButton" href="{{ url_for('frontend.login') }}">
-            {% endif %}
-            <div class="mediumauto22">Explore dataset</div>
-          </a>
+          <div class="mediumauto22">Explore dataset</div>
+        </a>
       </div>
     </div>
   </div>
@@ -33,13 +29,9 @@
         <div class="regularH160">We have gathered data of multivarious cell types, including CD4 T, CD14 Mono, Nk, etc.
           You may explore more and generate scFeature/ UMAP graph on our insight page.</div>
         <div class="d-flex">
-          {% if current_user.is_authenticated %}
           <a class="exploreButton" href="{{ url_for('tasks.table_view') }}">
-            {% else %}
-            <a class="exploreButton" href="{{ url_for('frontend.login') }}">
-              {% endif %}
-              <div class="mediumauto22">Explore dataset</div>
-            </a>
+            <div class="mediumauto22">Explore dataset</div>
+          </a>
         </div>
       </div>
       <div class="col-8">
@@ -217,11 +209,7 @@
   // Configure series
   const polygonTemplate = polygonSeries.mapPolygons.template;
   // %22 is "", %5D is ] %5B is [
-  {% if current_user.is_authenticated %}
   polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="http://covidsc.d24h.hk:5000/tasks/table_view?main=%7B%22pbmc.Country%22%3A+%7B%22$in%22%3A+%5B%22{dataset}%22%5D%7D%7D">Explore</a>';
-  {% else %}
-  polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="http://covidsc.d24h.hk:5000/login">Explore</a>';
-  {% endif %}
   polygonTemplate.fill = am4core.color("rgba(110, 166, 157, 0.5)");
   //polygonTemplate.tooltipText = '<b>{name}: {value}</b>';
 
@@ -370,11 +358,7 @@
   series.tooltip.keepTargetHover = true;
   series.tooltip.getFillFromObject = false;
   series.tooltip.background.fill = am4core.color("#FFFFFF");
-  {% if current_user.is_authenticated %}
   series.columns.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://covidsc.d24h.hk:5000/tasks/table_view?main=%7B%22level2%22%3A+%22{type}%22%7D">Explore</a>';
-  {% else %}
-  series.columns.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://covidsc.d24h.hk:5000/login">Explore</a>';
-  {% endif %}
   series.tooltip.autoTextColor = false;
   series.tooltip.label.fill = am4core.color("#045547");
 }); // end am4core.ready()
