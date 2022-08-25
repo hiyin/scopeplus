@@ -2,9 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from ast import If
+from binascii import crc32
+from curses import curs_set
+from itertools import count
 from operator import index
 from bson.json_util import dumps, loads, default
 from flask import Blueprint, render_template, flash, redirect, url_for, send_file, request, jsonify,session, make_response, current_app
+from tkinter import E
+from typing import final
 import uuid
 from flask_login import login_required, current_user
 from flask_mail import Message
@@ -31,21 +36,22 @@ import subprocess
 import pandas as pd
 import time
 from datetime import datetime
-from os.path import exists,basename
+from os.path import exists, basename
 import dash_bio
 from sklearn import preprocessing
 import seaborn as sns
-from tqdm import tqdm
 from celery import shared_task, chain
 import boto3
 from botocore.client import Config
 from concurrent.futures import ThreadPoolExecutor
 import threading
 
+
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
 
 # set in-memory storage for collection of ids for meta data table display
+matrixid = []
 collection_searched = []
 
 # sub folders to manage different flask instances: not a good place to put, should be in API endpoint?
@@ -765,6 +771,7 @@ def write_umap(path, towrite):
             file.write('\n')
     return fn
 
+
 # @shared_task()
 def zip_10x_mtx(tmp_folder):
     if (not (exists(tmp_folder + '/matrix.zip'))):
@@ -810,40 +817,8 @@ def send_s3_link(url, user_email):
     mail.send(msg)
 
 
-
-# @shared_task()
-# def write_10x_mtx(tmp_folder, gene_dict, barcode_dict, doc_count, towrite, suffix):
-#     mtx = mongo.single_cell_meta_country.aggregate(towrite + [{"$project": {"_id": 0}}], allowDiskUse=True)
-#     part = str(suffix)
-#     file_abs_path = tmp_folder + '/matrix' + '_part' + part +'.mtx'
-#     print('writing matrix.mtx to' + file_abs_path)
-#     ##text=List of strings to be written to file
-#     with open(file_abs_path, 'w') as file:
-#         file.write("%%MatrixMarket matrix coordinate real general")
-#         file.write('\n')
-#         # gene_dict length
-#         file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(doc_count)]))
-#         file.write('\n')
-#         for line in tqdm(mtx, total=doc_count):
-#             #line = loads(line)
-#         #for line in towrite:
-#             # gene = mongo.genes.find_one({"gene_name":line["gene_name"]},{"gene_id":1, "_id":0})
-#             file.write(" ".join([
-#                 str(gene_dict[line['gene_name']]),
-#                 str(barcode_dict[line['barcode']]),
-#                 str(line['expression']),
-#             ]))
-#             file.write('\n')
-    # zip after file is generated
-    # zip_10x_mtx(tmp_folder)
-    # # upload to aws
-    # url = upload_to_aws(tmp_folder + '/matrix.zip')
-    # # send s3 link
-    # send_s3_link(url)
-
-
 # 0816 deprecated by junyi
-@shared_task()
+#@shared_task()
 def write_10x_mtx_small(path, gene_dict, barcode_dict, query):
     fn = path + '/matrix.mtx'
     print('writing matrix.mtx to' + fn)
@@ -924,7 +899,7 @@ def write_10x_mtx(path, gene_dict, barcode_dict, doc_count, query, user_email):
                 {"$limit": limit}
             ]
         elif isinstance(query, list) and len(query) == 1:
-            print("Getting instance of list and getting  first element")
+            print("Getting instance of list and getting first element")
             pipeline = [
                 {"$lookup": {"from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'}},
                 {"$match": query[0]},
@@ -1041,11 +1016,8 @@ def write_10x_mtx(path, gene_dict, barcode_dict, doc_count, query, user_email):
     # # send s3 link
     send_s3_link(url, user_email)
 
+
 # 0816 added by junyi
-
-
-       
-
 
 def is_same_query(meta_path,collection_searched):
     try:
@@ -1159,6 +1131,7 @@ def download_matrix():
     estimated_expression = cell_nums * 3600
 
     if (not (exists(tmp_folder + '/matrix.mtx'))):
+
         start_time2 = time.time()
 
         ##### 0818 commented by junyi #####
@@ -1171,17 +1144,6 @@ def download_matrix():
 
         print("query finished --- %s seconds ---" % (time.time() - start_time2))
 
-        start_time2 = time.time()
-        # temporary check of length of matrix returned
-        # doc_count = 1
-        # {$setWindowFields: {output: {totalCount: {$count: {}}}}}
-        # mtx = mongo.single_cell_meta_country.aggregate(pipeline + [{"$setWindowFields": {"output": {"totalCount": {"$count": {}}}}}],allowDiskUse=True)
-        # doc_count = next(x["totalCount"] for x in mtx if x)
-        # print(doc_count)
-        # explain = mongo.command('aggregate', "matrix", pipeline=pipeline, explain=True)
-        # print(explain)
-        doc_count = 1
-        print("list finished --- %s seconds ---" % (time.time() - start_time2))
 
         ## Parse the barcode and gene based on name
         def get_dict(path, sep="\t", header=None, save_path=None):
@@ -1209,11 +1171,13 @@ def download_matrix():
         # Print start time for writing matrix
         start_time_wrtie = time.time()
         # 0818 commented by junyi
+
         if (cell_nums < 2000):
-            write_10x_mtx_small.delay(tmp_folder, dict_gene, dict_barcode, session["query"])
+            write_10x_mtx_small(tmp_folder, dict_gene, dict_barcode, session["query"])
         else:
             write_10x_mtx.delay(tmp_folder, dict_gene, dict_barcode, estimated_expression, session["query"], user_email)
         # write_10x_mtx_old(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
+
         # 0818 commented by junyi
         print("Write 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))
     #

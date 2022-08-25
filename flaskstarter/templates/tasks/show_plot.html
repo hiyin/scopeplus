@@ -5,70 +5,78 @@
 {% extends 'layouts/base.html' %}
 
 {% block body %}
-{% include 'layouts/banner.html' %}
 
+<div id="loading" style="display:none;"></div>
+<div id="loadingbox" style="display:none;">Loading</div>
 
-<div id="loading",style="display:none;"></div>
-<div id="loadingbox",style="display:none;">Loading</div>
-
-<div class="container">
-  <div class="row justify-content-center">
-    <h2>UMAP Plot</h2>
-  </div>
-  <td>Gene Option</td>
-  <td>
-    <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
-      <input list="opt_gene" name="name_opt_gene">
-        <datalist id="opt_gene">
+<div class="section03">
+  <div class="container" style="margin:0px; padding: 0px;">
+    <div class="row justify-content-center">
+      <div class="boldauto36">UMAP Plot</div>
+    </div>
+    <div class="row justify-content-center" style="padding: 30px 0px">
+      <form id="form_gene" action="{{ url_for('tasks.show_plot')}}" method="post">
+        <select id="opt_gene" name="name_opt_gene" class="form-control selectpicker" title="Gene option"
+          data-live-search=“true”>
           {% for val in genes %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
-      </datalist>
-      <button id="idbtnSelectgene" name="btnSelectgene" type="submit" onclick="loading();"> Search </button>
-    </form>
-  </td>
+        </select>
+      </form>
+      <button id="idbtnSelectgene" name="btnSelectgene" type="submit" onclick="loading();" class="darkButton"
+        style="margin-left:16px;" form="form_gene">
+        Generate </button>
 
-  <td>Color Option</td>
-  <td>
-    <form action="{{ url_for('tasks.show_plot')}}" method="post" style="display:inline-block">
-      <select id="opt_col" name="name_opt_col">
-          <option label=" "></option>
+      <form id="form_col" action="{{ url_for('tasks.show_plot')}}" method="post" style="margin-left:16px;">
+        <select id="opt_col" name="name_opt_col" class="form-control selectpicker" title="Color option"
+          data-live-search=“true”>
           {% for val in colors %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
-      </select>
-      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Select </button>
+        </select>
+      </form>
+      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit" class="darkButton" style="margin-left:16px;"
+        form="form_col">
+        Select </button>
+    </div>
+  </div>
+
+  <div class="row" style="border: 0.5px solid #B4B6B8; width: 100vw; margin-left:-200px"></div>
+
+  <div class="row justify-content-end" style="padding-top: 30px">
+    <form action="{{ url_for('tasks.table_view')}}" method="get" style="display:inline-block;">
+      <button class="mediumButton" name="jump_home" type="submit"> Go to homepage</button>
     </form>
-  </td>
-   <div id="chart" class="chart"></div>
-   <div id="chart2" class="chart"></div>
+    <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block; padding-left: 30px">
+      <button class="mediumButton" name="download_matrix" type="submit"> Download matrix </button>
+    </form>
+  </div>
+
+  <div class="row justify-content-center" style="padding-top: 30px">
+    <div id="chart" class="chart"></div>
+  </div>
+  <div class="row justify-content-center" style="padding-top: 30px">
+    <div id="chart2" class="chart"></div>
+  </div>
 
 </div>
-
-<div class="jumbotron">
-  <h4>Please choose any of the option below for data manipulation.</h4>
-  <form action="{{ url_for('tasks.table_view')}}" method="get" style="display:inline-block">
-    <button class="btn btn-primary" name="jump_home" type="submit"> Go to homepage</button>
-  </form>
-  <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
-    <button class="btn btn-primary" name="download_matrix" type="submit"> Download matrix </button>
-  </form>
 </div>
-
 
 {% endblock %}
+
+
 
 {% block scripts %}
 
 <script>
-  document.addEventListener("DOMContentLoaded", function(event) {
-              var scrollpos = localStorage.getItem('scrollpos');
-              if (scrollpos) window.scrollTo(0, scrollpos);
-          });
+  document.addEventListener("DOMContentLoaded", function (event) {
+    var scrollpos = localStorage.getItem('scrollpos');
+    if (scrollpos) window.scrollTo(0, scrollpos);
+  });
 
-          window.onbeforeunload = function(e) {
-              localStorage.setItem('scrollpos', window.scrollY);
-          };
+  window.onbeforeunload = function (e) {
+    localStorage.setItem('scrollpos', window.scrollY);
+  };
 </script>
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -89,9 +97,9 @@
 
 <!-- Show loading box -->
 <script type="text/javascript">// <![CDATA[
-  function loading(){
-      $("#loading").show();
-      $("#loadingbox").show();
+  function loading() {
+    $("#loading").show();
+    $("#loadingbox").show();
   }
 // ]]></script>
 
