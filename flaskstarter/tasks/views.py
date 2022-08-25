@@ -36,9 +36,11 @@ import dash_bio
 from sklearn import preprocessing
 import seaborn as sns
 from tqdm import tqdm
-from celery import shared_task
+from celery import shared_task, chain
 import boto3
 from botocore.client import Config
+from concurrent.futures import ThreadPoolExecutor
+import threading
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
@@ -763,6 +765,7 @@ def write_umap(path, towrite):
             file.write('\n')
     return fn
 
+# @shared_task()
 def zip_10x_mtx(tmp_folder):
     if (not (exists(tmp_folder + '/matrix.zip'))):
         list_files = [
@@ -784,10 +787,11 @@ def zip_10x_mtx(tmp_folder):
 def upload_to_aws(zipfile_path):
     # Let's use Amazon S3
     print("uploading to AWS...")
-    s3 = boto3.client('s3', region_name='ap-east-1', endpoint_url='https://s3.ap-east-1.amazonaws.com',  config=Config(signature_version='s3v4'))
+    s3 = boto3.client('s3', region_name='ap-east-1', endpoint_url='https://s3.ap-east-1.amazonaws.com',  config=Config(signature_version='s3v4', connect_timeout=6000))
     prefix = os.path.dirname(zipfile_path).replace("/", "-").lstrip("-") + "-"
     awsfilename = prefix + os.path.basename(zipfile_path)
     s3.upload_file(zipfile_path, "covid19-cell-atlas-portal", awsfilename)
+    print("uploading to AWS finished...")
 
 
     url = s3.generate_presigned_url(
@@ -799,43 +803,245 @@ def upload_to_aws(zipfile_path):
     )
     return url
 
-def send_s3_link(url):
+def send_s3_link(url, user_email):
     print("sending email")
-    msg = Message('Hello from the other side!', sender='yin.angela1@gmail.com', recipients=['yin.danqing1@gmail.com'])
+    msg = Message('Hello from the other side!', sender='yin.angela1@gmail.com', recipients=[user_email])
     msg.body = "Hey, sending you this email from my Flask app, lmk if it works\nPlease download the data in this link:\n" + url
     mail.send(msg)
 
 
 
+# @shared_task()
+# def write_10x_mtx(tmp_folder, gene_dict, barcode_dict, doc_count, towrite, suffix):
+#     mtx = mongo.single_cell_meta_country.aggregate(towrite + [{"$project": {"_id": 0}}], allowDiskUse=True)
+#     part = str(suffix)
+#     file_abs_path = tmp_folder + '/matrix' + '_part' + part +'.mtx'
+#     print('writing matrix.mtx to' + file_abs_path)
+#     ##text=List of strings to be written to file
+#     with open(file_abs_path, 'w') as file:
+#         file.write("%%MatrixMarket matrix coordinate real general")
+#         file.write('\n')
+#         # gene_dict length
+#         file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(doc_count)]))
+#         file.write('\n')
+#         for line in tqdm(mtx, total=doc_count):
+#             #line = loads(line)
+#         #for line in towrite:
+#             # gene = mongo.genes.find_one({"gene_name":line["gene_name"]},{"gene_id":1, "_id":0})
+#             file.write(" ".join([
+#                 str(gene_dict[line['gene_name']]),
+#                 str(barcode_dict[line['barcode']]),
+#                 str(line['expression']),
+#             ]))
+#             file.write('\n')
+    # zip after file is generated
+    # zip_10x_mtx(tmp_folder)
+    # # upload to aws
+    # url = upload_to_aws(tmp_folder + '/matrix.zip')
+    # # send s3 link
+    # send_s3_link(url)
+
+
+# 0816 deprecated by junyi
 @shared_task()
-def write_10x_mtx(tmp_folder, gene_dict, barcode_dict, doc_count, towrite):
-    file_abs_path = tmp_folder + '/matrix.mtx'
-    print('writing matrix.mtx to' + file_abs_path)
+def write_10x_mtx_small(path, gene_dict, barcode_dict, query):
+    fn = path + '/matrix.mtx'
+    print('writing matrix.mtx to' + fn)
+    if isinstance(query, dict):
+        print("Getting instance of dict")
+        pipeline = [
+            {"$lookup": {"from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'}},
+            {"$match": query},
+            {"$project": {"matrix": 1, "_id": 0}},
+            {"$unwind": '$matrix'},
+            {"$replaceRoot": {"newRoot": "$matrix"}}
+        ]
+    elif isinstance(query, list) and len(query) == 1:
+        print("Getting instance of list and getting  first element")
+        pipeline = [
+            {"$lookup": {"from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'}},
+            {"$match": query[0]},
+            {"$project": {"matrix": 1, "_id": 0}},
+            {"$unwind": '$matrix'},
+            {"$replaceRoot": {"newRoot": "$matrix"}}
+        ]
+    else:
+        pipeline = [
+            {"$lookup": {"from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'}},
+            {"$match": {"$and": query}},
+            {"$project": {"matrix": 1, "_id": 0}},
+            {"$unwind": '$matrix'},
+            {"$replaceRoot": {"newRoot": "$matrix"}}
+        ]
+    mtx = mongo.single_cell_meta_country.aggregate(pipeline, allowDiskUse=True)
+    records = 0
     ##text=List of strings to be written to file
-    with open(file_abs_path, 'w') as file:
-        file.write("%%MatrixMarket matrix coordinate real general")
-        file.write('\n')
-        # gene_dict length
-        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(doc_count)]))
-        file.write('\n')
-        for line in tqdm(towrite, total=doc_count):
-            line = loads(line)
-        #for line in towrite:
-            # gene = mongo.genes.find_one({"gene_name":line["gene_name"]},{"gene_id":1, "_id":0})
-            file.write(" ".join([             
+    with open(fn + str("data"), 'w') as file:
+        for line in mtx:
+            file.write(" ".join([
                 str(gene_dict[line['gene_name']]),
                 str(barcode_dict[line['barcode']]),
                 str(line['expression']),
             ]))
             file.write('\n')
-    # zip after file is generated
-    zip_10x_mtx(tmp_folder)
-    # upload to aws
-    url = upload_to_aws(tmp_folder + '/matrix.zip')
-    # send s3 link
-    send_s3_link(url)
+            records = records + 1
+
+    with open(fn + str("header"), 'w') as file:
+        file.write("%%MatrixMarket matrix coordinate real general")
+        file.write('\n')
+        # gene_dict length
+        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(records)]))
+        file.write('\n')
+
+    destination = open(fn, 'w')
+    shutil.copyfileobj(open(fn + str("header"), 'r'), destination)
+    shutil.copyfileobj(open(fn + str("data"), 'r'), destination)
+    destination.close()
+
+    if os.path.exists(fn + str("header")):
+        os.remove(fn + str("header"))
+    if os.path.exists(fn + str("data")):
+        os.remove(fn + str("data"))
 
 
+# 0816 added by junyi
+@shared_task()
+def write_10x_mtx(path, gene_dict, barcode_dict, doc_count, query, user_email):
+    abs_path = path
+    fn = path + '/matrix.mtx'
+    print('writing matrix.mtx to' + fn)
+
+    def generate_cursor(query, skip, limit):
+        if isinstance(query, dict):
+            print("Getting instance of dict")
+            pipeline = [
+                {"$lookup": {"from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'}},
+                {"$match": query},
+                {"$project": {"matrix": 1, "_id": 0}},
+                {"$unwind": '$matrix'},
+                {"$replaceRoot": {"newRoot": "$matrix"}},
+                {"$skip": skip},
+                {"$limit": limit}
+            ]
+        elif isinstance(query, list) and len(query) == 1:
+            print("Getting instance of list and getting  first element")
+            pipeline = [
+                {"$lookup": {"from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'}},
+                {"$match": query[0]},
+                {"$project": {"matrix": 1, "_id": 0}},
+                {"$unwind": '$matrix'},
+                {"$replaceRoot": {"newRoot": "$matrix"}},
+                {"$skip": skip},
+                {"$limit": limit}
+
+            ]
+        else:
+            pipeline = [
+                {"$lookup": {"from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'}},
+                {"$match": {"$and": query}},
+                {"$project": {"matrix": 1, "_id": 0}},
+                {"$unwind": '$matrix'},
+                {"$replaceRoot": {"newRoot": "$matrix"}},
+                {"$skip": skip},
+                {"$limit": limit}
+            ]
+        cursor = mongo.single_cell_meta_country.aggregate(pipeline, allowDiskUse=True)
+        return cursor
+
+    def write_file_line(path, query, skip, limit, gene_dict, barcode_dict, count_dict):
+        print('writing matrix.mtx to' + path)
+        towrite = generate_cursor(query, skip, limit)
+        ##text=List of strings to be written to file
+        record = 0
+        with open(path, 'w') as file:
+            # gene_dict length
+            for line in towrite:
+                # for line in towrite:
+                # gene = mongo.genes.find_one({"gene_name":line["gene_name"]},{"gene_id":1, "_id":0})
+                file.write(" ".join([
+                    str(gene_dict[line['gene_name']]),
+                    str(barcode_dict[line['barcode']]),
+                    str(line['expression']),
+                ]))
+                file.write('\n')
+                record = record + 1
+
+        count_dict[path] = record
+
+    Nthreads = 4
+    count_dict = {}
+    threads = []
+
+    start_time_query = time.time()
+
+    for i in range(Nthreads):
+        if (i != Nthreads - 1):
+            skip = i * int(doc_count / Nthreads)
+            limit = int(doc_count / Nthreads)
+        else:
+            skip = i * int(doc_count / Nthreads)
+            limit = doc_count
+        path = fn + str(i)
+        t = threading.Thread(target=write_file_line,
+                             args=(path, query, skip, limit, gene_dict, barcode_dict, count_dict))
+        threads.append(t)
+        t.start()
+    start_time_write = time.time()
+
+    for t in threads:
+        t.join()
+    # c1 = generate_cursor(query,0*doc_count/Nthreads,doc_count/Nthreads)
+    # c2 = generate_cursor(query,1*doc_count/Nthreads,doc_count/Nthreads)
+    # c3 = generate_cursor(query,2*doc_count/Nthreads,doc_count/Nthreads)
+    # c4 = generate_cursor(query,3*doc_count/Nthreads,doc_count)
+
+    # print("Cursor finised in ",time.time()-start_time_query)
+
+    # thread1 = threading.Thread(target=write_file_line, args=[fn+str(0), query,0*doc_count/Nthreads,doc_count/Nthreads,gene_dict,barcode_dict,count_dict])
+    # thread2 = threading.Thread(target=write_file_line, args=[fn+str(1), query,1*doc_count/Nthreads,doc_count/Nthreads,gene_dict,barcode_dict,count_dict])
+    # thread3 = threading.Thread(target=write_file_line, args=[fn+str(2), query,2*doc_count/Nthreads,doc_count/Nthreads,gene_dict,barcode_dict,count_dict])
+    # thread4 = threading.Thread(target=write_file_line, args=[fn+str(3), query,3*doc_count/Nthreads,doc_count,gene_dict,barcode_dict,count_dict])
+
+    # thread1.start()
+    # thread2.start()
+    # thread3.start()
+    # thread4.start()
+
+    # thread1.join()
+    # thread2.join()
+    # thread3.join()
+    # thread4.join()
+
+    print("Writing finised in ", time.time() - start_time_write)
+
+    final_count = sum(count_dict.values())
+
+    with open(fn + str("header"), 'w') as file:
+        file.write("%%MatrixMarket matrix coordinate real general")
+        file.write('\n')
+        # gene_dict length
+        file.write(" ".join([str(len(gene_dict)), str(len(barcode_dict)), str(final_count)]))
+        file.write('\n')
+
+    destination = open(fn, 'w')
+    shutil.copyfileobj(open(fn + str("header"), 'r'), destination)
+    for i in range(Nthreads):
+        shutil.copyfileobj(open(fn + str(i), 'r'), destination)
+    destination.close()
+
+    for i in range(Nthreads):
+        if os.path.exists(fn + str(i)):
+            os.remove(fn + str(i))
+    if os.path.exists(fn + str("header")):
+        os.remove(fn + str("header"))
+
+    zip_10x_mtx(abs_path)
+
+    url = upload_to_aws(abs_path + "/matrix.zip")
+    # # send s3 link
+    send_s3_link(url, user_email)
+
+# 0816 added by junyi
 
 
        
@@ -922,6 +1128,10 @@ def download_scfeature():
 
 @tasks.route('/download_matrix', methods=['POST'])
 def download_matrix():
+    if request.form:
+        print(request.form)
+        user_email = request.form["address"]
+        print(user_email)
     user_timestamp = session.get("sess_timestamp")
     user_id = session["user_id"]
     # user_id = str(current_user.id)
@@ -944,46 +1154,34 @@ def download_matrix():
                 meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
         write_id_meta(tmp_folder, meta)
     # Down load 10x matrix if not exist
-    if (not (exists(tmp_folder + '/matrix.mtx.gz'))):
-        start_time2 = time.time()
-        if isinstance(session["query"], dict):
-            print("Getting instance of dict")
-            pipeline = [
-                {"$lookup": {"from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'}},
-                {"$match": session["query"]},
-                {"$project": {"matrix": 1, "_id": 0}},
-                {"$unwind": '$matrix'},
-                {"$replaceRoot": {"newRoot": "$matrix"}}
-            ]
-        elif isinstance(session["query"], list) and len(session["query"]) == 1:
-            print("Getting instance of list and getting  first element")
-            pipeline = [
-                {"$lookup": {"from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'}},
-                {"$match": session["query"][0]},
-                {"$project": {"matrix": 1, "_id": 0}},
-                {"$unwind": '$matrix'},
-                {"$replaceRoot": {"newRoot": "$matrix"}}
-            ]
-        else:
-            pipeline = [
-                {"$lookup": {"from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix'}},
-                {"$match": {"$and": session["query"]}},
-                {"$project": {"matrix": 1, "_id": 0}},
-                {"$unwind": '$matrix'},
-                {"$replaceRoot": {"newRoot": "$matrix"}}
-            ]
+    df_meta = pd.read_csv(tmp_folder + '/meta.tsv', index_col=1, sep="\t")
+    cell_nums = df_meta.shape[0]
+    estimated_expression = cell_nums * 3600
 
-        mtx = mongo.single_cell_meta_country.aggregate(pipeline + [{"$project": {"_id": 0}}], allowDiskUse=True)
+    if (not (exists(tmp_folder + '/matrix.mtx'))):
+        start_time2 = time.time()
+
+        ##### 0818 commented by junyi #####
+        # Move to small file download and file download
+        ##### 0818 commented by junyi #####
+
+        with open(tmp_folder + '/query.txt', 'a') as file:
+            file.write(str(session["query"]))
+            file.write('\n')
 
         print("query finished --- %s seconds ---" % (time.time() - start_time2))
 
+        start_time2 = time.time()
         # temporary check of length of matrix returned
         # doc_count = 1
         # {$setWindowFields: {output: {totalCount: {$count: {}}}}}
         # mtx = mongo.single_cell_meta_country.aggregate(pipeline + [{"$setWindowFields": {"output": {"totalCount": {"$count": {}}}}}],allowDiskUse=True)
         # doc_count = next(x["totalCount"] for x in mtx if x)
         # print(doc_count)
+        # explain = mongo.command('aggregate', "matrix", pipeline=pipeline, explain=True)
+        # print(explain)
         doc_count = 1
+        print("list finished --- %s seconds ---" % (time.time() - start_time2))
 
         ## Parse the barcode and gene based on name
         def get_dict(path, sep="\t", header=None, save_path=None):
@@ -1010,17 +1208,29 @@ def download_matrix():
 
         # Print start time for writing matrix
         start_time_wrtie = time.time()
+        # 0818 commented by junyi
+        if (cell_nums < 2000):
+            write_10x_mtx_small.delay(tmp_folder, dict_gene, dict_barcode, session["query"])
+        else:
+            write_10x_mtx.delay(tmp_folder, dict_gene, dict_barcode, estimated_expression, session["query"], user_email)
+        # write_10x_mtx_old(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
+        # 0818 commented by junyi
+        print("Write 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))
+    #
+    # if (not (exists(tmp_folder + '/matrix.zip'))):
+    #     list_files = [
+    #         tmp_folder + '/matrix.mtx',
+    #         tmp_folder + '/genes.tsv.gz',
+    #         tmp_folder + '/barcodes.tsv.gz',
+    #         tmp_folder + '/meta.tsv'
+    #     ]
+    #     checkpoint_time = time.time()
+    #     with zipfile.ZipFile(tmp_folder + '/matrix.zip', 'w') as zipMe:
+    #         for file in list_files:
+    #             if (exists(file)):
+    #                 zipMe.write(file, arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
+    #     print("zipping finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
-        serialized_results = [dumps(result, default=default, separators=(',', ':')) for result in mtx]
-        print(serialized_results[:2])
-
-        write_10x_mtx.delay(tmp_folder, dict_gene, dict_barcode, doc_count, serialized_results)
-        print("Write and zip 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))
-
-    #response = make_response(send_file(tmp_folder + '/matrix.zip', as_attachment=True))
-    #print("setting cookies")
-    #response.set_cookie(key='downloadID', value=user_id, max_age=1)
-    #return response
     return "Download Task submitted!"
 
 # Constructor for column-filter after multi-select

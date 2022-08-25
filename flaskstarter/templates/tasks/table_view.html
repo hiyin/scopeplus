@@ -117,6 +117,8 @@
             </div>
             <div>
                 <form class="download" action="{{ url_for('tasks.download_matrix')}}" method="post">
+                    <label for="name">Enter your address to receive file: </label>
+                    <input type="text" name="address" id="address" required>
                     <button class="mediumButton" name="download_matrix" type="submit" style="display:inline-block;">
                         Download Matrix </button>
                 </form>
