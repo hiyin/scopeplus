@@ -108,12 +108,7 @@
                     style="display:inline-block ; margin-right: 16px;"
                     onclick="window.location.href='{{ url_for( 'frontend.index' ) }}';"> Return to Home </button>
             </div>
-            <div>
-                <button class="mediumButton" name="refresh_table" type="submit"
-                    style="display:inline-block; margin-right: 16px;"
-                    onclick="window.location.href='{{ url_for( 'tasks.table_view', main='')}}';"> Refresh table
-                </button>
-            </div>
+
             <div>
                 <form class="download" action="{{ url_for('tasks.download_meta')}}" method="post">
                     <button class="mediumButton" name="download_meta" type="submit"
