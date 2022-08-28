@@ -53,6 +53,16 @@ a {
     color: #045547;
 }
 
+.boldauto22 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 30px;
+    text-transform: capitalize;
+    color: #045547;
+}
+
 .mediumauto22 {
     font-family: 'Inter';
     font-style: normal;
@@ -133,6 +143,11 @@ a {
     -webkit-appearance: none;
     font-size: 15px;
     display: inline-block;
+}
+
+.mediumButton a {
+    text-decoration: none !important;
+    color: white;
 }
 
 .lightButton {
@@ -870,4 +885,55 @@ body {
 
 #empTable_paginate .previous {
     margin-right: 15px;
+}
+
+/*Hidden Form*/
+.overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    transition: opacity 500ms;
+    visibility: hidden;
+    opacity: 0;
+    z-index: 20;
+    overflow: scroll;
+}
+
+.overlay:target {
+    visibility: visible;
+    opacity: 1;
+}
+
+.wrapper {
+    margin: 10% auto;
+    padding: 30px 50px;
+    background: white;
+    border-radius: 5px;
+    width: 30%;
+    position: relative;
+    transition: all 5s ease-in-out;
+}
+
+.wrapper .filterContainer {
+    border-radius: 5px;
+    background-color: #FFFFFF;
+    padding: 20px 0px;
+}
+
+.wrapper .filterContent {
+    min-width: 100%;
+}
+
+.wrapper .close {
+    position: absolute;
+    top: 20px;
+    right: 50px;
+    transition: all 200ms;
+    font-size: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #066453;
 }

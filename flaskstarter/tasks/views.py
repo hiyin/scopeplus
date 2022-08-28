@@ -463,15 +463,20 @@ def process_dendrogram(data,cell_type,plot_type="gene",title="Title"):
     df.columns = data.columns
     df.index = data.index
 
-    if(plot_type!="gene"):
-        df = df.transpose()
+    #if(plot_type!="gene"):
+    df = df.transpose()
 
-
+    if(len(list(df.index))>30):
+        hidden_labels = "row"
+    else:
+        hidden_labels = None
     fig2 = dash_bio.Clustergram(
         data=df,
         column_labels=list(df.columns.values),
         row_labels=list(df.index),
         #column_colors= list(col_colors),
+        row_colors= list(col_colors),
+        optimal_leaf_order = True,
         #row_colors_label= "Condition",
         color_map= [
         [0.0, '#000080'],
@@ -479,7 +484,14 @@ def process_dendrogram(data,cell_type,plot_type="gene",title="Title"):
         [1.0, '#ff0000']
         ],
         height=1000,
-        width=1200
+        width=1200,
+        hidden_labels=hidden_labels
+        # row_group_marker=[
+        # {'group': 1, 'annotation': 'cluster 1', 'color': '#f00314'},
+        # {'group': 2, 'annotation': 'cluster 2', 'color': '#ff8019'},
+        # {'group': 3, 'annotation': 'cluster 3', 'color': '#3bb5ff'},
+        # ]
+        
     )
     fig2.update_layout(
         title={
@@ -489,6 +501,11 @@ def process_dendrogram(data,cell_type,plot_type="gene",title="Title"):
         'xanchor': 'center',
         'yanchor': 'top'}
     )   
+    # import plotly.graph_objects as go
+    # fig2.add_trace(go.Bar(name="first", x=["a", "b"], y=[1,2]))
+    # fig2.add_trace(go.Bar(name="second", x=["a", "b"], y=[2,1]))
+    # fig2.add_trace(go.Bar(name="third", x=["a", "b"], y=[1,2]))
+    # fig2.add_trace(go.Bar(name="fourth", x=["a", "b"], y=[2,1]))
 
     #fig2.update_layout(title_text='Pie',layout_showlegend=False)    
     return fig2
@@ -812,8 +829,8 @@ def upload_to_aws(zipfile_path):
 
 def send_s3_link(url, user_email):
     print("sending email")
-    msg = Message('Hello from the other side!', sender='yin.angela1@gmail.com', recipients=[user_email])
-    msg.body = "Hey, sending you this email from my Flask app, lmk if it works\nPlease download the data in this link:\n" + url
+    msg = Message('[Covidscope] Your download link for requested resources is ready', sender='Covidsope (covidsc.d24h.hk)', recipients=[user_email])
+    msg.body = "Please download the requested resources in this link:\n" + url
     mail.send(msg)
 
 
@@ -1194,8 +1211,8 @@ def download_matrix():
     #             if (exists(file)):
     #                 zipMe.write(file, arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
     #     print("zipping finished --- %s seconds ---" % (time.time() - checkpoint_time))
-
-    return "Download Task submitted!"
+    flash('Download links to your requested resources will be delivered to your email provided within a few hours.')
+    return redirect(request.referrer)
 
 # Constructor for column-filter after multi-select
 def query_builder(map):
