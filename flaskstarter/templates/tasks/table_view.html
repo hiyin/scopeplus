@@ -104,9 +104,9 @@
 
         <div class="row justify-content-end" style="margin-top: 24px; margin-bottom: 30px">
             <div>
-                <button class="mediumButton" name="refresh_table" type="submit"
+                <button class="mediumButton" id="return_home" type="submit"
                     style="display:inline-block ; margin-right: 16px;"
-                    onclick="window.location.href='{{ url_for( 'frontend.index') }}';"> Return to Home </button>
+                    onclick="window.location.href='{{ url_for( 'frontend.index' ) }}';"> Return to Home </button>
             </div>
             <div>
                 <button class="mediumButton" name="refresh_table" type="submit"
@@ -248,6 +248,7 @@
 <script>
     // $.fn.DataTable.ext.pager.numbers_length = 20;
     $(document).ready(function () {
+
         // $(function(){$('.download').click(function() { ShowDownloadMessage(); }); })
 
         function ShowDownloadMessage() {
@@ -480,6 +481,20 @@
 </script>
  -->
 <script>
+       function getURL() {
+            console.log("The URL of this page is: " + window.location.href);
+        }
+
+        $('#return_home').click(function () {
+            getURL();
+            var url =  window.location.href;
+            var arr = url.split('?');
+            arr.pop();
+            console.log(arr[0])
+            window.location.href = arr[0];
+            {{ url_for('frontend.index')}}
+        });
+
     $('#scfbutton').click(function () {
         // document.getElementById('dsform').submit();
         document.getElementById('scfform').submit();
