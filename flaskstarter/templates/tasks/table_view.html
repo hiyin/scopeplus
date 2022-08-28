@@ -151,7 +151,7 @@
                                 placeholder="Email address" required>
                         </div>
                         <div class="row justify-content-center">
-                            <button class="mediumButton" name="download_matrix" type="submit"
+                            <button class="download mediumButton" name="download_matrix" type="submit"
                                 style="display:inline-block;" form="downloadMatrix">
                                 Download Matrix </button>
                         </div>
@@ -262,6 +262,10 @@
             $('#message').show();
         }
 
+        function HideForm() {
+            $('.overlay').hide();
+        }
+
         $('.download').click(
             function (event) {
                 var target = event.target;
@@ -293,6 +297,7 @@
                             console.log("Download complete!!Remove downloadID cookie!")
                         );
                     }
+                    HideForm();
                     ShowDownloadMessage();
                     //console.log(
                     //    "File still downloading...",
