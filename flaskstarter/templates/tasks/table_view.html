@@ -19,19 +19,21 @@
         <div class="row" id="globalsearch">
             <input style="width: 50%; height: 48px; display:inline-block" class="form-control" id="customSearchBox"
                 placeholder="Global Search" />
-            <input type="button" style="display:inline-block;margin-left: 16px;" class="darkButton" value="Search all"
+            <input type="button" style="display:inline-block;margin-left: 16px;" class="darkButton" value="Search All"
                 id="btnGSearch" />
-            <input type="button" style="display:inline-block;margin-left: 16px;" class="lightButton" value="Clear"
-                id="btnGClear" />
+            <input type="button" style="display:inline-block;margin-left: 16px;" class="lightButton"
+                value="Clear Search Filed" id="btnGClear" />
         </div>
-        <div class="row justify-content-between" style="margin-top: 24px; max-width: 1200px;">
-            <div><select id="opt_sampleid" class="multibox" multiple="multiple" name="name_tbv_sample" form="scfform">
+        <div class="row justify-content-start" style="margin: 24px -15px 0px 0px;">
+            <div style="margin: 10px 15px 0px 0px">
+                <select id="opt_sampleid" class="multibox" multiple="multiple" name="name_tbv_sample" form="scfform">
                     <option label=" "></option>
                     {% for val in fsampleid %}
                     <option value="{{val}}">{{val}}</option>
                     {% endfor %}
-                </select></div>
-            <div>
+                </select>
+            </div>
+            <div style="margin: 10px 15px 0px 0px">
                 <select id="opt_age" class="multibox" multiple="multiple" name="name_tbv_age" form="scfform">
                     <option label=" "></option>
                     {% for val in fage %}
@@ -39,7 +41,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
+            <div style="margin: 10px 15px 0px 0px">
                 <!-- Change by junyi 2022 0620-->
                 <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype"
                     form="scfform">
@@ -49,7 +51,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
+            <div style="margin: 10px 15px 0px 0px">
                 <select id="opt_donor" class="multibox" multiple="multiple" name="name_tbv_donor" form="scfform">
                     <option label=" "></option>
                     {% for val in fdonor %}
@@ -57,7 +59,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
+            <div style="margin: 10px 15px 0px 0px">
                 <select id="opt_status" class="multibox" multiple="multiple" name="name_tbv_status" form="scfform">
                     <option label=" "></option>
                     {% for val in fstatus %}
@@ -65,7 +67,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
+            <div style="margin: 10px 15px 0px 0px">
                 <select id="opt_dataset" class="multibox" multiple="multiple" name="name_tbv_dataset" form="scfform">
                     <option label=" "></option>
                     {% for val in fdataset %}
@@ -73,7 +75,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
+            <div style="margin: 10px 15px 0px 0px">
                 <select id="opt_country" class="multibox" multiple="multiple" name="name_tbv_country" form="scfform">
                     <option label=" "></option>
                     {% for val in fcountry %}
@@ -84,43 +86,50 @@
         </div>
 
         <div class="row justify-content-start" style="margin-top: 24px;">
-            <div><input type="button" class="darkButton" style="display:inline-block;" value="Search" id="btnSearch" />
+            <div><input type="button" class="darkButton" style="display:inline-block;" value="Filter Search"
+                    id="btnSearch" />
             </div>
-            <div><input type="button" class="lightButton" style="display:inline-block; margin-left: 16px;" value="Clear"
-                    id="btnClear" /></div>
+            <div><input type="button" class="lightButton" style="display:inline-block; margin-left: 16px;"
+                    value="Clear Filter" id="btnClear" /></div>
         </div>
 
         <div class="row justify-content-end" style="margin-top: 24px;">
             <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
             </form>
-            <div><button id="scfbutton" class="lightButton" name="show_scfeature"
-                    style="display:inline-block ; margin-right: 16px;"> Show scFeature plot
+            <div style="margin-top: 10px;"><button id="scfbutton" class="lightButton" name="show_scfeature"
+                    style="display:inline-block ; margin-right: 16px;"
+                    title='Select more than 2 items in each of Sample ID + Cell Type OR Dataset + Cell Type & Search before clicking this button (Sample IDs should come from more than 1 dataset)'>
+                    Show scFeature plot
                 </button></div>
-            <div>
+            <div style="margin-top: 10px;">
                 <button class="lightButton" name="show_plot" type="submit" style="display:inline-block;"
-                    onclick="window.location.href='{{ url_for( 'tasks.show_plot') }}';"> Show UMAP Plot </button>
+                    onclick="window.location.href='{{ url_for( 'tasks.show_plot') }}';"
+                    title='Select 1 Cell Type & Search before clicking this button'> Show UMAP Plot </button>
             </div>
         </div>
 
-        <div class="row justify-content-end" style="margin-top: 24px; margin-bottom: 30px">
-            <div>
-                <button class="mediumButton" name="refresh_table" type="submit"
-                    style="display:inline-block ; margin-right: 16px;"
+        <div class="row justify-content-end" style="margin: 14px -10px 30px 0px;">
+            <div style="margin: 10px 10px 0px 0px;">
+                <button class="mediumButton" name="refresh_table" type="submit" style="display:inline-block ;"
                     onclick="window.location.href='{{ url_for( 'frontend.index') }}';"> Return to Home </button>
             </div>
-            <div>
-                <button class="mediumButton" name="refresh_table" type="submit"
-                    style="display:inline-block; margin-right: 16px;"
+            <div style="margin: 10px 10px 0px 0px;">
+                <button class="mediumButton" name="refresh_table" type="submit" style="display:inline-block;"
                     onclick="window.location.href='{{ url_for( 'tasks.table_view', main='')}}';"> Refresh table
                 </button>
             </div>
-            <div>
+            <div style="margin: 10px 10px 0px 0px;"><button id="btnAdvance" class="mediumButton"
+                    style="display:inline-block ;" title='Show/Hide Advanced Search'>
+                    Advanced
+                    Search
+                </button></div>
+            <div style="margin: 10px 10px 0px 0px;">
                 <form class="download" action="{{ url_for('tasks.download_meta')}}" method="post">
-                    <button class="mediumButton" name="download_meta" type="submit"
-                        style="display:inline-block; margin-right: 16px;"> Download Metadata </button>
+                    <button class="mediumButton" name="download_meta" type="submit" style="display:inline-block;">
+                        Download Metadata </button>
                 </form>
             </div>
-            <div>
+            <div style="margin: 10px 10px 0px 0px;">
                 <div class="mediumButton" style="display:inline-block;"><a href="#DownloadMatrixForm">Download
                         Matrix</a>
                 </div>
@@ -308,7 +317,7 @@
         );
 
 
-        //$("#globalsearch").hide();
+        $("#globalsearch").hide();
 
         $("#btnAdvance").click(function () {
             $("#globalsearch").toggle();
@@ -507,6 +516,11 @@
         diff = (endTime - startTime);
         console.log(diff);
     });
+
+    $('.buttonID').click(
+        do ();
+        do_more();
+    )
 
 </script>
 
