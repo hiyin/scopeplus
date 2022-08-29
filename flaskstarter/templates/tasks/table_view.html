@@ -89,7 +89,7 @@
             <div><input type="button" class="darkButton" style="display:inline-block;" value="Filter Search"
                     id="btnSearch" />
             </div>
-            <div><input type="button" class="lightButton" style="display:inline-block; margin-left: 16px;"
+            <div><input type="button" class="lightButton" style="display:inline-block; margin-left: 15px;"
                     value="Clear Filter" id="btnClear" /></div>
         </div>
 
@@ -97,7 +97,7 @@
             <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
             </form>
             <div style="margin-top: 10px;"><button id="scfbutton" class="lightButton" name="show_scfeature"
-                    style="display:inline-block ; margin-right: 16px;"
+                    style="display:inline-block ; margin-right: 15px;"
                     title='Select more than 2 items in each of Sample ID + Cell Type OR Dataset + Cell Type & Search before clicking this button (Sample IDs should come from more than 1 dataset)'>
                     Show scFeature plot
                 </button></div>
@@ -108,28 +108,25 @@
             </div>
         </div>
 
-        <div class="row justify-content-end" style="margin: 14px -10px 30px 0px;">
-            <div style="margin: 10px 10px 0px 0px;">
-                <button class="mediumButton" name="refresh_table" type="submit" style="display:inline-block ;"
-                    onclick="window.location.href='{{ url_for( 'frontend.index') }}';"> Return to Home </button>
+        <div class="row justify-content-end" style="margin: 14px -15px 30px 0px;">
+            <div style="margin: 10px 15px 0px 0px;">
+                <button class="mediumButton" id="return_home" type="submit" style="display:inline-block ;"
+                    onclick="window.location.href='{{ url_for( 'frontend.index' ) }}';"> Return to Home </button>
             </div>
-            <div style="margin: 10px 10px 0px 0px;">
-                <button class="mediumButton" name="refresh_table" type="submit" style="display:inline-block;"
-                    onclick="window.location.href='{{ url_for( 'tasks.table_view', main='')}}';"> Refresh table
-                </button>
-            </div>
-            <div style="margin: 10px 10px 0px 0px;"><button id="btnAdvance" class="mediumButton"
+
+            <div style="margin: 10px 15px 0px 0px;"><button id="btnAdvance" class="mediumButton"
                     style="display:inline-block ;" title='Show/Hide Advanced Search'>
                     Advanced
                     Search
                 </button></div>
-            <div style="margin: 10px 10px 0px 0px;">
+
+            <div style="margin: 10px 15px 0px 0px;">
                 <form class="download" action="{{ url_for('tasks.download_meta')}}" method="post">
                     <button class="mediumButton" name="download_meta" type="submit" style="display:inline-block;">
                         Download Metadata </button>
                 </form>
             </div>
-            <div style="margin: 10px 10px 0px 0px;">
+            <div style="margin: 10px 15px 0px 0px;">
                 <div class="mediumButton" style="display:inline-block;"><a href="#DownloadMatrixForm">Download
                         Matrix</a>
                 </div>
@@ -257,6 +254,7 @@
 <script>
     // $.fn.DataTable.ext.pager.numbers_length = 20;
     $(document).ready(function () {
+
         // $(function(){$('.download').click(function() { ShowDownloadMessage(); }); })
 
         function ShowDownloadMessage() {
@@ -489,6 +487,20 @@
 </script>
  -->
 <script>
+    function getURL() {
+        console.log("The URL of this page is: " + window.location.href);
+    }
+
+    $('#return_home').click(function () {
+        getURL();
+        var url = window.location.href;
+        var arr = url.split('?');
+        arr.pop();
+        console.log(arr[0])
+        window.location.href = arr[0];
+        { { url_for('frontend.index') } }
+    });
+
     $('#scfbutton').click(function () {
         // document.getElementById('dsform').submit();
         document.getElementById('scfform').submit();
