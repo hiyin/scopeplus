@@ -11,12 +11,29 @@
 }
 
 button:hover,
-button:focus {
-    outline: none;
+button:focus,
+button:active {
+    outline: none !important;
 }
+
+
 
 tr.spaceTop>td {
     padding-top: 24px;
+}
+
+input::-webkit-calendar-picker-indicator {
+    display: none !important;
+}
+
+input:hover,
+input:focus,
+input:active {
+    outline: none !important;
+}
+
+a {
+    text-decoration: none !important;
 }
 
 /*font*/
@@ -44,6 +61,16 @@ tr.spaceTop>td {
     color: #045547;
 }
 
+.boldauto22 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 22px;
+    line-height: 30px;
+    text-transform: capitalize;
+    color: #045547;
+}
+
 .mediumauto22 {
     font-family: 'Inter';
     font-style: normal;
@@ -53,6 +80,14 @@ tr.spaceTop>td {
     text-indent: 0.166506px;
     color: #FFFFFF;
     vertical-align: middle;
+}
+
+.mediumauto18 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: bold;
+    font-size: 18px;
+    line-height: 22px;
 }
 
 .regularH160 {
@@ -90,6 +125,59 @@ tr.spaceTop>td {
     line-height: 19px;
     text-align: center;
     color: #607673;
+}
+
+/*button*/
+
+.darkButton {
+    background: #045547;
+    box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
+    border-radius: 8px;
+    padding: 10px 40px;
+    border: 0px;
+    color: #ffffff;
+    -webkit-appearance: none;
+    font-size: 15px;
+    display: inline-block;
+}
+
+.mediumButton {
+    background: #1CA68C;
+    box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
+    border-radius: 8px;
+    padding: 10px 40px;
+    border: 0px;
+    color: #FFFFFF;
+    -webkit-appearance: none;
+    font-size: 15px;
+    display: inline-block;
+}
+
+.mediumButton a {
+    text-decoration: none !important;
+    color: white;
+}
+
+.lightButton {
+    background: #E2EEE8;
+    box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
+    border-radius: 8px;
+    padding: 10px 40px;
+    border: 0px;
+    color: #045547;
+    -webkit-appearance: none;
+    font-size: 15px;
+    display: inline-block;
+}
+
+.multiselect-container {
+    width: 300px;
+}
+
+.bootstrap-select button {
+    width: 200px !important;
+    background-color: white;
+    overflow: visible;
 }
 
 /*nav*/
@@ -197,40 +285,7 @@ tr.spaceTop>td {
     justify-items: start;
 }
 
-/*button*/
 
-.darkButton {
-    background: #045547;
-    box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
-    border-radius: 8px;
-    padding: 10px 44px;
-    border: 0px;
-    color: #ffffff;
-    -webkit-appearance: none;
-    font-size: 15px;
-}
-
-.mediumButton {
-    background: #1CA68C;
-    box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
-    border-radius: 8px;
-    padding: 10px 44px;
-    border: 0px;
-    color: #FFFFFF;
-    -webkit-appearance: none;
-    font-size: 15px;
-}
-
-.lightButton {
-    background: #E2EEE8;
-    box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
-    border-radius: 8px;
-    padding: 10px 44px;
-    border: 0px;
-    color: #045547;
-    -webkit-appearance: none;
-    font-size: 15px;
-}
 
 
 
@@ -515,9 +570,6 @@ body {
     background: #045547;
     box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
     border-radius: 8px;
-    -webkit-appearance: button;
-    -moz-appearance: button;
-    appearance: button;
     text-decoration: none;
     text-align: center;
     margin-top: 20px;
@@ -838,4 +890,59 @@ body {
 
 #empTable_paginate .previous {
     margin-right: 15px;
+}
+
+/*Hidden Form*/
+.overlay {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    transition: opacity 500ms;
+    visibility: hidden;
+    opacity: 0;
+    z-index: 20;
+    overflow: scroll;
+}
+
+.overlay:target {
+    visibility: visible;
+    opacity: 1;
+}
+
+.wrapper {
+    margin: 10% auto;
+    padding: 30px 50px;
+    background: white;
+    border-radius: 5px;
+    width: 30%;
+    position: relative;
+    transition: all 5s ease-in-out;
+}
+
+.wrapper .filterContainer {
+    border-radius: 5px;
+    background-color: #FFFFFF;
+    padding: 20px 0px;
+}
+
+.wrapper .filterContent {
+    min-width: 100%;
+}
+
+.wrapper .close {
+    position: absolute;
+    top: 20px;
+    right: 50px;
+    transition: all 200ms;
+    font-size: 30px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #066453;
+}
+
+.btn-group {
+    width: 158px !important;
 }

@@ -5,89 +5,109 @@
 {% extends 'layouts/base.html' %}
 
 {% block body %}
-{% include 'layouts/banner.html' %}
+
+<div id="loading" ,style="display:none;"></div>
+<div id="loadingbox" ,style="display:none;">Loading</div>
+
+<div class="section03">
+  <div class="container" style="margin:0px; padding: 0px;">
+    <div class="row justify-content-center">
+      <div class="boldauto36">scFeature Plots</div>
+    </div>
+    <!-- <td>Cell type</td>
+    <td>
+      <form action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
+        <input list="opt_gene" name="name_opt_gene">
+          <datalist id="opt_gene">
+            {% for val in genes %}
+            <option value="{{val}}">{{val}}</option>
+            {% endfor %}
+        </datalist>
+        <button id="idbtnSelectgene" name="btnSelectgene" type="submit" > Search </button>
+      </form>  
+    </td> -->
+
+    <!-- <td>Dataset</td> -->
+    <div class="row justify-content-center" style="padding: 30px 0px">
+      <form id="form_sCf" action="{{ url_for('tasks.show_scfeature')}}" method="post" hidden>
+        <!-- <select id="opt_dataset" name="name_opt_dataset">
+            <option label=" "></option>
+            {% for val in datasets %}
+            <option value="{{val}}">{{val}}</option>
+            {% endfor %}
+        </select> -->
+      </form>
+      <div style="width: 200px !important; overflow:visible">
+        <select id="opt_celltype" name="name_opt_celltype" class="form-control selectpicker" title="Cell Type"
+          form="form_sCf" style="width:300px;" data-live-search=“true”>
+          {% for val in celltypes %}
+          <option value="{{val}}">{{val}}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div style="width: 200px !important; overflow:visible !important;">
+        <select id="opt_feature" name="name_opt_feature" class="form-control selectpicker" title="Pathways"
+          form="form_sCf" style="width:300px; margin-left:16px;" data-live-search=“true”>
+          {% for val in features %}
+          <option value="{{val}}">{{val}}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit" class="darkButton" style="margin-left:16px;"
+        form="form_sCf">
+        Select </button>
+    </div>
+
+    <div class="row" style="border: 0.5px solid #B4B6B8; width: 100vw; margin-left:-200px"></div>
 
 
-<div id="loading",style="display:none;"></div>
-<div id="loadingbox",style="display:none;">Loading</div>
+    <div class="row justify-content-end" style="padding-top: 30px">
+      <form action="{{ url_for('tasks.table_view')}}" method="get" style="display:inline-block">
+        <button class="mediumButton" name="jump_home" type="submit"> Go to homepage</button>
+      </form>
+      <form action="{{ url_for('tasks.download_scfeature')}}" method="post"
+        style="display:inline-block; margin-left:16px;">
+        <button class="mediumButton" name="download_scfeature" type="submit"> Download scFeatures </button>
+      </form>
+    </div>
 
-<div class="container">
-  <div class="row justify-content-center">
-    <h2>scFeature Plots</h2>
+    <div class="row justify-content-center" style="padding-top: 30px">
+      <div id="chart" class="chart"></div>
+    </div>
+
+    <div class="row justify-content-center" style="padding-top: 30px">
+      <div id="chart4" class="chart"></div>
+    </div>
+
+    <div class="row justify-content-center" style="padding-top: 30px">
+      <div id="chart2" class="chart"></div>
+    </div>
+
+    <div class="row justify-content-center" style="padding-top: 30px">
+      <div id="chart3" class="chart"></div>
+    </div>
+
   </div>
-  <!-- <td>Cell type</td>
-  <td>
-    <form action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
-      <input list="opt_gene" name="name_opt_gene">
-        <datalist id="opt_gene">
-          {% for val in genes %}
-          <option value="{{val}}">{{val}}</option>
-          {% endfor %}
-      </datalist>
-      <button id="idbtnSelectgene" name="btnSelectgene" type="submit" > Search </button>
-    </form>  
-  </td> -->
 
-  <!-- <td>Dataset</td> -->
-  <td>
-    <form action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
-      <!-- <select id="opt_dataset" name="name_opt_dataset">
-          <option label=" "></option>
-          {% for val in datasets %}
-          <option value="{{val}}">{{val}}</option>
-          {% endfor %}
-      </select> -->
-
-      <td>Cell types</td>
-      <select id="opt_celltype" name="name_opt_celltype">
-        <option label=" "></option>
-        {% for val in celltypes %}
-        <option value="{{val}}">{{val}}</option>
-        {% endfor %}
-      </select>
-      <td>Pathways</td>
-      <select id="opt_feature" name="name_opt_feature">
-        <option label=" "></option>
-        {% for val in features %}
-        <option value="{{val}}">{{val}}</option>
-        {% endfor %}
-      </select>
-      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit"> Select </button>
-    </form>  
-  </td>
-
-   <div id="chart" class="chart"></div>
-   <div id="chart4" class="chart"></div>
-   <div id="chart2" class="chart"></div>
-   <div id="chart3" class="chart"></div>
-
-
-</div>
-
-
-<div class="jumbotron">
-  <h4>Please choose any of the option below for data manipulation.</h4>
-  <form action="{{ url_for('tasks.table_view')}}" method="get" style="display:inline-block">
-    <button class="btn btn-primary" name="jump_home" type="submit"> Go to homepage</button>
-  </form>
-  <form action="{{ url_for('tasks.download_scfeature')}}" method="post" style="display:inline-block">
-    <button class="btn btn-primary" name="download_scfeature" type="submit"> Download scFeatures </button>
-  </form>
 </div>
 
 {% endblock %}
 
+
+
 {% block scripts %}
 
 <script>
-  document.addEventListener("DOMContentLoaded", function(event) {
-              var scrollpos = localStorage.getItem('scrollpos');
-              if (scrollpos) window.scrollTo(0, scrollpos);
-          });
-  
-          window.onbeforeunload = function(e) {
-              localStorage.setItem('scrollpos', window.scrollY);
-          };
+  document.addEventListener("DOMContentLoaded", function (event) {
+    var scrollpos = localStorage.getItem('scrollpos');
+    if (scrollpos) window.scrollTo(0, scrollpos);
+  });
+
+  window.onbeforeunload = function (e) {
+    localStorage.setItem('scrollpos', window.scrollY);
+  };
 </script>
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
@@ -124,9 +144,9 @@
 
 <!-- Show loading box -->
 <script type="text/javascript">// <![CDATA[
-  function loading(){
-      $("#loading").show();
-      $("#loadingbox").show();       
+  function loading() {
+    $("#loading").show();
+    $("#loadingbox").show();
   }
 // ]]></script>
 
@@ -140,7 +160,7 @@
     } else {
       x.style.display = "none";
     }
-}// ]]></script>
+  }// ]]></script>
 
 
 {% endblock %}

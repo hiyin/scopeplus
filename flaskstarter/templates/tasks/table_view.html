@@ -12,26 +12,28 @@
 </div>
 
 <div class="section03" style="padding-left: 120px; padding-right: 120px;">
-    <div class="container" style="padding: 0px;">
+    <div id="searchPage" class="container" style="padding: 0px;">
         <div class="row justify-content-start">
             <div class="boldauto36" style="padding-bottom: 30px;">Explore scRNA-seq Data</div>
         </div>
         <div class="row" id="globalsearch">
             <input style="width: 50%; height: 48px; display:inline-block" class="form-control" id="customSearchBox"
                 placeholder="Global Search" />
-            <input type="button" style="display:inline-block;margin-left: 16px;" class="darkButton" value="Search all"
+            <input type="button" style="display:inline-block;margin-left: 16px;" class="darkButton" value="Search All"
                 id="btnGSearch" />
-            <input type="button" style="display:inline-block;margin-left: 16px;" class="lightButton" value="Clear"
-                id="btnGClear" />
+            <input type="button" style="display:inline-block;margin-left: 16px;" class="lightButton"
+                value="Clear Search Filed" id="btnGClear" />
         </div>
-        <div class="row justify-content-between" style="margin-top: 24px; max-width: 1200px;">
-            <div><select id="opt_sampleid" class="multibox" multiple="multiple" name="name_tbv_sample" form="scfform">
+        <div class="row justify-content-start" style="margin: 24px -15px 0px 0px;">
+            <div style="margin: 10px 15px 0px 0px">
+                <select id="opt_sampleid" class="multibox" multiple="multiple" name="name_tbv_sample" form="scfform">
                     <option label=" "></option>
                     {% for val in fsampleid %}
                     <option value="{{val}}">{{val}}</option>
                     {% endfor %}
-                </select></div>
-            <div>
+                </select>
+            </div>
+            <div style="margin: 10px 15px 0px 0px">
                 <select id="opt_age" class="multibox" multiple="multiple" name="name_tbv_age" form="scfform">
                     <option label=" "></option>
                     {% for val in fage %}
@@ -39,7 +41,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
+            <div style="margin: 10px 15px 0px 0px">
                 <!-- Change by junyi 2022 0620-->
                 <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype"
                     form="scfform">
@@ -49,7 +51,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
+            <div style="margin: 10px 15px 0px 0px">
                 <select id="opt_donor" class="multibox" multiple="multiple" name="name_tbv_donor" form="scfform">
                     <option label=" "></option>
                     {% for val in fdonor %}
@@ -57,7 +59,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
+            <div style="margin: 10px 15px 0px 0px">
                 <select id="opt_status" class="multibox" multiple="multiple" name="name_tbv_status" form="scfform">
                     <option label=" "></option>
                     {% for val in fstatus %}
@@ -65,7 +67,7 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
+            <div style="margin: 10px 15px 0px 0px">
                 <select id="opt_dataset" class="multibox" multiple="multiple" name="name_tbv_dataset" form="scfform">
                     <option label=" "></option>
                     {% for val in fdataset %}
@@ -73,7 +75,33 @@
                     {% endfor %}
                 </select>
             </div>
-            <div>
+            <div style="margin: 10px 15px 0px 0px">
+                <select id="opt_onset" class="multibox" multiple="multiple" name="name_tbv_onset" form="scfform">
+                    <option label=" "></option>
+                    {% for val in fonset %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin: 10px 15px 0px 0px">
+                <select id="opt_outcome" class="multibox" multiple="multiple" name="name_tbv_outcome" form="scfform">
+                    <option label=" "></option>
+                    {% for val in foutcome %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="margin: 10px 15px 0px 0px">
+                <select id="opt_gender" class="multibox" multiple="multiple" name="name_tbv_gender" form="scfform">
+                    <option label=" "></option>
+                    {% for val in fgender %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="margin: 10px 15px 0px 0px">
                 <select id="opt_country" class="multibox" multiple="multiple" name="name_tbv_country" form="scfform">
                     <option label=" "></option>
                     {% for val in fcountry %}
@@ -84,53 +112,95 @@
         </div>
 
         <div class="row justify-content-start" style="margin-top: 24px;">
-            <div><input type="button" class="darkButton" style="display:inline-block;" value="Search" id="btnSearch" />
+            <div><input type="button" class="darkButton" style="display:inline-block;" value="Filter Search"
+                    id="btnSearch" />
             </div>
-            <div><input type="button" class="lightButton" style="display:inline-block; margin-left: 16px;" value="Clear"
-                    id="btnClear" /></div>
+            <div><input type="button" class="lightButton" style="display:inline-block; margin-left: 15px;"
+                    value="Clear Filter" id="btnClear" /></div>
         </div>
 
         <div class="row justify-content-end" style="margin-top: 24px;">
             <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
             </form>
-            <div><button id="scfbutton" class="lightButton" name="show_scfeature"
-                    style="display:inline-block ; margin-right: 16px;"> Show scFeature plot
+            <div style="margin-top: 10px;"><button id="scfbutton" class="lightButton" name="show_scfeature"
+                    style="display:inline-block ; margin-right: 15px;" form="scfform"
+                    title='Select more than 2 items in each of Sample ID + Cell Type OR Dataset + Cell Type & Search before clicking this button (Sample IDs should come from more than 1 dataset)'>
+                    Show scFeature plot
                 </button></div>
-            <div>
+            <div style="margin-top: 10px;">
                 <button class="lightButton" name="show_plot" type="submit" style="display:inline-block;"
-                    onclick="window.location.href='{{ url_for( 'tasks.show_plot') }}';"> Show UMAP Plot </button>
+                    onclick="window.location.href='{{ url_for( 'tasks.show_plot') }}';"
+                    title='Select 1 Cell Type & Search before clicking this button'> Show UMAP Plot </button>
             </div>
         </div>
 
-        <div class="row justify-content-end" style="margin-top: 24px; margin-bottom: 100px">
-            <div>
-                <button class="mediumButton" name="refresh_table" type="submit"
-                    style="display:inline-block ; margin-right: 16px;"
-                    onclick="window.location.href='{{ url_for( 'frontend.index') }}';"> Return to Home </button>
+        <div class="row justify-content-end" style="margin: 14px -15px 30px 0px;">
+            <div style="margin: 10px 15px 0px 0px;">
+                <button class="mediumButton" id="return_home" type="submit" style="display:inline-block ;"
+                    onclick="window.location.href='{{ url_for( 'frontend.index' ) }}';"> Return to Home </button>
             </div>
-            <div>
-                <button class="mediumButton" name="refresh_table" type="submit"
-                    style="display:inline-block; margin-right: 16px;"
-                    onclick="window.location.href='{{ url_for( 'tasks.table_view', main='')}}';"> Refresh table
-                </button>
-            </div>
-            <div>
+
+            <div style="margin: 10px 15px 0px 0px;"><button id="btnAdvance" class="mediumButton"
+                    style="display:inline-block ;" title='Show/Hide Advanced Search'>
+                    Advanced
+                    Search
+                </button></div>
+
+            <div style="margin: 10px 15px 0px 0px;">
                 <form class="download" action="{{ url_for('tasks.download_meta')}}" method="post">
-                    <button class="mediumButton" name="download_meta" type="submit"
-                        style="display:inline-block; margin-right: 16px;"> Download Metadata </button>
+                    <button class="mediumButton" name="download_meta" type="submit" style="display:inline-block;">
+                        Download Metadata </button>
                 </form>
             </div>
-            <div>
-                <form class="download" action="{{ url_for('tasks.download_matrix')}}" method="post">
-                    <button class="mediumButton" name="download_matrix" type="submit" style="display:inline-block;">
-                        Download Matrix </button>
+            <div id="matrixFormButton" style="margin: 10px 15px 0px 0px;">
+                <form id="downloadMatrix" class="download" action="{{ url_for('tasks.download_matrix')}}" method="post">
                 </form>
+                <div class="mediumButton" style="display:inline-block;"><a href="#DownloadMatrixForm">Download
+                        Matrix</a>
+                </div>
+            </div>
+            <div id="matrixDownloadButton" style="margin: 10px 15px 0px 0px;">
+                <button class="mediumButton" name="download_matrix" type="submit" style="display:inline-block;"
+                    form="downloadMatrix">
+                    Download Matrix </button>
+            </div>
+        </div>
+
+        <div class="overlay" id="DownloadMatrixForm">
+            <div class="wrapper container justify-content-center">
+                <div style="margin-right: auto;">
+                    <a href="#searchPage" class="close">&times;</a>
+                </div>
+                <div class="row justify-content-center">
+                    <div class=" boldauto36">
+                        Dowload Form
+                    </div>
+                </div>
+                <div class="filterContent row justify-content-center">
+                    <div class="filterContainer justify-content-center">
+                        <div class="row justify-content-center">
+                            <label form="downloadMatrix" class="mediumauto16" for="name">Email
+                                address for receiving
+                                file: </label>
+                        </div>
+                        <div class="row justify-content-center" style="margin-bottom: 40px">
+                            <input id="emailInput" form="downloadMatrix" class="form-control" type="text" name="address"
+                                id="address" placeholder="Email address" required>
+                        </div>
+                        <div class="row justify-content-center">
+                            <button id="dowloadSubmitButton" class="mediumButton" name="download_matrix" type="submit"
+                                style="display:inline-block;" form="downloadMatrix">
+                                Download Matrix </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
 
+        <div class="row" style="border: 0.5px solid #B4B6B8; width: 100vw; margin: 0px 0px 70px -150px;"></div>
 
-        <div class="row" style="margin-top: 24px;" hidden>
+        <div class="row" style="margin-top: 70px;" hidden>
             <table style="width:100%">
                 <tbody>
                     <tr>
@@ -161,12 +231,15 @@
             <thead>
                 <tr>
                     <th>id</th>
-                    <th>sampleId</th>
+                    <th>sample id</th>
                     <th>age</th>
                     <th>prediction</th>
                     <th>donor</th>
                     <th>dataset</th>
                     <th>status</th>
+                    <th>days from onset</th>
+                    <th>outcome</th>
+                    <th>gender</th>
                     <th>country</th>
                 </tr>
             </thead>
@@ -188,13 +261,12 @@
                     Thank you for your download!
                 </strong>
             </p>
-
-
-
         </div>
 
     </div>
 </div>
+
+
 {% endblock %}
 
 {% block scripts %}
@@ -216,6 +288,7 @@
 <script>
     // $.fn.DataTable.ext.pager.numbers_length = 20;
     $(document).ready(function () {
+
         // $(function(){$('.download').click(function() { ShowDownloadMessage(); }); })
 
         function ShowDownloadMessage() {
@@ -228,6 +301,10 @@
             // window.removeEventListener('focus', HideDownloadMessage, false);
             $('#message-text').text('Your file completed download!');
             $('#message').show();
+        }
+
+        function HideForm() {
+            $('.overlay').hide();
         }
 
         $('.download').click(
@@ -261,7 +338,9 @@
                             console.log("Download complete!!Remove downloadID cookie!")
                         );
                     }
+
                     ShowDownloadMessage();
+
                     //console.log(
                     //    "File still downloading...",
                     //    new Date().getTime()
@@ -270,12 +349,15 @@
             }
         );
 
+        $('#downloadMatrix').submit(
+            function (event) {
+                HideForm()
+            })
 
 
+        $("#globalsearch").hide();
 
-
-
-        //$("#globalsearch").hide();
+        $("#matrixDownloadButton").hide();
 
         $("#btnAdvance").click(function () {
             $("#globalsearch").toggle();
@@ -341,6 +423,36 @@
             maxHeight: 450
         });
 
+        $('#opt_onset').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Days from onset',
+            buttonWidth: '300px',
+            maxHeight: 450
+        });
+
+        $('#opt_outcome').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Outcome',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
+
+        $('#opt_gender').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Gender',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
+
 
         $('#opt_country').multiselect({
             includeSelectAllOption: true,
@@ -375,6 +487,9 @@
                 { data: 'donor' },
                 { data: 'dataset' },
                 { data: 'status' },
+                { data: 'onset' },
+                { data: 'outcome' },
+                { data: 'gender' },
                 { data: 'country' },
 
             ],
@@ -387,6 +502,9 @@
                 { "width": "14%", "targets": 5 },
                 { "width": "14%", "targets": 6 },
                 { "width": "14%", "targets": 7 },
+                { "width": "14%", "targets": 8 },
+                { "width": "14%", "targets": 9 },
+                { "width": "14%", "targets": 10 },
             ],
             initComplete: function () {
                 var input = $('#customSearchBox').unbind(),
@@ -401,12 +519,14 @@
                         .click(function () {
                             input.val('');
                             $searchButton.click();
+                            //var perviousEntries = Number(entries);
                         })
             }
 
         });
 
         oTable = $('#empTable').DataTable();
+
         $('#btnSearch').click(function () {
             //Apply search for Employee Name // DataTable column index 0
             oTable.columns(0).search($('#txt_id').val().trim());
@@ -417,10 +537,14 @@
             oTable.columns(4).search($('#opt_donor').val().join("|"));
             oTable.columns(5).search($('#opt_dataset').val().join("|"));
             oTable.columns(6).search($('#opt_status').val().join("|"));
-            oTable.columns(7).search($('#opt_country').val().join("|"));
+            oTable.columns(7).search($('#opt_onset').val().join("|"));
+            oTable.columns(8).search($('#opt_outcome').val().join("|"));
+            oTable.columns(9).search($('#opt_gender').val().join("|"));
+            oTable.columns(10).search($('#opt_country').val().join("|"));
             //hit search on server
             oTable.draw();
         });
+
         $('#btnClear').click(function () {
 
             oTable.columns().search('').draw();
@@ -431,6 +555,9 @@
             $('#opt_donor').multiselect('clearSelection');
             $('#opt_dataset').multiselect('clearSelection');
             $('#opt_status').multiselect('clearSelection');
+            $('#opt_onset').multiselect('clearSelection');
+            $('#opt_outcome').multiselect('clearSelection');
+            $('#opt_gender').multiselect('clearSelection');
             $('#opt_country').multiselect('clearSelection');
 
 
@@ -447,6 +574,20 @@
 </script>
  -->
 <script>
+    function getURL() {
+        console.log("The URL of this page is: " + window.location.href);
+    }
+
+    $('#return_home').click(function () {
+        getURL();
+        var url = window.location.href;
+        var arr = url.split('?');
+        arr.pop();
+        console.log(arr[0])
+        window.location.href = arr[0];
+        { { url_for('frontend.index') } }
+    });
+
     $('#scfbutton').click(function () {
         // document.getElementById('dsform').submit();
         document.getElementById('scfform').submit();
@@ -467,17 +608,35 @@
         //console.log(startTime);
     });
 
+    var getEntries = function () {
+        var entrieString = $('#empTable_info').text();
+        var entries = entrieString.split('of ').pop().split(' entries')[0];
+        entries = entries.replaceAll(',', '');
+
+        if (Number(entries) < 2000) {
+            $("#matrixFormButton").hide();
+            $("#matrixDownloadButton").show();
+            $('#emailInput').removeAttr('required');
+        } else {
+            $("#matrixFormButton").show();
+            $("#matrixDownloadButton").hide();
+            $('#emailInput').attr('required', 'required');
+        }
+
+        console.log(Number(entries))
+
+        return Number(entries);
+    }
+
     $('#empTable').on('draw.dt', function () {
         console.log("Page finish change");
         //console.log($.now());
         endTime = new Date();
         diff = (endTime - startTime);
         console.log(diff);
+        getEntries();
     });
-
-
 
 </script>
 
-{% include 'layouts/citation.html' %}
 {% endblock %}

@@ -173,13 +173,16 @@
     </div>
   </div>
 </div>
-{% endblock %} {% block scripts %}
+{% endblock %}
+
+{% block scripts %}
 
 <script src="https://www.amcharts.com/lib/4/core.js"></script>
 <script src="https://www.amcharts.com/lib/4/maps.js"></script>
 <script src="https://cdn.amcharts.com/lib/4/geodata/worldLow.js"></script>
 <script src="https://www.amcharts.com/lib/4/themes/animated.js"></script>
 <script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+
 
 <script>
 
@@ -206,7 +209,7 @@
   // Configure series
   const polygonTemplate = polygonSeries.mapPolygons.template;
   // %22 is "", %5D is ] %5B is [
-  polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="http://147.8.194.29:5000/tasks/table_view?main=%7B%22pbmc.Country%22%3A+%7B%22$in%22%3A+%5B%22{dataset}%22%5D%7D%7D">Explore</a>';
+  polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="http://covidsc.d24h.hk/tasks/table_view?main=%7B%22pbmc.Country%22%3A+%7B%22$in%22%3A+%5B%22{dataset}%22%5D%7D%7D">Explore</a>';
   polygonTemplate.fill = am4core.color("rgba(110, 166, 157, 0.5)");
   //polygonTemplate.tooltipText = '<b>{name}: {value}</b>';
 
@@ -355,7 +358,7 @@
   series.tooltip.keepTargetHover = true;
   series.tooltip.getFillFromObject = false;
   series.tooltip.background.fill = am4core.color("#FFFFFF");
-  series.columns.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://147.8.194.29:5000/tasks/table_view?main=%7B%22level2%22%3A+%22{type}%22%7D">Explore</a>';
+  series.columns.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://covidsc.d24h.hk/tasks/table_view?main=%7B%22level2%22%3A+%22{type}%22%7D">Explore</a>';
   series.tooltip.autoTextColor = false;
   series.tooltip.label.fill = am4core.color("#045547");
 }); // end am4core.ready()
@@ -366,7 +369,4 @@
   });
 
 </script>
-
-
-
 {% endblock %}
