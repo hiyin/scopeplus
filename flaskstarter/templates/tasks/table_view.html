@@ -76,6 +76,32 @@
                 </select>
             </div>
             <div style="margin: 10px 15px 0px 0px">
+                <select id="opt_onset" class="multibox" multiple="multiple" name="name_tbv_onset" form="scfform">
+                    <option label=" "></option>
+                    {% for val in fonset %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin: 10px 15px 0px 0px">
+                <select id="opt_outcome" class="multibox" multiple="multiple" name="name_tbv_outcome" form="scfform">
+                    <option label=" "></option>
+                    {% for val in foutcome %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="margin: 10px 15px 0px 0px">
+                <select id="opt_gender" class="multibox" multiple="multiple" name="name_tbv_gender" form="scfform">
+                    <option label=" "></option>
+                    {% for val in fgender %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="margin: 10px 15px 0px 0px">
                 <select id="opt_country" class="multibox" multiple="multiple" name="name_tbv_country" form="scfform">
                     <option label=" "></option>
                     {% for val in fcountry %}
@@ -205,12 +231,15 @@
             <thead>
                 <tr>
                     <th>id</th>
-                    <th>sampleId</th>
+                    <th>sample id</th>
                     <th>age</th>
                     <th>prediction</th>
                     <th>donor</th>
                     <th>dataset</th>
                     <th>status</th>
+                    <th>days from onset</th>
+                    <th>outcome</th>
+                    <th>gender</th>
                     <th>country</th>
                 </tr>
             </thead>
@@ -394,6 +423,36 @@
             maxHeight: 450
         });
 
+        $('#opt_onset').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Days from onset',
+            buttonWidth: '300px',
+            maxHeight: 450
+        });
+
+        $('#opt_outcome').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Outcome',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
+
+        $('#opt_gender').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Gender',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
+
 
         $('#opt_country').multiselect({
             includeSelectAllOption: true,
@@ -428,6 +487,9 @@
                 { data: 'donor' },
                 { data: 'dataset' },
                 { data: 'status' },
+                { data: 'onset' },
+                { data: 'outcome' },
+                { data: 'gender' },
                 { data: 'country' },
 
             ],
@@ -440,6 +502,9 @@
                 { "width": "14%", "targets": 5 },
                 { "width": "14%", "targets": 6 },
                 { "width": "14%", "targets": 7 },
+                { "width": "14%", "targets": 8 },
+                { "width": "14%", "targets": 9 },
+                { "width": "14%", "targets": 10 },
             ],
             initComplete: function () {
                 var input = $('#customSearchBox').unbind(),
@@ -472,7 +537,10 @@
             oTable.columns(4).search($('#opt_donor').val().join("|"));
             oTable.columns(5).search($('#opt_dataset').val().join("|"));
             oTable.columns(6).search($('#opt_status').val().join("|"));
-            oTable.columns(7).search($('#opt_country').val().join("|"));
+            oTable.columns(7).search($('#opt_onset').val().join("|"));
+            oTable.columns(8).search($('#opt_outcome').val().join("|"));
+            oTable.columns(9).search($('#opt_gender').val().join("|"));
+            oTable.columns(10).search($('#opt_country').val().join("|"));
             //hit search on server
             oTable.draw();
         });
@@ -487,6 +555,9 @@
             $('#opt_donor').multiselect('clearSelection');
             $('#opt_dataset').multiselect('clearSelection');
             $('#opt_status').multiselect('clearSelection');
+            $('#opt_onset').multiselect('clearSelection');
+            $('#opt_outcome').multiselect('clearSelection');
+            $('#opt_gender').multiselect('clearSelection');
             $('#opt_country').multiselect('clearSelection');
 
 
