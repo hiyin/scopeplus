@@ -846,7 +846,7 @@ def upload_to_aws(zipfile_path):
     return url
 
 def send_s3_link(url, user_email):
-    print("sending email")
+    print("sending email to " + user_email)
     msg = Message('[Covidscope] Your download link for requested resources is ready', sender='Covidsope (covidsc.d24h.hk)', recipients=[user_email])
     msg.body = "Please download the requested resources in this link:\n" + url
     mail.send(msg)
@@ -912,6 +912,7 @@ def write_10x_mtx_small(path, gene_dict, barcode_dict, query):
         os.remove(fn + str("header"))
     if os.path.exists(fn + str("data")):
         os.remove(fn + str("data"))
+
 
 
 
@@ -1212,28 +1213,23 @@ def download_matrix():
         # 0818 commented by junyi
 
         if (cell_nums < 2000):
+            flash('Your file is downloading, please wait...')
             write_10x_mtx_small(tmp_folder, dict_gene, dict_barcode, session["query"])
+            make_summary_report(tmp_folder)
+            zip_10x_mtx(tmp_folder)
+            if (exists(tmp_folder + '/matrix.zip')):
+                return send_file(os.path.join(tmp_folder, 'matrix.zip'), as_attachment=True)
+                # response = make_response(send_file(tmp_folder + '/matrix.zip', as_attachment=True))
+                # print("setting cookies")
+                # response.set_cookie(key='downloadID', value=user_id,max_age=1)
+                # return response
+
         else:
             write_10x_mtx.delay(tmp_folder, dict_gene, dict_barcode, estimated_expression, session["query"], user_email)
-        # write_10x_mtx_old(tmp_folder, dict_gene, dict_barcode, doc_count, mtx)
+            flash('Download link will be sent to your email within a few hours.')
 
         # 0818 commented by junyi
         print("Write 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))
-    #
-    # if (not (exists(tmp_folder + '/matrix.zip'))):
-    #     list_files = [
-    #         tmp_folder + '/matrix.mtx',
-    #         tmp_folder + '/genes.tsv.gz',
-    #         tmp_folder + '/barcodes.tsv.gz',
-    #         tmp_folder + '/meta.tsv'
-    #     ]
-    #     checkpoint_time = time.time()
-    #     with zipfile.ZipFile(tmp_folder + '/matrix.zip', 'w') as zipMe:
-    #         for file in list_files:
-    #             if (exists(file)):
-    #                 zipMe.write(file, arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
-    #     print("zipping finished --- %s seconds ---" % (time.time() - checkpoint_time))
-    flash('Download links to your requested resources will be delivered to your email provided within a few hours.')
     return redirect(request.referrer)
 
 # Constructor for column-filter after multi-select
