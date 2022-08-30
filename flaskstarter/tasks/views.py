@@ -45,6 +45,7 @@ import boto3
 from botocore.client import Config
 from concurrent.futures import ThreadPoolExecutor
 import threading
+import subprocess
 
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
@@ -61,6 +62,13 @@ user_tmp = [TMP_FOLDER + "/" + user_timestamp]
 #print(user_tmp)
 os.makedirs(user_tmp[-1])
 
+
+def make_summary_report(tmp_path):
+    print("making summary report")
+    code_path = TMP_FOLDER + "/" + "html_codes"
+    cmd = 'rmarkdown::render(input="%s/report_html.Rmd",output_format="html_document",output_file="%s/report.html",params=list(meta_path="%s"))' % (code_path, tmp_path, tmp_path)
+    print(cmd)
+    subprocess.call("Rscript -e '%s'" % cmd, shell=True)
 
 # New view
 @tasks.route('/contribute')
@@ -805,7 +813,8 @@ def zip_10x_mtx(tmp_folder):
             tmp_folder + '/matrix.mtx',
             tmp_folder + '/genes.tsv.gz',
             tmp_folder + '/barcodes.tsv.gz',
-            tmp_folder + '/meta.tsv'
+            tmp_folder + '/meta.tsv',
+            tmp_folder + '/report.html'
         ]
         checkpoint_time = time.time()
         with zipfile.ZipFile(tmp_folder + '/matrix.zip', 'w') as zipMe:
@@ -903,6 +912,7 @@ def write_10x_mtx_small(path, gene_dict, barcode_dict, query):
         os.remove(fn + str("header"))
     if os.path.exists(fn + str("data")):
         os.remove(fn + str("data"))
+
 
 
 # 0816 added by junyi
@@ -1036,6 +1046,8 @@ def write_10x_mtx(path, gene_dict, barcode_dict, doc_count, query, user_email):
     if os.path.exists(fn + str("header")):
         os.remove(fn + str("header"))
 
+    make_summary_report(abs_path)
+
     zip_10x_mtx(abs_path)
 
     url = upload_to_aws(abs_path + "/matrix.zip")
@@ -1106,6 +1118,7 @@ def download_meta():
     print('writing ids to csv file only once, firstly load the data')
     #write_file_byid(tmp_folder, meta) # ids.csv is used in download_matrix barcode_dict
     write_file_meta(tmp_folder, meta)
+    #make_summary_report(tmp_folder)
     return send_file(os.path.join(tmp_folder,'meta.tsv'), as_attachment=True)
 
 # Download big file
