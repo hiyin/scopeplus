@@ -39,7 +39,7 @@
       </form>
       <div style="width: 200px !important; overflow:visible">
         <select id="opt_celltype" name="name_opt_celltype" class="form-control selectpicker" title="Cell Type"
-          form="form_sCf" style="width:300px;">
+          form="form_sCf" style="width:300px;" data-live-search=“true”>
           {% for val in celltypes %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
@@ -48,7 +48,7 @@
 
       <div style="width: 200px !important; overflow:visible !important;">
         <select id="opt_feature" name="name_opt_feature" class="form-control selectpicker" title="Pathways"
-          form="form_sCf" style="width:300px; margin-left:16px;">
+          form="form_sCf" style="width:300px; margin-left:16px;" data-live-search=“true”>
           {% for val in features %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
