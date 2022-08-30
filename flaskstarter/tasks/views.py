@@ -667,6 +667,9 @@ def table_view():
     fprediction = get_field("level2")
     fstatus = get_field("meta_severity")
     fdataset = get_field("meta_dataset")
+    fonset = get_field("meta_days_from_onset_of_symptoms")
+    foutcome = get_field("meta_outcome")
+    fgender = get_field("meta_gender")
     fcountry = get_field("pbmc.Country")
     if "main" in request.args:
         l = request.args["main"]
@@ -678,6 +681,9 @@ def table_view():
                                    fprediction=fprediction,
                                    fstatus=fstatus,
                                    fdataset=fdataset,
+                                   fonset=fonset,
+                                   foutcome=foutcome,
+                                   fgender=fgender,
                                    fcountry=fcountry,
                                    link=l)
     else:
@@ -689,6 +695,9 @@ def table_view():
                            fprediction=fprediction,
                            fstatus=fstatus,
                            fdataset=fdataset,
+                           fonset=fonset,
+                           foutcome=foutcome,
+                           fgender=fgender,
                            fcountry=fcountry,
                            link=l)
 
@@ -1219,7 +1228,7 @@ def query_builder(map):
     construct = []
     re_match = re.compile(r'^\d{1,10}\.?\d{0,10}$')
     for k in map:
-        if (k in ["meta_age_category", "meta_sample_id2", "meta_dataset", "level2", "meta_severity", "meta_patient_id", "pbmc.Country"]):
+        if (k in ["meta_age_category", "meta_sample_id2", "meta_dataset", "level2", "meta_severity", "meta_days_from_onset_of_symptoms", "meta_outcome", "meta_gender", "meta_patient_id", "pbmc.Country"]):
             l = []
             for ki in map[k]:
                 if re_match.findall(ki):
@@ -1358,6 +1367,15 @@ def api_db():
                 elif "6" in i:
                     search_column = "meta_severity"
                     map[search_column] = column_value
+                elif "7" in i:
+                    search_column = "meta_days_from_onset_of_symptoms"
+                    map[search_column] = column_value
+                elif "8" in i:
+                    search_column = "meta_outcome"
+                    map[search_column] = column_value
+                elif "9" in i:
+                    search_column = "meta_gender"
+                    map[search_column] = column_value
                 else:
                     search_column = "pbmc.Country"
                     map[search_column] = column_value
@@ -1411,6 +1429,9 @@ def api_db():
                 'donor': "",
                 'dataset': "",
                 'status': "",
+                'onset':"",
+                'outcome':"",
+                'gender':"",
                 'country':""
             })
 
@@ -1424,6 +1445,9 @@ def api_db():
                         'donor': r['meta_patient_id'],
                         'dataset': r['meta_dataset'],
                         'status': r['meta_severity'],
+                        'onset':r['meta_days_from_onset_of_symptoms'],
+                        'outcome':r['meta_outcome'],
+                        'gender':r['meta_gender'],
                         'country': r['pbmc'][0]['Country']
                     })
 
