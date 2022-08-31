@@ -6,3 +6,5 @@ db.sqlite
 cov192kaxis.csv
 .idea/
 *.log
+dump.rdb
+dump.rdb
