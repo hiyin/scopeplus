@@ -160,7 +160,7 @@
                 </div>
             </div>
             <div id="matrixDownloadButton" style="margin: 10px 15px 0px 0px;">
-                <button class="mediumButton" name="download_matrix" type="submit" style="display:inline-block;"
+                <button class="mediumButton download" name="download_matrix" type="submit" style="display:inline-block;"
                     form="downloadMatrix">
                     Download Matrix </button>
             </div>
@@ -261,11 +261,6 @@
                     class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-front ui-draggable ui-resizable waitmessage">
                     Please wait...</div>
             </div>
-            <p class="thanks" style="display: none ;">
-                <strong style="background-color: yellow ;">
-                    Thank you for your download!
-                </strong>
-            </p>
         </div>
 
     </div>
@@ -322,7 +317,7 @@
                 // Update the URL that is *currently being requested*
                 // to contain the downloadID. This will then be response
                 // cookie header.
-                target.href += ("?downloadID=" + downloadID);
+                window.location.href += ("?downloadID=" + downloadID);
                 // The local cookie cache is defined in the browser
                 // as one large string; we need to search for the
                 // name-value pattern with the above ID.

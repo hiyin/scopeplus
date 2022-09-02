@@ -1251,16 +1251,15 @@ def download_matrix():
         # 0818 commented by junyi
 
         if (cell_nums < 2000):
-            flash('Your file is downloading, please wait...')
             write_10x_mtx_small(tmp_folder, dict_gene, dict_barcode, session["query"])
             make_summary_report(tmp_folder)
             zip_10x_mtx(tmp_folder)
             if (exists(tmp_folder + '/matrix.zip')):
-                return send_file(os.path.join(tmp_folder, 'matrix.zip'), as_attachment=True)
-                # response = make_response(send_file(tmp_folder + '/matrix.zip', as_attachment=True))
-                # print("setting cookies")
-                # response.set_cookie(key='downloadID', value=user_id,max_age=1)
-                # return response
+                #return send_file(os.path.join(tmp_folder, 'matrix.zip'), as_attachment=True)
+                response = make_response(send_file(os.path.join(tmp_folder, 'matrix.zip'), as_attachment=True))
+                print("setting cookies")
+                response.set_cookie(key='downloadID', value=user_id,max_age=1)
+                return response
 
         else:
             write_10x_mtx.delay(tmp_folder, dict_gene, dict_barcode, estimated_expression, session["query"], user_email)
