@@ -662,6 +662,46 @@ def run_scClassify():
 def download_scClassify():
     return send_file(user_tmp[-1] + "/scClassify_predicted_results.csv", as_attachment=True)
 
+@tasks.route('/show_search', methods=['POST', 'GET'])
+def show_search():
+    graphJSON = None
+    ## 0831 ADD BY JUNYI
+    try:
+        if (session.get("query") == None):
+            graphJSON = None
+        elif (len(session["query"]) == 0):
+            # ID is presented, no meta data:
+            graphJSON = None
+        # If search box not empty, write id meta umap
+        else:
+            print("Search value provided, write id, meta...")
+            if isinstance(session["query"], dict):
+                print(session["query"])
+                meta = mongo.single_cell_meta_country.find(session["query"])
+            elif isinstance(session["query"], list) and len(session["query"]) == 1:
+                meta = mongo.single_cell_meta_country.find(session["query"][0])
+            else:
+                meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+
+            # Create tmpfolder is not exist
+            query_timestamp = session.get("sess_timestamp")
+            print("Checking user information")
+            user_id = session["user_id"]
+            print(user_id)
+            tmp_folder = os.path.join(user_tmp[-1], user_id, query_timestamp)
+            os.makedirs(tmp_folder, exist_ok=True)
+            write_file_meta(tmp_folder, meta)
+            df_meta = pd.read_csv(tmp_folder + '/meta.tsv', index_col=1, sep="\t")
+            new_df = df_meta['level2'].value_counts().rename_axis('level2').reset_index(name='counts')
+            fig = px.bar(new_df, x="level2", y="counts", color="counts", title="Cell type propotion")
+            graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+    except Exception as e:
+        print(e)
+        graphJSON = None
+
+    return render_template('tasks/show_search_plot.html', graphJSON=graphJSON)
+
+
 # here
 @tasks.route('/table_view', methods=['POST', 'GET'])
 # @login_required
@@ -677,7 +717,7 @@ def table_view():
     foutcome = get_field("meta_outcome")
     fgender = get_field("meta_gender")
     fcountry = get_field("pbmc.Country")
-    #
+
     # graphJSON = None
     # ## 0831 ADD BY JUNYI
     # try:
