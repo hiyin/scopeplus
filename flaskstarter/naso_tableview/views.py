@@ -4,7 +4,6 @@ from flask import Blueprint, render_template, flash, redirect, url_for, send_fil
 from flask_login import login_required, current_user
 from ..extensions import db, mongo
 
-from flaskstarter.covid2k_meta import covid2k_metaModel
 from flaskstarter.tasks.forms import UmapForm
 
 import csv

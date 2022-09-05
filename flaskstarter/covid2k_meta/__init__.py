@@ -1,1 +1,0 @@
-from .models import covid2k_metaModel, covid2k_metaAdmin
