@@ -1,14 +1,47 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-    <div class="row justify-content-center" style="padding-top: 30px">
-            <div id="chart" class="chart"></div>
-    </div>
-</head>
-<body>
+{% from "macros/_form.html" import render_form %}
 
+{% set page_title = 'ScFeature' %}
+
+{% extends 'layouts/base.html' %}
+
+{% block body %}
+
+<div class="section03">
+  <div class="container" style="margin:0px; padding: 0px;">
+    <div class="row justify-content-center">
+      <div class="boldauto36">Cell Type Proportion</div>
+    </div>
+    <div class="row justify-content-center" style="padding-top: 30px">
+      <div id="chart" class="chart"></div>
+    </div>
+
+    <div class="row justify-content-center" style="padding-top: 100px">
+      <div class="boldauto36">Severity Proportion</div>
+    </div>
+    <div class="row justify-content-center" style="padding-top: 30px">
+      <div id="chart2" class="chart"></div>
+    </div>
+
+    <div class="row justify-content-center" style="padding-top: 100px">
+      <div class="boldauto36">Outcome Proportion</div>
+    </div>
+    <div class="row justify-content-center" style="padding-top: 30px">
+      <div id="chart3" class="chart"></div>
+    </div>
+
+    <div class="row justify-content-center" style="padding-top: 100px">
+      <div class="boldauto36">Symptoms Proportion</div>
+    </div>
+    <div class="row justify-content-center" style="padding-top: 30px">
+      <div id="chart4" class="chart"></div>
+    </div>
+  </div>
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script type="text/javascript">
   var graphs = {{ graphJSON | safe }};
@@ -16,5 +49,26 @@
   Plotly.plot('chart', graphs, {});
 
 </script>
-</body>
-</html>
+
+<script type="text/javascript">
+  var graphs = {{ graphJSON2 | safe }};
+
+  Plotly.plot('chart2', graphs, {});
+
+</script>
+
+<script type="text/javascript">
+  var graphs = {{ graphJSON3 | safe }};
+
+  Plotly.plot('chart3', graphs, {});
+
+</script>
+
+<script type="text/javascript">
+  var graphs = {{ graphJSON4 | safe }};
+
+  Plotly.plot('chart4', graphs, {});
+
+</script>
+
+{% endblock %}

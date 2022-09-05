@@ -42,6 +42,7 @@ from botocore.client import Config
 from concurrent.futures import ThreadPoolExecutor
 import threading
 import subprocess
+import plotly.graph_objects as go
 
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
@@ -689,14 +690,35 @@ def show_search():
             os.makedirs(tmp_folder, exist_ok=True)
             write_file_meta(tmp_folder, meta)
             df_meta = pd.read_csv(tmp_folder + '/meta.tsv', index_col=1, sep="\t")
+            #Cell Type
             new_df = df_meta['level2'].value_counts().rename_axis('level2').reset_index(name='counts')
-            fig = px.bar(new_df, x="level2", y="counts", color="counts", title="Cell type propotion")
+            fig = px.bar(new_df, x="counts", y="level2", color="counts", orientation='h')
+            fig.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
             graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+            #severity
+            new_df2 = df_meta['meta_severity'].value_counts().rename_axis('meta_severity').reset_index(name='counts')
+            fig2 = px.bar(new_df2, x="counts", y="meta_severity", color="counts", orientation='h')
+            fig2.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
+            graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
+            #outcome
+            new_df3 = df_meta['meta_outcome'].value_counts().rename_axis('meta_outcome').reset_index(name='counts')
+            fig3 = px.bar(new_df3, x="counts", y="meta_outcome", color="counts", orientation='h')
+            fig3.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
+            graphJSON3 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
+            #meta_days_from_onset_of_symptoms
+            new_df4 = df_meta['meta_days_from_onset_of_symptoms'].value_counts().rename_axis('meta_days_from_onset_of_symptoms').reset_index(name='counts')
+            fig4 = px.bar(new_df4, x="counts", y="meta_days_from_onset_of_symptoms", color="counts", orientation='h')
+            fig4.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
+            graphJSON4 = json.dumps(fig4, cls=plotly.utils.PlotlyJSONEncoder)
+
     except Exception as e:
         print(e)
         graphJSON = None
+        graphJSON2 = None
+        graphJSON3 = None
+        graphJSON4 = None
 
-    return render_template('tasks/show_search_plot.html', graphJSON=graphJSON)
+    return render_template('tasks/show_search_plot.html', graphJSON=graphJSON, graphJSON2=graphJSON2, graphJSON3=graphJSON3, graphJSON4=graphJSON4)
 
 
 # here
