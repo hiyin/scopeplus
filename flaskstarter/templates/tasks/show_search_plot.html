@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <div class="row justify-content-center" style="padding-top: 30px">
+            <div id="chart" class="chart"></div>
+    </div>
+</head>
+<body>
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+  var graphs = {{ graphJSON | safe }};
+
+  Plotly.plot('chart', graphs, {});
+
+</script>
+</body>
+</html>
