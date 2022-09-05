@@ -145,7 +145,7 @@
         <div class="row justify-content-end" style="margin: 14px -15px 30px 0px;">
             <div style="margin: 10px 15px 0px 0px;">
                 <button class="mediumButton" id="return_home" type="submit" style="display:inline-block ;"
-                    onclick="window.location.href='{{ url_for( 'frontend.index' ) }}';"> Return to Home </button>
+                    onclick="window.location.href='{{ url_for( 'frontend.index') }}';"> Return to Home </button>
             </div>
 
             <div style="margin: 10px 15px 0px 0px;"><button id="btnAdvance" class="mediumButton"
@@ -587,13 +587,12 @@
     }
 
     $('#return_home').click(function () {
-        getURL();
         var url = window.location.href;
-        var arr = url.split('return render_template('tasks/table_view.html',/table_view?');
+        var arr = url.split("?");
         arr.pop();
-        console.log(arr[0])
+        console.log(arr[0]);
         window.location.href = arr[0];
-
+        {{ url_for( 'frontend.index') }}
     });
 
     $('#scfbutton').click(function () {
