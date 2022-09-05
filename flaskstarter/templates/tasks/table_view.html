@@ -256,7 +256,7 @@
         <div class="row justify-content-center" style="padding-top: 30px">
             <div id="chart" class="chart"></div>
         </div>
-        
+
 
         <div class="jumbotron" hidden>
             <h4>Please choose any of the option below for data manipulation.</h4>
@@ -649,9 +649,9 @@
 
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script type="text/javascript">
-  var graphs = {{ graphJSON | safe }};
+    var graphs = {{ graphJSON | safe }};
 
-  Plotly.plot('chart', graphs, {});
+    Plotly.plot('chart', graphs, {});
 
 </script>
 
