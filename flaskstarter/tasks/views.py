@@ -13,8 +13,6 @@ from flask_login import login_required, current_user
 from flask_mail import Message
 from ..extensions import db, mongo,scfeature, mail
 import sys
-from flaskstarter.covid2k_meta import covid2k_metaModel
-from flaskstarter.tasks.forms import UmapForm
 from plotly.subplots import make_subplots
 import csv
 import gzip
