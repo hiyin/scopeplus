@@ -104,10 +104,10 @@ def show_plot():
     cell_gene = request.form.get('name_opt_gene')
 
     try:
-        df_genes = pd.read_csv(TMP_FOLDER+"/genes.tsv", sep="\t", header=None)
+        df_genes = pd.read_csv(TMP_FOLDER+"/features.tsv", sep="\t", header=None)
     except Exception as e:
         print(e)
-        print("Error loading genes.tsv" )
+        print("Error loading features.tsv" )
 
     # Create tmpfolder is not exist
     query_timestamp = session.get("sess_timestamp")
@@ -871,8 +871,8 @@ def write_umap(path, towrite):
 def zip_10x_mtx(tmp_folder):
     if (not (exists(tmp_folder + '/matrix.zip'))):
         list_files = [
-            tmp_folder + '/matrix.mtx',
-            tmp_folder + '/genes.tsv.gz',
+            tmp_folder + '/matrix.mtx.gz',
+            tmp_folder + '/features.tsv.gz',
             tmp_folder + '/barcodes.tsv.gz',
             tmp_folder + '/meta.tsv',
             tmp_folder + '/report.html'
@@ -974,7 +974,10 @@ def write_10x_mtx_small(path, gene_dict, barcode_dict, query):
     if os.path.exists(fn + str("data")):
         os.remove(fn + str("data"))
 
-
+    # gzip file of the output
+    with open(fn, 'rb') as f_in:
+        with gzip.open(fn+'.gz', 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
 
 
 # 0816 added by junyi
@@ -1063,27 +1066,6 @@ def write_10x_mtx(path, gene_dict, barcode_dict, doc_count, query, user_email):
 
     for t in threads:
         t.join()
-    # c1 = generate_cursor(query,0*doc_count/Nthreads,doc_count/Nthreads)
-    # c2 = generate_cursor(query,1*doc_count/Nthreads,doc_count/Nthreads)
-    # c3 = generate_cursor(query,2*doc_count/Nthreads,doc_count/Nthreads)
-    # c4 = generate_cursor(query,3*doc_count/Nthreads,doc_count)
-
-    # print("Cursor finised in ",time.time()-start_time_query)
-
-    # thread1 = threading.Thread(target=write_file_line, args=[fn+str(0), query,0*doc_count/Nthreads,doc_count/Nthreads,gene_dict,barcode_dict,count_dict])
-    # thread2 = threading.Thread(target=write_file_line, args=[fn+str(1), query,1*doc_count/Nthreads,doc_count/Nthreads,gene_dict,barcode_dict,count_dict])
-    # thread3 = threading.Thread(target=write_file_line, args=[fn+str(2), query,2*doc_count/Nthreads,doc_count/Nthreads,gene_dict,barcode_dict,count_dict])
-    # thread4 = threading.Thread(target=write_file_line, args=[fn+str(3), query,3*doc_count/Nthreads,doc_count,gene_dict,barcode_dict,count_dict])
-
-    # thread1.start()
-    # thread2.start()
-    # thread3.start()
-    # thread4.start()
-
-    # thread1.join()
-    # thread2.join()
-    # thread3.join()
-    # thread4.join()
 
     print("Writing finised in ", time.time() - start_time_write)
 
@@ -1101,6 +1083,11 @@ def write_10x_mtx(path, gene_dict, barcode_dict, doc_count, query, user_email):
     for i in range(Nthreads):
         shutil.copyfileobj(open(fn + str(i), 'r'), destination)
     destination.close()
+
+
+    with open(fn, 'rb') as f_in:
+        with gzip.open(fn+'.gz', 'wb') as f_out:
+            shutil.copyfileobj(f_in, f_out)
 
     for i in range(Nthreads):
         if os.path.exists(fn + str(i)):
@@ -1137,7 +1124,7 @@ def remove_files(path):
         path + '/ids.csv',
         path + '/matrix.zip',
         path + '/matrix.mtx.gz',
-        path + '/genes.tsv.gz',
+        path + '/features.tsv.gz',
         path + '/barcodes.tsv.gz',
         path + '/meta.tsv']:
         if((exists(f))):
@@ -1234,7 +1221,7 @@ def download_matrix():
     cell_nums = df_meta.shape[0]
     estimated_expression = cell_nums * 3600
 
-    if (not (exists(tmp_folder + '/matrix.mtx'))):
+    if (not (exists(tmp_folder + '/matrix.mtx.gz'))):
 
         start_time2 = time.time()
 
@@ -1264,8 +1251,8 @@ def download_matrix():
             return result_dict
 
         # Save gene name
-        if (not (exists(tmp_folder + '/genes.tsv.gz'))):
-            dict_gene = get_dict(TMP_FOLDER + "/genes.tsv", save_path=tmp_folder + "/genes.tsv.gz")
+        if (not (exists(tmp_folder + '/features.tsv.gz'))):
+            dict_gene = get_dict(TMP_FOLDER + "/features.tsv", save_path=tmp_folder + "/features.tsv.gz")
         # Save barcodes
         if (not (exists(tmp_folder + '/barcodes.tsv.gz'))):
             # write_file_byid(tmp_folder, meta)

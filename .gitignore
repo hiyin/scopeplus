@@ -8,3 +8,5 @@ cov192kaxis.csv
 *.log
 dump.rdb
 dump.rdb
+dump.rdb
+*.rdb
