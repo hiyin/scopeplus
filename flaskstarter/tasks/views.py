@@ -975,6 +975,7 @@ def write_10x_mtx_small(path, gene_dict, barcode_dict, query):
         os.remove(fn + str("data"))
 
     # gzip file of the output
+    print("Writing",fn,"to",fn+".gz")
     with open(fn, 'rb') as f_in:
         with gzip.open(fn+'.gz', 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)
@@ -1084,7 +1085,8 @@ def write_10x_mtx(path, gene_dict, barcode_dict, doc_count, query, user_email):
         shutil.copyfileobj(open(fn + str(i), 'r'), destination)
     destination.close()
 
-
+    #
+    print("zipping mtx file")
     with open(fn, 'rb') as f_in:
         with gzip.open(fn+'.gz', 'wb') as f_out:
             shutil.copyfileobj(f_in, f_out)
