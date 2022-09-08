@@ -120,14 +120,14 @@
         </div>
 
 
-        <div class="row justify-content-end" style="margin-top: 24px -15px 0px 0px;">
+        <div class="row justify-content-end" style="margin: 24px -15px 0px 0px;">
             <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block"
                 target="_blank">
             </form>
             <div style="margin-top: 10px;">
                 <button class="lightButton" name="show_plot" style="display:inline-block ; margin-right: 15px;"
                     title='Bar Charts of Cell type, Severity, Days from onset and Outcome'
-                    onclick="window.location.href='{{ url_for( 'tasks.show_search') }}';">
+                    onclick="window.open('{{ url_for( 'tasks.show_search') }}', '_blank');">
                     Show plots
                 </button>
             </div>
@@ -137,8 +137,9 @@
                     Show scFeature plot
                 </button></div>
             <div style="margin-top: 10px;">
-                <button class="lightButton" name="show_plot" type="submit" style="display:inline-block;"
-                    onclick="window.location.href='{{ url_for( 'tasks.show_plot') }}';"
+                <button class="lightButton" name="show_plot" type="submit"
+                    style="display:inline-block; margin-right: 15px;"
+                    onclick="window.open('{{ url_for( 'tasks.show_plot') }}', '_blank');"
                     title='Select 1 Cell Type & Search before clicking this button'> Show UMAP Plot
                 </button>
             </div>
@@ -598,11 +599,11 @@
         { { url_for('frontend.index') } }
     });
 
-    $('#scfbutton').click(function () {
-        // document.getElementById('dsform').submit();
-        document.getElementById('scfform').submit();
+    //$('#scfbutton').click(function () {
+    // document.getElementById('dsform').submit();
+    //document.getElementById('scfform').submit();
 
-    });
+    //});
     var startTime;
     var endTime;
     var diff;

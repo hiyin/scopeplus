@@ -186,12 +186,21 @@ a {
     padding-top: 45px;
 }
 
+.navbar-nav .nav-item .nav-link {
+    font-family: 'Inter';
+    font-style: normal;
+    font-size: 20px;
+    font-weight: 700;
+    color: #066453;
+    padding: 12px;
+}
+
 .navbar-nav>.active>a {
-    color: aqua !important;
+    color: #1CA68C !important;
 }
 
 .nav-item>a:hover {
-    color: aqua;
+    color: #1CA68C !important;
 }
 
 #banner {
@@ -246,6 +255,7 @@ a {
 }
 
 #dashboard {
+    display: flex;
     background: #FFFFFF;
     box-shadow: 2px 12px 60px -5px rgba(170, 170, 170, 0.35);
     border-radius: 40px;
@@ -886,6 +896,10 @@ body {
 .next {
     background-color: #EEF4F3;
     color: #045547;
+}
+
+#distro_data_next {
+    background-color: #ffffff !important;
 }
 
 #empTable_paginate .previous {

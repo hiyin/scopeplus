@@ -1,12 +1,12 @@
 <div class="footer" style="padding: 60px 200px 30px 200px;">
     <div class="container" style="margin: 0px; padding:0px;">
         <div class="row" style="margin: 0px; padding:0px;">
-            <div class="col-12 col-md-3 justify-content-start" style="padding:0px;">
+            <div class="col-12 col-lg-3 justify-content-start" style="padding:0px;">
                 <a class="navbar-brand" href="{{ url_for('frontend.index') }}"><img
                         src="{{url_for('static', filename='D24H_Logo.png')}}" width="273" height="129"
                         style="margin:-20px -20px 0px 0px;" /></a>
             </div>
-            <div class="col-12 col-md-6 justify-content-start" style="padding:0px 60px 0px 60px;">
+            <div class="col-lg-6 d-none d-lg-block justify-content-start" style="padding:0px 60px 0px 60px;">
                 <div class="row" style="margin: 0px; padding:12px 0px 0px 0px;">
                     <img src="{{url_for('static', filename='tel icon.svg')}}" />
                     <div class="regularauto16" style="margin-left: 8px; color:hsla(176, 39%, 15%, 1);">+852 3910 3800
@@ -52,7 +52,7 @@
                 </div>
             </div>
             {% if current_user.is_authenticated %}
-            <div class="col-12 col-md-3 justify-content-start" style="padding:0px 0px 0px 60px;">
+            <div class="col-lg-3 d-none d-lg-block d-xl-block justify-content-start" style="padding:0px 0px 0px 60px;">
                 <div class="row" style="margin: 15px 0px 30px 0px; padding:0px;">
                     <div class="mediumauto18"><a href="{{ url_for('tasks.table_view') }}"
                             style="color: hsla(169, 91%, 17%, 1)">EXPLORE DATA</a></div>
@@ -74,7 +74,7 @@
                 </div>
             </div>
             {%else%}
-            <div class="col-12 col-md-3 justify-content-start" style="padding:0px 0px 0px 60px;">
+            <div class="col-lg-3 d-none d-lg-block d-xl-block justify-content-start" style="padding:0px 0px 0px 60px;">
                 <div class="row" style="margin: 15px 0px 30px 0px; padding:0px;">
                     <div class="mediumauto18"><a href="{{ url_for('frontend.login') }}"
                             style="color: hsla(169, 91%, 17%, 1)">EXPLORE DATA</a></div>
