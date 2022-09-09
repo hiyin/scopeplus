@@ -154,7 +154,6 @@ def show_plot():
         #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
         if isinstance(session["query"], dict):
             print("Getting instance of dict")
-
             pipeline = [
                     {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
                     {"$match": session["query"] }, 
@@ -183,9 +182,7 @@ def show_plot():
         write_file_meta(tmp_folder, meta)
         #umap = mongo.umap.find({'id': {'$in': ids}})
         write_umap(tmp_folder, umap)
-
         # Assume ids,meta files are provided
-
         # No cell color is provided
         if(cell_color is None):
             cell_color="level2"
@@ -1287,6 +1284,7 @@ def download_matrix():
 # Constructor for column-filter after multi-select
 def query_builder(map):
     construct = []
+    print(map)
     re_match = re.compile(r'^\d{1,10}\.?\d{0,10}$')
     for k in map:
         if (k in ["meta_age_category", "meta_sample_id2", "meta_dataset", "level2", "meta_severity", "meta_days_from_onset_of_symptoms", "meta_outcome", "meta_gender", "meta_patient_id", "pbmc.Country"]):
@@ -1407,37 +1405,37 @@ def api_db():
         for i in request.form:
             if ("[search][value]" in i) and (len(request.form[i]) != 0):
                 column_value = request.form[i].split("|")
-                if "0" in i:
+                if "[0]" in i:
                     search_column = "id"
                     map[search_column] = column_value
-                elif "1" in i:
+                elif "[1]" in i:
                     search_column = "meta_sample_id2"
                     map[search_column] = column_value
-                elif "2" in i:
+                elif "[2]" in i:
                     search_column = "meta_age_category"
                     map[search_column] = column_value
-                elif "3" in i:
+                elif "[3]" in i:
                     search_column = "level2"
                     map[search_column] = column_value
-                elif "4" in i:
+                elif "[4]" in i:
                     search_column = "meta_patient_id"
                     map[search_column] = column_value
-                elif "5" in i:
+                elif "[5]" in i:
                     search_column = "meta_dataset"
                     map[search_column] = column_value
-                elif "6" in i:
+                elif "[6]" in i:
                     search_column = "meta_severity"
                     map[search_column] = column_value
-                elif "7" in i:
+                elif "[7]" in i:
                     search_column = "meta_days_from_onset_of_symptoms"
                     map[search_column] = column_value
-                elif "8" in i:
+                elif "[8]" in i:
                     search_column = "meta_outcome"
                     map[search_column] = column_value
-                elif "9" in i:
+                elif "[9]" in i:
                     search_column = "meta_gender"
                     map[search_column] = column_value
-                else:
+                elif "[10]" in i:
                     search_column = "pbmc.Country"
                     map[search_column] = column_value
 
