@@ -786,8 +786,10 @@ body {
 #loadingbox {
     display: none;
     position: fixed;
-    top: 40%;
-    left: 45%;
+    top: 50%;
+    left: 50%;
+    margin-left: -110px;
+    margin-top: -100px;
     z-index: 999998;
     /* transform: translate(-50%, -50%); */
     background: #ffffffEE;
