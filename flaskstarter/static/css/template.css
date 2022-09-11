@@ -761,10 +761,6 @@ body {
 
 
 #loading {
-    display: none;
-    position: fixed;
-    top: 50%;
-    left: 50%;
     z-index: 999999;
     transform: translate(-50%, -50%);
     border: 16px solid #f3f3f3;
@@ -790,8 +786,8 @@ body {
 #loadingbox {
     display: none;
     position: fixed;
-    top: 46%;
-    left: 47.5%;
+    top: 40%;
+    left: 45%;
     z-index: 999998;
     /* transform: translate(-50%, -50%); */
     background: #ffffffEE;
@@ -801,6 +797,7 @@ body {
     text-align: center;
     font-family: 'Inter';
     font-style: normal;
+    padding: 10px;
 }
 
 /* Tutorial */
