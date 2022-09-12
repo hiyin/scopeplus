@@ -264,7 +264,7 @@ def show_plot():
 
         # Pass color options to the html
         colors = list(df_plot.columns.values.ravel())
-        genes = df_genes.values.ravel()
+        genes = df_genes.iloc[:,0].values.ravel()
     return render_template('tasks/show_plot.html', graphJSON=graphJSON,graphJSON2=graphJSON2,colors=colors,genes=genes)
 
 @tasks.route('/show_scfeature', methods=['GET', 'POST'])

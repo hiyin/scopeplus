@@ -6,8 +6,12 @@
 
 {% block body %}
 
-<div id="loading" ,style="display:none;"></div>
-<div id="loadingbox" ,style="display:none;">Loading</div>
+<div class="container" id="loadingbox" style="display:none;">
+  <div class="row justify-content-center">
+    <div id="loading"></div>
+  </div>
+  <div class="row justify-content-center" style="padding: 10px 0px 0px 10px;">Loading...</div>
+</div>
 
 <div class="section03">
   <div class="container" style="margin:0px; padding: 0px;">
@@ -55,8 +59,8 @@
         </select>
       </div>
 
-      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit" class="darkButton" style="margin-left:16px;"
-        form="form_sCf">
+      <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit" onclick="loading();" class="darkButton"
+        style="margin-left:16px;" form="form_sCf">
         Select </button>
     </div>
 
@@ -145,7 +149,6 @@
 <!-- Show loading box -->
 <script type="text/javascript">// <![CDATA[
   function loading() {
-    $("#loading").show();
     $("#loadingbox").show();
   }
 // ]]></script>

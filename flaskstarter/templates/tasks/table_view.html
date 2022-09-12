@@ -11,6 +11,13 @@
     <div id="message-text">Please wait...</div>
 </div>
 
+<div class="container" id="loadingbox" style="display:none;">
+    <div class="row justify-content-center">
+        <div id="loading"></div>
+    </div>
+    <div class="row justify-content-center" style="padding: 10px 0px 0px 10px;">Loading...</div>
+</div>
+
 <div class="section03" style="padding-left: 120px; padding-right: 120px;">
     <div id="searchPage" class="container" style="padding: 0px;">
         <div class="row justify-content-start">
@@ -112,25 +119,22 @@
 
 
         <div class="row justify-content-end" style="margin: 24px -15px 0px 0px;">
-            <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block"
-                target="_blank">
+            <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
             </form>
             <div style="margin-top: 10px;">
                 <button class="lightButton" name="show_plot" style="display:inline-block ; margin-right: 15px;"
-                    title='Bar Charts of Cell type, Severity, Days from onset and Outcome'
-                    onclick="window.open('{{ url_for( 'tasks.show_search') }}', '_blank');">
+                    title='Bar Charts of Cell type, Severity, Days from onset and Outcome' onclick="showSearchPlot()">
                     Show plots
                 </button>
             </div>
             <div style="margin-top: 10px;"><button id="scfbutton" class="lightButton" name="show_scfeature"
-                    style="display:inline-block ; margin-right: 15px;" form="scfform"
+                    style="display:inline-block ; margin-right: 15px;" form="scfform" onclick="loading()"
                     title='Select more than 2 items in each of Sample ID + Cell Type OR Dataset + Cell Type & Search before clicking this button (Sample IDs should come from more than 1 dataset)'>
                     Show scFeature plot
                 </button></div>
             <div style="margin-top: 10px;">
                 <button class="lightButton" name="show_plot" type="submit"
-                    style="display:inline-block; margin-right: 15px;"
-                    onclick="window.open('{{ url_for( 'tasks.show_plot') }}', '_blank');"
+                    style="display:inline-block; margin-right: 15px;" onclick="showplot()"
                     title='Select 1 Cell Type & Search before clicking this button'> Show UMAP Plot
                 </button>
             </div>
@@ -650,7 +654,33 @@
 
 </script>
 
+<script>
+    document.addEventListener("DOMContentLoaded", function (event) {
+        var scrollpos = localStorage.getItem('scrollpos');
+        if (scrollpos) window.scrollTo(0, scrollpos);
+    });
 
+    window.onbeforeunload = function (e) {
+        localStorage.setItem('scrollpos', window.scrollY);
+    };
+</script>
+
+<!-- Show loading box -->
+<script type="text/javascript">// <![CDATA[
+    function loading() {
+        $("#loadingbox").show();
+    }
+
+    function showplot() {
+        window.location.href = '{{ url_for( 'tasks.show_plot') }}';
+        $("#loadingbox").show();
+    }
+
+    function showSearchPlot() {
+        window.location.href = '{{ url_for( 'tasks.show_search') }}';
+        $("#loadingbox").show();
+    }
+  // ]]></script>
 
 
 {% endblock %}
