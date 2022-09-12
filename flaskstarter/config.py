@@ -47,8 +47,8 @@ class DefaultConfig(BaseConfig):
     MAIL_USE_SSL = True
 
     # Keep these in instance folder or in env variables
-    MAIL_USERNAME = "yin.angela1@gmail.com"
-    MAIL_PASSWORD = "etppcnecyejgbnio"
+    MAIL_USERNAME = "covidscope@gmail.com"
+    MAIL_PASSWORD = "szhslqcuvvoqadwo"
     MAIL_DEFAULT_SENDER = MAIL_USERNAME
 
 

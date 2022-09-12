@@ -65,7 +65,10 @@ def make_summary_report(tmp_path):
     code_path = TMP_FOLDER + "/" + "html_codes"
     cmd = 'rmarkdown::render(input="%s/report_html.Rmd",output_format="html_document",output_file="%s/report.html",params=list(meta_path="%s"))' % (code_path, tmp_path, tmp_path)
     print(cmd)
-    subprocess.call("Rscript -e '%s'" % cmd, shell=True)
+    try:
+        subprocess.call("Rscript -e '%s'" % cmd, shell=True)
+    except Exception as e:
+        print(e)
 
 # New view
 @tasks.route('/contribute')
@@ -912,7 +915,7 @@ def upload_to_aws(zipfile_path):
 
 def send_s3_link(url, user_email):
     print("sending email to " + user_email)
-    msg = Message('[Covidscope] Your download link for requested resources is ready', sender='Covidsope (covidsc.d24h.hk)', recipients=[user_email])
+    msg = Message('[Covidscope] Your download link for requested resources is ready', sender='Covidscope', recipients=[user_email])
     msg.body = "Please download the requested resources in this link:\n" + url
     mail.send(msg)
 
