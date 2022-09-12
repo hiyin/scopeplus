@@ -146,41 +146,48 @@ def show_plot():
         print("Search value provided, write id, meta...")
         if isinstance(session["query"], dict):
             print(session["query"])
-            meta = mongo.single_cell_meta_country.find(session["query"])
+            #meta = mongo.single_cell_meta_country.find(session["query"])
+            meta = list(mongo.single_cell_meta_country.aggregate(
+                [{"$match": session["query"] }, {"$sample": {"size": 10000}}]))
         elif  isinstance(session["query"], list) and len(session["query"]) == 1:
-            meta = mongo.single_cell_meta_country.find(session["query"][0])
+            #meta = mongo.single_cell_meta_country.find(session["query"][0])
+            meta = list(mongo.single_cell_meta_country.aggregate(
+                [{"$match": session["query"][0]}, {"$sample": {"size": 10000}}]))
         else:
-            meta = mongo.single_cell_meta_country.find({"$and": session["query"]})    
-        #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
-        if isinstance(session["query"], dict):
-            print("Getting instance of dict")
-            pipeline = [
-                    {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
-                    {"$match": session["query"] }, 
-                    {"$project": { "umap": 1, "_id": 0 } }, 
-                    {"$unwind": '$umap' }, 
-                    {"$replaceRoot": { "newRoot": "$umap" } }
-                ]
-        elif isinstance(session["query"], list) and len(session["query"]) == 1:
-            print("Getting instance of list and getting  first element")
-            pipeline = [
-                    {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
-                    {"$match": session["query"][0] }, 
-                    {"$project": { "umap": 1, "_id": 0 } }, 
-                    {"$unwind": '$umap' }, 
-                    {"$replaceRoot": { "newRoot": "$umap" } }
-                ]        
-        else:
-            pipeline = [
-                    {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
-                    {"$match": {"$and": session["query"] }  }, 
-                    {"$project": { "umap": 1, "_id": 0 } }, 
-                    {"$unwind": '$umap' }, 
-                    {"$replaceRoot": { "newRoot": "$umap" } }
-            ]
-        umap = mongo.single_cell_meta_country.aggregate(pipeline)
+            #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+            meta = list(mongo.single_cell_meta_country.aggregate(
+                [{"$match": {"$and": session["query"] }}, {"$sample": {"size": 10000}}]))
+        # if isinstance(session["query"], dict):
+        #     print("Getting instance of dict")
+        #     pipeline = [
+        #             {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} },
+        #             {"$match": session["query"] },
+        #             {"$project": { "umap": 1, "_id": 0 } },
+        #             {"$unwind": '$umap' },
+        #             {"$replaceRoot": { "newRoot": "$umap" } }
+        #         ]
+        # elif isinstance(session["query"], list) and len(session["query"]) == 1:
+        #     print("Getting instance of list and getting  first element")
+        #     pipeline = [
+        #             {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} },
+        #             {"$match": session["query"][0] },
+        #             {"$project": { "umap": 1, "_id": 0 } },
+        #             {"$unwind": '$umap' },
+        #             {"$replaceRoot": { "newRoot": "$umap" } }
+        #         ]
+        # else:
+        #     pipeline = [
+        #             {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} },
+        #             {"$match": {"$and": session["query"] }  },
+        #             {"$project": { "umap": 1, "_id": 0 } },
+        #             {"$unwind": '$umap' },
+        #             {"$replaceRoot": { "newRoot": "$umap" } }
+        #     ]
+        #umap = mongo.single_cell_meta_country.aggregate(pipeline)
+        bclist = list(meta)
+        bc_list = [x["barcode"] for x in list(bclist)]
+        umap = mongo.umap.find({'barcode': {'$in': bc_list}})
         write_file_meta(tmp_folder, meta)
-        #umap = mongo.umap.find({'id': {'$in': ids}})
         write_umap(tmp_folder, umap)
         # Assume ids,meta files are provided
         # No cell color is provided
@@ -208,7 +215,7 @@ def show_plot():
                                 { "$match": session["query"]  }, 
                                 { "$unwind": "$matrix" }, 
                                 { "$match": { "matrix.gene_name": cell_gene }}, 
-                                {"$project":  { "matrix": 1, "_id": 0 } }, 
+                                { "$project":  { "matrix": 1, "_id": 0 } },
                                 { "$replaceRoot": { "newRoot": "$matrix" } } 
                         ]
 
@@ -219,7 +226,7 @@ def show_plot():
                                 { "$match": session["query"][0]  }, 
                                 { "$unwind": "$matrix" }, 
                                 { "$match": { "matrix.gene_name": cell_gene }}, 
-                                {"$project":  { "matrix": 1, "_id": 0 } }, 
+                                { "$project":  { "matrix": 1, "_id": 0 } },
                                 { "$replaceRoot": { "newRoot": "$matrix" } } 
                         ]            
                     else:
@@ -228,10 +235,10 @@ def show_plot():
                                 { "$match": {"$and": session["query"] }  }, 
                                 { "$unwind": "$matrix" }, 
                                 { "$match": { "matrix.gene_name": cell_gene }}, 
-                                {"$project":  { "matrix": 1, "_id": 0 } }, 
+                                { "$project":  { "matrix": 1, "_id": 0 } },
                                 { "$replaceRoot": { "newRoot": "$matrix" } } 
                         ]
-
+                    print(pipeline)
                     result = mongo.single_cell_meta_country.aggregate(pipeline)
                     #query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
                     print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
