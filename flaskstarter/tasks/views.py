@@ -1295,7 +1295,7 @@ def download_matrix():
 def query_builder(map):
     construct = []
     print(map)
-    re_match = re.compile(r'^\d{1,10}\.?\d{0,10}$')
+    re_match = re.compile(r'^-?\d{1,10}\.?\d{0,10}$')
     for k in map:
         if (k in ["meta_age_category", "meta_sample_id2", "meta_dataset", "level2", "meta_severity", "meta_days_from_onset_of_symptoms", "meta_outcome", "meta_gender", "meta_patient_id", "pbmc.Country"]):
             l = []
@@ -1303,9 +1303,14 @@ def query_builder(map):
                 if re_match.findall(ki):
                     # if string only contains numbers, we need to convert it to integer to search
                     # age contains strings and integers, but the front-end will always process them to strings
-                    if ki.isdigit():
+                    # check for absolute value abs() as meta_days_from_onset_of_symptoms has -3 and -1
+                    if ki.lstrip('-+').isdigit():
+                        print("integer")
+                        print(ki)
                         l.append(int(ki))
                     else:
+                        print("float")
+                        print(ki)
                         l.append(int(float(ki)))
                 else:
                     l.append(ki)
@@ -1473,7 +1478,7 @@ def api_db():
             tmp, total_records = paginate_skiplimit(rowperpage, page_no, "global", search_value) 
 
  
-
+        
         if map:
             print("Column-specific (multi) search value provided")
             construct = query_builder(map)
@@ -1483,11 +1488,14 @@ def api_db():
             # Pagination algorithm
             # Calculate number of documents to skip
             tmp, total_records = paginate_skiplimit(rowperpage, page_no, "column", construct)
-            
+
+
             checkpoint_time = time.time()
             print("finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
         total_records_filter = total_records
+        print(total_records_filter)
+        print(total_records)
         if total_records_filter == 0:
             print("return nothing")
             data.append({
@@ -1515,7 +1523,7 @@ def api_db():
                         'dataset': r['meta_dataset'],
                         'status': r['meta_severity'],
                         'onset':r['meta_days_from_onset_of_symptoms'],
-                        'outcome':r['meta_outcome'],
+                        'outcome':str(r['meta_outcome']),
                         'gender':r['meta_gender'],
                         'country': r['pbmc'][0]['Country']
                     })
