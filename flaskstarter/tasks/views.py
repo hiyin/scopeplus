@@ -188,8 +188,8 @@ def show_plot():
         #     ]
         #umap = mongo.single_cell_meta_country.aggregate(pipeline)
         bclist = list(meta)
-        bc_list = [x["barcode"] for x in list(bclist)]
-        umap = mongo.umap.find({'barcode': {'$in': bc_list}})
+        bc_list = [x["id"] for x in list(bclist)]
+        umap = mongo.umap.find({'id': {'$in': bc_list}})
         write_file_meta(tmp_folder, meta)
         write_umap(tmp_folder, umap)
         # Assume ids,meta files are provided
@@ -242,8 +242,8 @@ def show_plot():
                                 { "$replaceRoot": { "newRoot": "$matrix" } } 
                         ]
                     print(pipeline)
-                    result = mongo.single_cell_meta_country.aggregate(pipeline)
-                    #query = mongo.matrix.find({'barcode': {'$in': lookups},'gene_name':cell_gene})
+                    #result = mongo.single_cell_meta_country.aggregate(pipeline)
+                    result = mongo.matrix.find({'barcode': {'$in': bc_list},'gene_name':cell_gene})
                     print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
                     ##text=List of strings to be written to file
