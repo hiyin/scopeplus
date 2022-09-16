@@ -126,9 +126,9 @@ def show_plot():
     # Search box is empty
     if(len(session["query"])==0):
         # ID is presented, no meta data:
-        if(not (exists(tmp_folder + '/meta.tsv'))):
+        if(not (exists(tmp_folder + '/meta_sampled.tsv'))):
             meta = mongo.single_cell_meta_country.find({})
-            write_file_meta(tmp_folder, meta)
+            write_file_meta(tmp_folder, meta,filename="meta_sampled.tsv")
         
         # If ID is presented, no umap:
         elif(not (exists(tmp_folder + '/umap.csv'))):
@@ -190,7 +190,7 @@ def show_plot():
         bclist = list(meta)
         bc_list = [x["id"] for x in list(bclist)]
         umap = mongo.umap.find({'id': {'$in': bc_list}})
-        write_file_meta(tmp_folder, meta)
+        write_file_meta(tmp_folder, meta,filename="meta_sampled.tsv")
         write_umap(tmp_folder, umap)
         # Assume ids,meta files are provided
         # No cell color is provided
@@ -602,7 +602,7 @@ def plot_stack_bar(df):
 def plot_umap(cell_color='scClassify_prediction',gene_color=None,tmp_folder="."):
     df = pd.read_csv(tmp_folder + '/umap.csv', index_col=0)
     df.columns = ["umap_0","umap_1"]
-    df_meta = pd.read_csv(tmp_folder + '/meta.tsv', index_col=1,sep="\t")
+    df_meta = pd.read_csv(tmp_folder + '/meta_sampled.tsv', index_col=1,sep="\t")
     df_plot = df.merge(df_meta, left_index=True, right_index=True)
 
 
@@ -712,11 +712,24 @@ def show_search():
             fig3 = px.bar(new_df3, x="counts", y="meta_outcome", color="counts", orientation='h')
             fig3.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
             graphJSON3 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
-            #meta_days_from_onset_of_symptoms
-            new_df4 = df_meta['meta_days_from_onset_of_symptoms'].value_counts().rename_axis('meta_days_from_onset_of_symptoms').reset_index(name='counts')
-            fig4 = px.bar(new_df4, x="counts", y="meta_days_from_onset_of_symptoms", color="counts", orientation='h')
+            #Gender
+            new_df6 = df_meta['meta_gender'].value_counts().rename_axis('meta_gender').reset_index(name='counts')
+            fig6 = px.bar(new_df6, x="counts", y="meta_gender", color="counts", orientation='h')
+            fig6.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
+            graphJSON6 = json.dumps(fig6, cls=plotly.utils.PlotlyJSONEncoder)
+
+            # Age
+            new_df4 = df_meta['meta_age_category'].value_counts().rename_axis('meta_age_category').reset_index(name='counts')
+            fig4 = px.bar(new_df4, x="counts", y="meta_age_category", color="counts", orientation='h')
             fig4.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
-            graphJSON4 = json.dumps(fig4, cls=plotly.utils.PlotlyJSONEncoder)
+            graphJSON4= json.dumps(fig4, cls=plotly.utils.PlotlyJSONEncoder)
+
+            #meta_days_from_onset_of_symptoms
+            # new_df4 = df_meta['meta_days_from_onset_of_symptoms'].value_counts().rename_axis('meta_days_from_onset_of_symptoms').reset_index(name='counts')
+            # fig4 = px.bar(new_df4, x="counts", y="meta_days_from_onset_of_symptoms", color="counts", orientation='h')
+            # fig4.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
+            fig5 = px.histogram(df_meta, x="meta_days_from_onset_of_symptoms")
+            graphJSON5 = json.dumps(fig5, cls=plotly.utils.PlotlyJSONEncoder)
 
     except Exception as e:
         print(e)
@@ -724,8 +737,11 @@ def show_search():
         graphJSON2 = None
         graphJSON3 = None
         graphJSON4 = None
+        graphJSON5 = None
+        graphJSON6 = None
 
-    return render_template('tasks/show_search_plot.html', graphJSON=graphJSON, graphJSON2=graphJSON2, graphJSON3=graphJSON3, graphJSON4=graphJSON4)
+
+    return render_template('tasks/show_search_plot.html', graphJSON=graphJSON, graphJSON2=graphJSON2, graphJSON3=graphJSON3, graphJSON4=graphJSON4,graphJSON5=graphJSON5,graphJSON6=graphJSON6)
 
 
 # here
@@ -818,8 +834,8 @@ def write_id_meta(path, towrite):
     return ids
 
 # Write file
-def write_file_meta(path, towrite):
-    fn = os.path.join(path,'meta.tsv')
+def write_file_meta(path, towrite, filename='meta.tsv'):	
+    fn = os.path.join(path,filename)
     print('writing meta to' + fn)
 
     fields = [
