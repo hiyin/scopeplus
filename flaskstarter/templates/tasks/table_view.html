@@ -122,14 +122,20 @@
             <div style="margin-top: 10px;">
                 <button class="lightButton" name="show_plot" style="display:inline-block ; margin-right: 15px;"
                     title='Bar Charts of Cell type, Severity, Days from onset and Outcome' onclick="showSearchPlot()">
-                    Show plots
+                    Show Cell count meta
                 </button>
             </div>
-            <div style="margin-top: 10px;"><button id="scfbutton" class="lightButton" name="show_scfeature"
-                    style="display:inline-block ; margin-right: 15px;" form="scfform" onclick="loading()"
-                    title='Select more than 2 items in each of Sample ID + Cell Type OR Dataset + Cell Type & Search before clicking this button (Sample IDs should come from more than 1 dataset)'>
-                    Show scFeature plot
-                </button></div>
+            <div style="margin-top: 10px; margin-right: 15px;">
+                <div style="display:inline-block;">
+                    <button id="scfbutton" class="lightButton" name="show_scfeature" form="scfform" onclick="loading()"
+                        title='Select more than 2 items in each of Sample ID + Cell Type OR Dataset + Cell Type & Search before clicking this button (Sample IDs should come from more than 1 dataset)'>
+                        Show scFeature Plot
+                    </button>
+                </div>
+                <div style="display:inline-block; vertical-align:top; margin-top:-5px"><a href="#scfeatureGuide"><img
+                            src="{{url_for('static', filename='exclamation-mark-64.png')}}" width="20"
+                            height="20" /></a></div>
+            </div>
             <div style="margin-top: 10px;">
                 <button class="lightButton" name="show_plot" type="submit"
                     style="display:inline-block; margin-right: 15px;" onclick="showplot()"
@@ -196,6 +202,39 @@
                             <button id="dowloadSubmitButton" class="mediumButton" name="download_matrix" type="submit"
                                 style="display:inline-block;" form="downloadMatrix">
                                 Download Matrix </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="overlay" id="scfeatureGuide">
+            <div class="wrapper container justify-content-center">
+                <div style="margin-right: auto;">
+                    <a href="#searchPage" class="close">&times;</a>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="boldauto36">
+                        scFeature Plot
+                    </div>
+                </div>
+                <div class="filterContent row justify-content-center">
+                    <div class="filterContainer justify-content-center">
+                        <div class="row mediumauto16" style="text-align:start">
+                            <ol>
+                                <li>Select more than 2 items in each of the following filter options: <br>
+                                    <div style="padding: 5px 0px 10px 0px">Sample ID + Cell Type<br>
+                                        (Sample IDs should come from more
+                                        than 1 dataset)<br>
+                                        OR<br>
+                                        Dataset + Cell Type
+                                    </div>
+                                </li>
+                                <li>
+                                    Press "Search Button".
+                                </li>
+                                <li>Press "Show scFeature Plot" to generate scFeature Plot.</li>
+                            </ol>
                         </div>
                     </div>
                 </div>
@@ -293,23 +332,23 @@
 <script>
     // $.fn.DataTable.ext.pager.numbers_length = 20;
 
-    
+
     $(document).ready(function () {
 
         // $(function(){$('.download').click(function() { ShowDownloadMessage(); }); })
-        $("#downloadMatrix").on('submit',function(e){
+        $("#downloadMatrix").on('submit', function (e) {
             e.preventDefault();
             $.ajax({
                 type: "POST",
                 url: '{{ url_for('tasks.download_matrix')}}',
                 data: $("#downloadMatrix").serialize(),
-                success: function() {
+                success: function () {
                     //success message mybe...
                     ShowQueueMessage();
                     // hide after 10 seconds
                     $('#message').delay(10000).fadeOut();
                 }
-                });
+            });
         });
 
         function ShowDownloadMessage() {
@@ -323,7 +362,7 @@
             $('#message').show();
             // window.addEventListener('focus', HideDownloadMessage, false);
         }
-        
+
 
         function HideDownloadMessage() {
             // window.removeEventListener('focus', HideDownloadMessage, false);

@@ -52,7 +52,6 @@
                             src="{{url_for('static', filename='vimeo.svg')}}" width="20" height="20" /></a>
                 </div>
             </div>
-            {% if current_user.is_authenticated %}
             <div class="col-lg-3 d-none d-lg-block d-xl-block justify-content-start" style="padding:0px 0px 0px 60px;">
                 <div class="row" style="margin: 15px 0px 30px 0px; padding:0px;">
                     <div class="mediumauto18"><a href="{{ url_for('tasks.table_view') }}"
@@ -74,29 +73,6 @@
                             US</a></div>
                 </div>
             </div>
-            {%else%}
-            <div class="col-lg-3 d-none d-lg-block d-xl-block justify-content-start" style="padding:0px 0px 0px 60px;">
-                <div class="row" style="margin: 15px 0px 30px 0px; padding:0px;">
-                    <div class="mediumauto18"><a href="{{ url_for('frontend.login') }}"
-                            style="color: hsla(169, 91%, 17%, 1)">EXPLORE DATA</a></div>
-                </div>
-                <div class=" row" style="margin: 30px 0px; padding:0px;">
-                    <div class="mediumauto18" style="color: hsla(169, 91%, 17%, 1)"><a
-                            href="{{ url_for('frontend.login') }}" style="color: hsla(169, 91%, 17%, 1)">CONTRIBUTE</a>
-                    </div>
-                </div>
-                <div class="row" style="margin: 30px 0px; padding:0px;">
-                    <div class="mediumauto18" style="color: hsla(169, 91%, 17%, 1)"><a
-                            href="{{ url_for('frontend.tutorial') }}" style="color: hsla(169, 91%, 17%, 1)">TUTORIAL</a>
-                    </div>
-                </div>
-                <div class="row" style="margin: 30px 0px; padding:0px;">
-                    <div class="mediumauto18" style="color: hsla(169, 91%, 17%, 1)"><a
-                            href="{{ url_for('frontend.contact_us') }}" style="color: hsla(169, 91%, 17%, 1)">CONTACT
-                            US</a></div>
-                </div>
-            </div>
-            {%endif%}
         </div>
         <div class="row justify-content-between" style="margin: 50px 0px 0px 0px; color: #173533 !important;">
             <div>
