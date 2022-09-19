@@ -178,7 +178,7 @@ def signup():
 
         confirm_user_mail(form.name.data, form.email.data)
 
-        flash(u'Confirmation email sent to ' + form.email.data + ' Please verify!', 'success')
+        flash(u'Registration successful! Please verify!', 'success')
         return redirect(url_for('frontend.login'))
 
     return render_template('frontend/signup.html', form=form,
