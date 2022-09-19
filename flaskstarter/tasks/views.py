@@ -1300,8 +1300,9 @@ def download_matrix():
                 return response
 
         else:
-            write_10x_mtx.delay(tmp_folder, dict_gene, dict_barcode, estimated_expression, session["query"], user_email)
+            print("Download job in queue")
             flash('Download link will be sent to your email within a few hours.')
+            write_10x_mtx.delay(tmp_folder, dict_gene, dict_barcode, estimated_expression, session["query"], user_email)
 
         # 0818 commented by junyi
         print("Write 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))

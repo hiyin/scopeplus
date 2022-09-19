@@ -292,15 +292,38 @@
 </style>
 <script>
     // $.fn.DataTable.ext.pager.numbers_length = 20;
+
+    
     $(document).ready(function () {
 
         // $(function(){$('.download').click(function() { ShowDownloadMessage(); }); })
+        $("#downloadMatrix").on('submit',function(e){
+            e.preventDefault();
+            $.ajax({
+                type: "POST",
+                url: '{{ url_for('tasks.download_matrix')}}',
+                data: $("#downloadMatrix").serialize(),
+                success: function() {
+                    //success message mybe...
+                    ShowQueueMessage();
+                    // hide after 10 seconds
+                    $('#message').delay(10000).fadeOut();
+                }
+                });
+        });
 
         function ShowDownloadMessage() {
             $('#message-text').text('Your file is downloading. Please wait...');
             $('#message').show();
             // window.addEventListener('focus', HideDownloadMessage, false);
         }
+
+        function ShowQueueMessage() {
+            $('#message-text').text('Download link for your requested file will be sent to your email within a few hours.');
+            $('#message').show();
+            // window.addEventListener('focus', HideDownloadMessage, false);
+        }
+        
 
         function HideDownloadMessage() {
             // window.removeEventListener('focus', HideDownloadMessage, false);
