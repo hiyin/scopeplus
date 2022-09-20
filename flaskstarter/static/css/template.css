@@ -129,6 +129,17 @@ a {
     line-height: 22px;
 }
 
+.lightS18 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 300;
+    font-size: 18px;
+    line-height: 22px;
+    text-align: center;
+    letter-spacing: 0.16em;
+    color: #4C4C4C;
+}
+
 .regularH160 {
     font-family: 'Inter';
     font-style: normal;
