@@ -87,10 +87,11 @@ def index():
     fdataset = get_all_study_meta()
     res = get_celltype_count()
     counting = get_overview()
+    counts = counting
     #pprint.pprint(res)
     if current_user.is_authenticated:
-        return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res, counting=counting)
-    return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res, counting=counting)
+        return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res, counting=counting, counts=counts)
+    return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res, counting=counting, counts=counts)
 # @frontend.route('/')
 # def index():
 #     # current_app.logger.debug('debug')

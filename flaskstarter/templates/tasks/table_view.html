@@ -21,7 +21,7 @@
 <div class="section03" style="padding-left: 120px; padding-right: 120px;">
     <div id="searchPage" class="container" style="padding: 0px;">
         <div class="row justify-content-start">
-            <div class="boldauto36" style="padding-bottom: 30px; text-transform:none;">Explore scRNA-seq Data</div>
+            <div class="boldauto36" style="padding-bottom: 30px; text-transform:none;">Explore scRNA-seq data</div>
         </div>
         <div class="row" id="globalsearch">
             <input style="width: 50%; height: 48px; display:inline-block" class="form-control" id="customSearchBox"
@@ -121,14 +121,14 @@
             <div style="margin-top: 10px;">
                 <button class="lightButton" name="show_plot" style="display:inline-block ; margin-right: 15px;"
                     title='Bar Charts of Cell type, Severity, Days from onset and Outcome' onclick="showSearchPlot()">
-                    Show Cell count meta
+                    Show cell count meta
                 </button>
             </div>
             <div style="margin-top: 10px; margin-right: 15px;">
                 <div style="display:inline-block;">
                     <button id="scfbutton" class="lightButton" name="show_scfeature" form="scfform" onclick="loading()"
                         title='Select more than 2 items in each of Sample ID + Cell Type OR Dataset + Cell Type & Search before clicking this button (Sample IDs should come from more than 1 dataset)'>
-                        Show scFeature Plot
+                        Show scFeature plot
                     </button>
                 </div>
                 <div style="display:inline-block; vertical-align:top; margin-top:-5px">
@@ -147,33 +147,33 @@
         <div class="row justify-content-end" style="margin: 14px -15px 30px 0px;">
             <div style="margin: 10px 15px 0px 0px;" hidden>
                 <button class="mediumButton" id="return_home" type="submit" style="display:inline-block ;"
-                    onclick="window.location.href='{{ url_for( 'frontend.index') }}';"> Return to Home </button>
+                    onclick="window.location.href='{{ url_for( 'frontend.index') }}';"> Return to home </button>
             </div>
 
             <div style="margin: 10px 15px 0px 0px;"><button id="btnAdvance" class="mediumButton"
                     style="display:inline-block ;" title='Show/Hide Advanced Search'>
                     Advanced
-                    Search
+                    search
                 </button></div>
 
             <div style="margin: 10px 15px 0px 0px;">
                 <form class="download" action="{{ url_for('tasks.download_meta')}}" method="post">
                     <button class="mediumButton download" name="download_meta" type="submit"
                         style="display:inline-block;">
-                        Download Metadata </button>
+                        Download metadata </button>
                 </form>
             </div>
             <div id="matrixFormButton" style="margin: 10px 15px 0px 0px;">
                 <form id="downloadMatrix" class="download" action="{{ url_for('tasks.download_matrix')}}" method="post">
                 </form>
                 <div class="mediumButton" style="display:inline-block;"><a href="#DownloadMatrixForm">Download
-                        Matrix</a>
+                        matrix</a>
                 </div>
             </div>
             <div id="matrixDownloadButton" style="margin: 10px 15px 0px 0px;">
                 <button class="mediumButton download" name="download_matrix" type="submit" style="display:inline-block;"
                     form="downloadMatrix">
-                    Download Matrix </button>
+                    Download matrix </button>
             </div>
         </div>
 
@@ -184,7 +184,7 @@
                 </div>
                 <div class="row justify-content-center">
                     <div class=" boldauto36">
-                        Dowload Form
+                        Dowload form
                     </div>
                 </div>
                 <div class="filterContent row justify-content-center">
@@ -201,7 +201,7 @@
                         <div class="row justify-content-center">
                             <button id="dowloadSubmitButton" class="mediumButton" name="download_matrix" type="submit"
                                 style="display:inline-block;" form="downloadMatrix">
-                                Download Matrix </button>
+                                Download matrix </button>
                         </div>
                     </div>
                 </div>
@@ -215,7 +215,7 @@
                 </div>
                 <div class="row justify-content-center">
                     <div class="boldauto36">
-                        scFeature Plot
+                        scFeature plot
                     </div>
                 </div>
                 <div class="filterContent row justify-content-center">
@@ -223,17 +223,17 @@
                         <div class="row mediumauto16" style="text-align:start">
                             <ol>
                                 <li>Select more than 2 items in each of the following filter options: <br>
-                                    <div style="padding: 5px 0px 10px 0px">Sample ID + Cell Type<br>
-                                        (Sample IDs should come from more
+                                    <div style="padding: 5px 0px 10px 0px">Sample id + Cell type<br>
+                                        (Sample ids should come from more
                                         than 1 dataset)<br>
                                         OR<br>
-                                        Dataset + Cell Type
+                                        Dataset + Cell type
                                     </div>
                                 </li>
                                 <li>
-                                    Press "Search Button".
+                                    Press "Search" button.
                                 </li>
-                                <li>Press "Show scFeature Plot" to generate scFeature Plot.</li>
+                                <li>Press "Show scFeature plot" to generate scFeature plot.</li>
                             </ol>
                         </div>
                     </div>
