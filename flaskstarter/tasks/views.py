@@ -43,6 +43,7 @@ from concurrent.futures import ThreadPoolExecutor
 import threading
 import subprocess
 import plotly.graph_objects as go
+from shutil import rmtree
 
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
@@ -1126,8 +1127,13 @@ def write_10x_mtx(path, gene_dict, barcode_dict, doc_count, query, user_email):
     zip_10x_mtx(abs_path)
 
     url = upload_to_aws(abs_path + "/matrix.zip")
+
     # # send s3 link
     send_s3_link(url, user_email)
+
+    # delete user temp once upload is completed
+    print("delete path recursively..." + abs_path)
+    rmtree(abs_path)
 
 
 # 0816 added by junyi
