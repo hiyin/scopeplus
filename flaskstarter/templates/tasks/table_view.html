@@ -101,7 +101,6 @@
 
             <div style="margin: 10px 15px 0px 0px">
                 <select id="opt_country" class="multibox" multiple="multiple" name="name_tbv_country" form="scfform">
-                    <option label=" "></option>
                     {% for val in fcountry %}
                     <option value="{{val}}">{{val}}</option>
                     {% endfor %}
@@ -132,9 +131,10 @@
                         Show scFeature Plot
                     </button>
                 </div>
-                <div style="display:inline-block; vertical-align:top; margin-top:-5px"><a href="#scfeatureGuide"><img
-                            src="{{url_for('static', filename='exclamation-mark-64.png')}}" width="20"
-                            height="20" /></a></div>
+                <div style="display:inline-block; vertical-align:top; margin-top:-5px">
+                    <a href="#scfeatureGuide"><img src="{{url_for('static', filename='exclamation-mark-64.png')}}"
+                            width="20" height="20" /></a>
+                </div>
             </div>
             <div style="margin-top: 10px;">
                 <button class="lightButton" name="show_plot" type="submit"
@@ -180,7 +180,7 @@
         <div class="overlay" id="DownloadMatrixForm">
             <div class="wrapper container justify-content-center">
                 <div style="margin-right: auto;">
-                    <a href="#searchPage" class="close">&times;</a>
+                    <a href="javascript:history.back()" class="close">&times;</a>
                 </div>
                 <div class="row justify-content-center">
                     <div class=" boldauto36">
@@ -211,7 +211,7 @@
         <div class="overlay" id="scfeatureGuide">
             <div class="wrapper container justify-content-center">
                 <div style="margin-right: auto;">
-                    <a href="#searchPage" class="close">&times;</a>
+                    <a href="javascript:history.back()" class="close">&times;</a>
                 </div>
                 <div class="row justify-content-center">
                     <div class="boldauto36">
@@ -274,17 +274,17 @@
         <table id="empTable" class="table table-hover table-striped table-responsive" style="width:100%; padding:0px;">
             <thead>
                 <tr>
-                    <th>id</th>
-                    <th>sample id</th>
-                    <th>age</th>
-                    <th>prediction</th>
-                    <th>donor</th>
-                    <th>dataset</th>
-                    <th>status</th>
-                    <th>days from onset</th>
-                    <th>outcome</th>
-                    <th>gender</th>
-                    <th>country</th>
+                    <th>Id</th>
+                    <th>Sample id</th>
+                    <th>Age</th>
+                    <th>Prediction</th>
+                    <th>Donor</th>
+                    <th>Dataset</th>
+                    <th>Status</th>
+                    <th>Days from onset</th>
+                    <th>Outcome</th>
+                    <th>Gender</th>
+                    <th>Country</th>
                 </tr>
             </thead>
         </table>
@@ -373,6 +373,11 @@
         function HideForm() {
             $('.overlay').hide();
         }
+
+        $('ul.product-info li a').click(function (event) {
+            event.preventDefault();
+            $(this).next('div').slideToggle(200);
+        });
 
         $('.download').click(
             function (event) {
