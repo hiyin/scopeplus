@@ -16,8 +16,6 @@ button:active {
     outline: none !important;
 }
 
-
-
 tr.spaceTop>td {
     padding-top: 24px;
 }
@@ -37,6 +35,15 @@ a {
 }
 
 /*font*/
+
+.boldH72 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 48px;
+    line-height: 72px;
+    color: #000000;
+}
 
 .boldauto64 {
     font-family: 'Inter';
@@ -68,6 +75,16 @@ a {
     color: #045547;
 }
 
+.mediumH22 {
+    font-family: 'Inter';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 22px;
+    line-height: 24px;
+    text-indent: 0.166506px;
+    color: #045547;
+}
+
 .mediumauto22 {
     font-family: 'Inter';
     font-style: normal;
@@ -90,6 +107,18 @@ a {
     text-transform: uppercase;
     color: #757779;
     margin-bottom: 30px;
+}
+
+.regularH20 {
+    font-family: 'Inter';
+    font-style: normal;
+    text-align: center;
+    letter-spacing: 0.165em;
+    margin-top: 10px;
+    font-weight: 500;
+    font-size: 20px;
+    line-height: 180%;
+    color: #4f5153;
 }
 
 .mediumauto18 {
@@ -236,7 +265,6 @@ a {
     color: #757779;
 }
 
-#projectAim0,
 #projectAim1 {
     font-style: normal;
     font-weight: bold;
@@ -244,19 +272,6 @@ a {
     line-height: 70px;
     text-align: center;
     color: #000000;
-}
-
-#projectDisp {
-    font-family: Inter;
-    font-style: normal;
-    font-weight: 300;
-    font-size: 18.9103px;
-    line-height: 35px;
-    text-align: center;
-    letter-spacing: 0.165em;
-    text-indent: 0.10809px;
-    color: rgba(0, 0, 0, 0.7);
-    margin-top: 10px;
 }
 
 #dashrow {
@@ -729,48 +744,12 @@ body {
 }
 
 .contactboard {
-    display: flex;
-    flex-wrap: wrap;
     width: 100%;
     background: #FFFFFF;
     box-shadow: 2px 12px 60px -5px rgba(170, 170, 170, 0.35);
     border-radius: 40px;
     padding: 100px 100px 200px;
 }
-
-.contact-row {
-    display: flex;
-    width: 100%;
-    justify-content: space-evenly;
-}
-
-.contact-item {
-    display: inline-block;
-    text-align: center;
-    font-family: 'Inter';
-    font-style: normal;
-    font-weight: 600;
-    font-size: 40px;
-    line-height: 59px;
-    letter-spacing: 0.015em;
-    color: #6EA69D;
-    margin-top: 60px;
-    margin-bottom: 60px;
-}
-
-.contact-item p {
-    color: #000000;
-    font-weight: 400;
-    font-size: 20px;
-    line-height: 40px;
-}
-
-
-.contact-item hr {
-    border: 2.5px solid #6EA69D;
-    width: 180px;
-}
-
 
 #loading {
     z-index: 999999;
