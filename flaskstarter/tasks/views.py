@@ -925,7 +925,8 @@ def upload_to_aws(zipfile_path):
         Params={
             'Bucket': 'covid19-cell-atlas-portal',
             'Key': awsfilename
-        }
+        },
+        ExpiresIn=604800
     )
     return url
 
