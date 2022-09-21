@@ -335,20 +335,30 @@
 
     $(document).ready(function () {
 
-        // $(function(){$('.download').click(function() { ShowDownloadMessage(); }); })
+        $(function(){$('.download').click(function() { ShowDownloadMessage(); }); })
+
+        
         $("#downloadMatrix").on('submit', function (e) {
-            e.preventDefault();
-            $.ajax({
-                type: "POST",
-                url: '{{ url_for('tasks.download_matrix')}}',
-                data: $("#downloadMatrix").serialize(),
-                success: function () {
-                    //success message mybe...
-                    ShowQueueMessage();
-                    // hide after 10 seconds
-                    $('#message').delay(10000).fadeOut();
-                }
-            });
+            var entrieString = $('#empTable_info').text();
+            var entries = entrieString.split('of ').pop().split(' entries')[0];
+            entries = entries.replaceAll(',', '');
+            if (Number(entries) > 2000) {
+                e.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: '{{ url_for('tasks.download_matrix')}}',
+                    data: $("#downloadMatrix").serialize(),
+                    success: function () {
+                        //success message mybe...
+
+                            console.log("cell number > 2000")
+                            ShowQueueMessage();
+                            // hide after 10 seconds
+                            $('#message').delay(10000).fadeOut();
+                    
+                    }
+                });   
+           }
         });
 
         function ShowDownloadMessage() {
@@ -389,7 +399,7 @@
                 // Update the URL that is *currently being requested*
                 // to contain the downloadID. This will then be response
                 // cookie header.
-                window.location.href += ("?downloadID=" + downloadID);
+                target.href += ("?downloadID=" + downloadID);
                 // The local cookie cache is defined in the browser
                 // as one large string; we need to search for the
                 // name-value pattern with the above ID.
