@@ -7,11 +7,21 @@
 {% block body %}
 <div class="log-in">
   <div class="log-container flex-column">
-    <h3>Sign In</h3>
-        {{ render_form(url_for('frontend.login'), form)}}
-        <a href="{{url_for('frontend.reset_password')}}" class="auth-link">Forgot Password?</a>
-       </br>
-        <p class="mb-4 text-sm mx-auto"> Don't have an account? <a href="{{url_for('frontend.signup')}}" class="text-info text-gradient font-weight-bold">Sign UP</a> </p>
+    <div class="container" style="margin: 0px; padding:0px;">
+      <div class="row justify-content-center">
+        <h3>Sign in</h3>
+      </div>
+      {{ render_form(url_for('frontend.login'), form)}}
+      <div class="row justify-content-center">
+        <p class="mb-2 text-sm mx-auto"> Don't have an account? <a href="{{url_for('frontend.signup')}}"
+            class="text-info text-gradient font-weight-bold">Sign up</a> </p>
+      </div>
+      <div class="row justify-content-center">
+        <a href="{{url_for('frontend.reset_password')}}" class="auth-link">Forgot password?</a>
+      </div>
+    </div>
+
+
 
   </div>
 </div>

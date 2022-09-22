@@ -957,3 +957,11 @@ body {
 .btn-group {
     width: 158px !important;
 }
+
+/* Form_wtf */
+.form-actions #submit {
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 20px;
+    margin-bottom: 45px;
+}

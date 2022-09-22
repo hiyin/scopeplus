@@ -13,7 +13,7 @@ from ..utils import (NAME_LEN_MIN, NAME_LEN_MAX, PASSWORD_LEN_MIN,
 
 from ..user import Users
 
-terms_html = Markup('<a target="blank" href="/terms">Terms of Service</a>')
+terms_html = Markup('<a target="blank" href="/terms">Terms of service</a>')
 
 
 class LoginForm(FlaskForm):
@@ -22,8 +22,8 @@ class LoginForm(FlaskForm):
     password = PasswordField('Password', [Required(),
                                           Length(PASSWORD_LEN_MIN,
                                                  PASSWORD_LEN_MAX)])
-    remember = BooleanField('Remember me')
-    submit = SubmitField('Sign in')
+    remember = BooleanField(' Remember me')
+    submit = SubmitField('      Sign in')
 
 
 class SignupForm(FlaskForm):
@@ -33,8 +33,8 @@ class SignupForm(FlaskForm):
     password = PasswordField(u'Password',
                              [Required(), Length(PASSWORD_LEN_MIN, PASSWORD_LEN_MAX)],
                              description=u' 6 or more characters.')
-    agree = BooleanField(u'Agree to the ' + terms_html, [Required()])
-    submit = SubmitField('Sign up')
+    agree = BooleanField(u' Agree to the ' + terms_html, [Required()])
+    submit = SubmitField('      Sign up')
 
     def validate_email(self, field):
         if Users.query.filter_by(email=field.data).first() is not None:
@@ -43,7 +43,7 @@ class SignupForm(FlaskForm):
 
 class RecoverPasswordForm(FlaskForm):
     email = EmailField(u'Your email', [Email()])
-    submit = SubmitField('Send instructions')
+    submit = SubmitField('       Send')
 
 
 class ChangePasswordForm(FlaskForm):
