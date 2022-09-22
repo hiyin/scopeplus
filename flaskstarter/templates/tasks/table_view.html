@@ -132,8 +132,9 @@
                     </button>
                 </div>
                 <div style="display:inline-block; vertical-align:top; margin-top:-5px">
-                    <a href="#scfeatureGuide"><img src="{{url_for('static', filename='exclamation-mark-64.png')}}"
-                            width="20" height="20" /></a>
+                    <a href="#scfeatureGuide" onclick="showGuide()"><img
+                            src="{{url_for('static', filename='exclamation-mark-64.png')}}" width="20"
+                            height="20" /></a>
                 </div>
             </div>
             <div style="margin-top: 10px;">
@@ -166,7 +167,8 @@
             <div id="matrixFormButton" style="margin: 10px 15px 0px 0px;">
                 <form id="downloadMatrix" class="download" action="{{ url_for('tasks.download_matrix')}}" method="post">
                 </form>
-                <div class="mediumButton" style="display:inline-block;"><a href="#DownloadMatrixForm">Download
+                <div class="mediumButton" style="display:inline-block;" onclick="showDLform()"><a
+                        href="#DownloadMatrixForm">Download
                         matrix</a>
                 </div>
             </div>
@@ -717,6 +719,15 @@
         console.log(diff);
         getEntries();
     });
+
+    var showDLform = function () {
+        $("#DownloadMatrixForm").css("display", "block")
+    }
+
+    var showGuide = function () {
+        $("#scfeatureGuide").css("display", "block")
+    }
+
 
 </script>
 
