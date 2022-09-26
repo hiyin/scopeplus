@@ -149,22 +149,28 @@ def show_plot():
     # If search box not empty, write id meta umap
     else:
         print("Search value provided, write id, meta...")
-        searched = session.get("gene_searched")
+        try:
+            searched = session.get("gene_search")
+        except:
+            searched = False
+
         print("Get gene search",searched)
         ### Edit by junyi 2022 0926, if the condition is gene provided, then search for gene
         ### Other wise, use original method
         if (searched == False):
             print("Search gene not provided, write id, meta...")
             if isinstance(session["query"], dict):
-                print(session["query"])
+                print("Isinstance dict",session["query"])
                 #meta = mongo.single_cell_meta_country.find(session["query"])
                 meta = list(mongo.single_cell_meta_country.aggregate(
                     [{"$match": session["query"] }, {"$sample": {"size": 10000}}]))
-            elif  isinstance(session["query"], list) and len(session["query"]) == 1:
+            elif isinstance(session["query"], list) and len(session["query"]) == 1:
+                print("Len ==1",session["query"])
                 #meta = mongo.single_cell_meta_country.find(session["query"][0])
                 meta = list(mongo.single_cell_meta_country.aggregate(
                     [{"$match": session["query"][0]}, {"$sample": {"size": 10000}}]))
             else:
+                print("Not and",session["query"])
                 #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
                 meta = list(mongo.single_cell_meta_country.aggregate(
                     [{"$match": {"$and": session["query"] }}, {"$sample": {"size": 10000}}]))
@@ -181,11 +187,11 @@ def show_plot():
                 {"$match": {"$and": construct_main }  }, 
                 {"$sample": {"size": 10000}}
             ]
-            #meta = mongo.single_cell_meta_country.find(session["query"])
             meta = list(mongo.matrix.aggregate(pipeline))
-
             
         bclist = list(meta)
+
+        print(meta[1:5])
         bc_list = [x["id"] for x in list(bclist)]
         umap = mongo.umap.find({'id': {'$in': bc_list}})
         write_file_meta(tmp_folder, meta,filename="meta_sampled.tsv")
