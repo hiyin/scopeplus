@@ -760,6 +760,9 @@ def table_view():
     foutcome = get_field("meta_outcome")
     fgender = get_field("meta_gender")
     fcountry = get_field("pbmc.Country")
+    #fgene = get_matrix_field("gene_name")
+    fgene = ["AAAS", "A1BG"]
+    print(fgene)
 
 
     # 0831 ADD by JUNYI
@@ -777,6 +780,7 @@ def table_view():
                                    foutcome=foutcome,
                                    fgender=fgender,
                                    fcountry=fcountry,
+                                   fgene=fgene,
                                    link=l)# 0831 ADD by JUNYI
 
     else:
@@ -792,6 +796,7 @@ def table_view():
                            foutcome=foutcome,
                            fgender=fgender,
                            fcountry=fcountry,
+                           fgene=fgene,
                            link=l)# 0831 ADD by JUNYI
 
 
@@ -1297,6 +1302,7 @@ def download_matrix():
 
         if (cell_nums < 2000):
             write_10x_mtx_small(tmp_folder, dict_gene, dict_barcode, session["query"])
+            print("Write 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))
             make_summary_report(tmp_folder)
             zip_10x_mtx(tmp_folder)
             if (exists(tmp_folder + '/matrix.zip')):
@@ -1310,10 +1316,11 @@ def download_matrix():
             print("Download job in queue")
             flash('Download link will be sent to your email within a few hours.')
             write_10x_mtx.delay(tmp_folder, dict_gene, dict_barcode, estimated_expression, session["query"], user_email)
+            return redirect(request.referrer)
 
         # 0818 commented by junyi
-        print("Write 10x mtx finished --- %s seconds ---" % (time.time() - start_time_wrtie))
-    return redirect(request.referrer)
+        
+    
 
 # Constructor for column-filter after multi-select
 def query_builder(map):
@@ -1321,7 +1328,7 @@ def query_builder(map):
     print(map)
     re_match = re.compile(r'^-?\d{1,10}\.?\d{0,10}$')
     for k in map:
-        if (k in ["meta_age_category", "meta_sample_id2", "meta_dataset", "level2", "meta_severity", "meta_days_from_onset_of_symptoms", "meta_outcome", "meta_gender", "meta_patient_id", "pbmc.Country"]):
+        if (k in ["meta_age_category", "meta_sample_id2", "meta_dataset", "level2", "meta_severity", "meta_days_from_onset_of_symptoms", "meta_outcome", "meta_gender", "meta_patient_id", "pbmc.Country","gene_name"]):
             l = []
             for ki in map[k]:
                 if re_match.findall(ki):
@@ -1355,7 +1362,9 @@ def paginate_skiplimit(page_size, page_no, search_type, search_params):
   
     # search type 1 - no search: by default search value is empty ''
     if search_type == "default":
-        tmp = mongo.single_cell_meta_country.find().skip(skips).limit(page_size)
+        tmp = list(mongo.single_cell_meta_country.find().skip(skips).limit(page_size))
+        print(tmp[2:4])
+        #tmp = tmp["gene_name"] = ""
         total_records = mongo.command("collstats","single_cell_meta_country")['count']    
 
     # search type 2 - global search: search value is mongo raw query 
@@ -1364,8 +1373,25 @@ def paginate_skiplimit(page_size, page_no, search_type, search_params):
         total_records = mongo.single_cell_meta_country.count_documents(json.loads(search_params))
     # search type 3 - multi-column filter
     elif search_type == "column":
-        tmp = mongo.single_cell_meta_country.find({"$and": search_params}).skip(skips).limit(page_size)
-        total_records = mongo.single_cell_meta_country.count_documents({"$and": search_params}) 
+        print(search_params)
+        # search construct is a list
+        if "gene_name" in str(search_params):
+            print("searching for genes")
+            pipeline = [
+                {"$lookup": {"from": 'single_cell_meta_country', "localField": 'barcode', "foreignField": 'id', "as": 'meta'}},
+                {"$match":  {"$and": search_params}},
+                #{"$addFields":{"meta.expression": "$expression", "meta.gene_name":"$gene_name"}},
+                {"$addFields":{"meta.gene_name":"$gene_name"}},
+                {"$unwind": '$meta'},
+                { "$replaceRoot": { "newRoot": "$meta" }}, {"$project":{"_id":0}}
+            ]
+            print(pipeline)
+            tmp = mongo.matrix.aggregate(pipeline + [ {"$skip": skips}, {"$limit": page_size} ])
+            total_records = mongo.matrix.count_documents({"$and": search_params})
+        else:
+            print("search without gene_name")    
+            tmp = mongo.single_cell_meta_country.find({"$and": search_params}).skip(skips).limit(page_size)
+            total_records = mongo.single_cell_meta_country.count_documents({"$and": search_params}) 
 
     return tmp, total_records
             
@@ -1477,6 +1503,9 @@ def api_db():
                 elif "[10]" in i:
                     search_column = "pbmc.Country"
                     map[search_column] = column_value
+                elif "[11]" in i:
+                    search_column = "gene_name"
+                    map[search_column] = column_value    
 
         if search_value == '':
             # Pagination algorithm 
@@ -1533,12 +1562,14 @@ def api_db():
                 'onset':"",
                 'outcome':"",
                 'gender':"",
-                'country':""
+                'country':"",
+                "gene_name":"",
             })
 
         else:
             for r in tmp:
-                data.append({
+                if "gene_name" not in r:
+                    data.append({
                         'id': r['id'],
                         'sample_id': r['meta_sample_id2'],
                         'age': r['meta_age_category'],
@@ -1549,8 +1580,26 @@ def api_db():
                         'onset':r['meta_days_from_onset_of_symptoms'],
                         'outcome':str(r['meta_outcome']),
                         'gender':r['meta_gender'],
-                        'country': r['pbmc'][0]['Country']
+                        'country': r['pbmc'][0]['Country'],
+                        'gene_name':"TBA",
                     })
+                else:
+                    data.append({
+                        'id': r['id'],
+                        'sample_id': r['meta_sample_id2'],
+                        'age': r['meta_age_category'],
+                        'prediction': r['level2'],
+                        'donor': r['meta_patient_id'],
+                        'dataset': r['meta_dataset'],
+                        'status': r['meta_severity'],
+                        'onset':r['meta_days_from_onset_of_symptoms'],
+                        'outcome':str(r['meta_outcome']),
+                        'gender':r['meta_gender'],
+                        'country': r['pbmc'][0]['Country'],
+                        'gene_name':r['gene_name'],
+                    })
+
+
 
         response = {
                 'draw': draw,
@@ -1567,7 +1616,10 @@ def get_field(field_name):
     print("%s has %d uniq fields" % (field_name, len(key)))
     return key
 
-
+def get_matrix_field(field_name):
+    key = mongo.genes.distinct(field_name)
+    print("%s has %d uniq fields" % (field_name, len(key)))
+    return key
 
 def get_study_field(field_name):
     key = mongo.pbmc_all_study_meta.distinct(field_name)

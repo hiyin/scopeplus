@@ -106,21 +106,28 @@
                     {% endfor %}
                 </select>
             </div>
+            <div style="margin: 10px 15px 0px 0px">
+                <select id="opt_gene" class="multibox" multiple="multiple" name="name_tbv_gene" form="scfform">
+                    {% for val in fgene %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
         </div>
 
         <div class="row justify-content-start" style="margin-top: 24px;">
-            <div><input type="button" class="darkButton" style="display:inline-block;" value="Filter search"
+            <div><input type="button" class="darkButton" style="display:inline-block;" value="Filter Search"
                     id="btnSearch" />
             </div>
             <div><input type="button" class="lightButton" style="display:inline-block; margin-left: 15px;"
-                    value="Clear filter" id="btnClear" /></div>
+                    value="Clear Filter" id="btnClear" /></div>
         </div>
         <div class="row justify-content-end" style="margin: 24px -15px 0px 0px;">
             <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
             </form>
             <div style="margin-top: 10px;">
                 <button class="lightButton" name="show_plot" style="display:inline-block ; margin-right: 15px;"
-                    title='Bar Charts of cell type, severity, days from onset and outcome' onclick="showSearchPlot()">
+                    title='Bar Charts of Cell type, Severity, Days from onset and Outcome' onclick="showSearchPlot()">
                     Show cell count meta
                 </button>
             </div>
@@ -132,15 +139,14 @@
                     </button>
                 </div>
                 <div style="display:inline-block; vertical-align:top; margin-top:-5px">
-                    <a href="#scfeatureGuide" onclick="showGuide()"><img
-                            src="{{url_for('static', filename='exclamation-mark-64.png')}}" width="20"
-                            height="20" /></a>
+                    <a href="#scfeatureGuide"><img src="{{url_for('static', filename='exclamation-mark-64.png')}}"
+                            width="20" height="20" /></a>
                 </div>
             </div>
             <div style="margin-top: 10px;">
                 <button class="lightButton" name="show_plot" type="submit"
                     style="display:inline-block; margin-right: 15px;" onclick="showplot()"
-                    title='Select 1 sell type & search before clicking this button'> Show UMAP plot
+                    title='Select 1 Cell Type & Search before clicking this button'> Show UMAP Plot
                 </button>
             </div>
         </div>
@@ -167,12 +173,11 @@
             <div id="matrixFormButton" style="margin: 10px 15px 0px 0px;">
                 <form id="downloadMatrix" class="download" action="{{ url_for('tasks.download_matrix')}}" method="post">
                 </form>
-                <div class="mediumButton" style="display:inline-block;" onclick="showDLform()"><a
-                        href="#DownloadMatrixForm">Download
+                <div class="mediumButton" style="display:inline-block;"><a href="#DownloadMatrixForm">Download
                         matrix</a>
                 </div>
             </div>
-            <div id="matrixDownloadButton" style="margin: 10px 15px 0px 0px;">
+            <div id="matrixDownloadButton" class="hide" style="margin: 10px 15px 0px 0px;">
                 <button class="mediumButton download" name="download_matrix" type="submit" style="display:inline-block;"
                     form="downloadMatrix">
                     Download matrix </button>
@@ -233,7 +238,7 @@
                                     </div>
                                 </li>
                                 <li>
-                                    Press "Filter search" button.
+                                    Press "Search" button.
                                 </li>
                                 <li>Press "Show scFeature plot" to generate scFeature plot.</li>
                             </ol>
@@ -287,6 +292,7 @@
                     <th>Outcome</th>
                     <th>Gender</th>
                     <th>Country</th>
+                    <th>Gene</th>
                 </tr>
             </thead>
         </table>
@@ -337,31 +343,31 @@
 
     $(document).ready(function () {
 
-        $(function () { $('.download').click(function () { ShowDownloadMessage(); }); })
+        $(function(){$('.download').click(function() { ShowDownloadMessage(); }); })
 
+        // only prevent the page reload when the cell num is > 2000. 
+        // $("#downloadMatrix").on('submit', function (e) {
+        //     var entrieString = $('#empTable_info').text();
+        //     var entries = entrieString.split('of ').pop().split(' entries')[0];
+        //     entries = entries.replaceAll(',', '');
+        //     if (Number(entries) > 2000) {
+        //         //e.preventDefault();
+        //         $.ajax({
+        //             type: "POST",
+        //             url: '{{ url_for('tasks.download_matrix')}}',
+        //             data: $("#downloadMatrix").serialize(),
+        //             success: function () {
+        //                 //success message mybe...
 
-        $("#downloadMatrix").on('submit', function (e) {
-            var entrieString = $('#empTable_info').text();
-            var entries = entrieString.split('of ').pop().split(' entries')[0];
-            entries = entries.replaceAll(',', '');
-            if (Number(entries) > 2000) {
-                e.preventDefault();
-                $.ajax({
-                    type: "POST",
-                    url: '{{ url_for('tasks.download_matrix')}}',
-                    data: $("#downloadMatrix").serialize(),
-                    success: function () {
-                        //success message mybe...
-
-                        console.log("cell number > 2000")
-                        ShowQueueMessage();
-                        // hide after 10 seconds
-                        $('#message').delay(10000).fadeOut();
-
-                    }
-                });
-            }
-        });
+        //                     console.log("cell number > 2000")
+        //                     ShowQueueMessage();
+        //                     // hide after 10 seconds
+        //                     $('#message').delay(10000).fadeOut();
+                    
+        //             }
+        //         });   
+        //    }
+        // });
 
         function ShowDownloadMessage() {
             $('#message-text').text('Your file is downloading. Please wait...');
@@ -379,7 +385,7 @@
         function HideDownloadMessage() {
             // window.removeEventListener('focus', HideDownloadMessage, false);
             $('#message-text').text('Your file completed download!');
-            $('#message').show();
+            $('#message').show().delay(10000).fadeOut();
         }
 
         function HideForm() {
@@ -441,7 +447,7 @@
 
         $("#globalsearch").hide();
 
-        $("#matrixDownloadButton").hide();
+        // $("#matrixDownloadButton").hide();
 
         $("#btnAdvance").click(function () {
             $("#globalsearch").toggle();
@@ -502,7 +508,7 @@
             enableFiltering: true,
             enableCaseInsensitiveFiltering: true,
             filterPlaceholder: 'Search for something...',
-            nonSelectedText: 'Cell type',
+            nonSelectedText: 'Cell Type',
             buttonWidth: '150px',
             maxHeight: 450
         });
@@ -549,6 +555,18 @@
         });
 
 
+        $('#opt_gene').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Gene name',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
+
+
+
         $('#empTable').DataTable({
             'pagingType': "input",
             'processing': true,
@@ -558,7 +576,11 @@
             'serverSide': true,
             'serverMethod': 'post',
             'ajax': {
-                'url': '{{ url_for('tasks.api_db', main=link)}}'
+                'url': '{{ url_for('tasks.api_db', main=link)}}',
+                // "dataSrc": function ( json ) {
+                //     console.log("check json return")
+                //     console.log(json.aaData)
+                //     }
                 },
             'lengthMenu': [[10, 25, 50, 100], [10, 25, 50, 100]],
             searching: true,
@@ -575,20 +597,21 @@
                 { data: 'outcome' },
                 { data: 'gender' },
                 { data: 'country' },
-
+                { data: 'gene_name'},
             ],
             "columnDefs": [
                 { "width": "28%", "targets": 0 },
                 { "width": "14%", "targets": 1 },
                 { "width": "7%", "targets": 2 },
                 { "width": "7%", "targets": 3 },
-                { "width": "14%", "targets": 4 },
-                { "width": "14%", "targets": 5 },
-                { "width": "14%", "targets": 6 },
-                { "width": "14%", "targets": 7 },
-                { "width": "14%", "targets": 8 },
-                { "width": "14%", "targets": 9 },
-                { "width": "14%", "targets": 10 },
+                { "width": "7%", "targets": 4 },
+                { "width": "7%", "targets": 5 },
+                { "width": "7%", "targets": 6 },
+                { "width": "7%", "targets": 7 },
+                { "width": "7%", "targets": 8 },
+                { "width": "7%", "targets": 9 },
+                { "width": "7%", "targets": 10 },
+                { "width": "7%", "targets": 11 },
             ],
             initComplete: function () {
                 var input = $('#customSearchBox').unbind(),
@@ -625,6 +648,7 @@
             oTable.columns(8).search($('#opt_outcome').val().join("|"));
             oTable.columns(9).search($('#opt_gender').val().join("|"));
             oTable.columns(10).search($('#opt_country').val().join("|"));
+            oTable.columns(11).search($('#opt_gene').val().join("|"));
             //hit search on server
             oTable.draw();
         });
@@ -643,8 +667,7 @@
             $('#opt_outcome').multiselect('clearSelection');
             $('#opt_gender').multiselect('clearSelection');
             $('#opt_country').multiselect('clearSelection');
-
-
+            $('#opt_gene').multiselect('clearSelection');
         });
 
     });
@@ -696,20 +719,17 @@
         var entries = entrieString.split('of ').pop().split(' entries')[0];
         entries = entries.replaceAll(',', '');
 
-        if (Number(entries) < 2000) {
-            $("#matrixFormButton").hide();
-            $("#matrixDownloadButton").show();
-            $('#emailInput').removeAttr('required');
-        } else {
-            $("#matrixFormButton").show();
-            $("#matrixDownloadButton").hide();
-            $('#emailInput').attr('required', 'required');
-        }
+        
+        console.log("Getting numbers")
+        console.log(Number(entries))
 
         console.log(Number(entries))
 
         return Number(entries);
     }
+
+    
+
 
     $('#empTable').on('draw.dt', function () {
         console.log("Page finish change");
@@ -717,17 +737,26 @@
         endTime = new Date();
         diff = (endTime - startTime);
         console.log(diff);
-        getEntries();
+        var entries = getEntries();
+
+        if (Number(entries) < 2000) {
+            console.log("change button to default download")
+            $('#matrixFormButton').removeClass('show');
+            $('#matrixDownloadButton').removeClass('hide');
+            // $("#matrixFormButton").hide();
+            // $("#matrixDownloadButton").show();
+            $('#emailInput').removeAttr('required');
+        } else {
+            console.log("change button to queue download")
+            $('#matrixFormButton').addClass('show');
+            //$('#matrixDownloadButton').removeClass('show');
+            // $("#matrixFormButton").show();
+            // $("#matrixDownloadButton").hide();
+            $('#emailInput').attr('required', 'required');
+        }
+
+        //getEntries();
     });
-
-    var showDLform = function () {
-        $("#DownloadMatrixForm").css("display", "block")
-    }
-
-    var showGuide = function () {
-        $("#scfeatureGuide").css("display", "block")
-    }
-
 
 </script>
 
