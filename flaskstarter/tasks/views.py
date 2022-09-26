@@ -127,67 +127,64 @@ def show_plot():
     # Search box is empty
     if(len(session["query"])==0):
         # ID is presented, no meta data:
-        if(not (exists(tmp_folder + '/meta_sampled.tsv'))):
-            meta = mongo.single_cell_meta_country.find({})
-            write_file_meta(tmp_folder, meta,filename="meta_sampled.tsv")
+        print("Should not reach here")
+        # if(not (exists(tmp_folder + '/meta_sampled.tsv'))):
+        #     meta = mongo.single_cell_meta_country.find({})
+        #     write_file_meta(tmp_folder, meta,filename="meta_sampled.tsv")
         
-        # If ID is presented, no umap:
-        elif(not (exists(tmp_folder + '/umap.csv'))):
+        # # If ID is presented, no umap:
+        # elif(not (exists(tmp_folder + '/umap.csv'))):
 
-            pipeline = [
-                {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
-                {"$project": { "umap": 1, "_id": 0 } }, 
-                {"$unwind": '$umap' }, 
-                {"$replaceRoot": { "newRoot": "$umap" } }
-            ]
+        #     pipeline = [
+        #         {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
+        #         {"$project": { "umap": 1, "_id": 0 } }, 
+        #         {"$unwind": '$umap' }, 
+        #         {"$replaceRoot": { "newRoot": "$umap" } }
+        #     ]
 
-            umap = mongo.single_cell_meta_country.aggregate(pipeline)
+        #     umap = mongo.single_cell_meta_country.aggregate(pipeline)
 
-            write_umap(tmp_folder, umap)
+        #     write_umap(tmp_folder, umap)
 
     # If search box not empty, write id meta umap
     else:
         print("Search value provided, write id, meta...")
-        if isinstance(session["query"], dict):
-            print(session["query"])
-            #meta = mongo.single_cell_meta_country.find(session["query"])
-            meta = list(mongo.single_cell_meta_country.aggregate(
-                [{"$match": session["query"] }, {"$sample": {"size": 10000}}]))
-        elif  isinstance(session["query"], list) and len(session["query"]) == 1:
-            #meta = mongo.single_cell_meta_country.find(session["query"][0])
-            meta = list(mongo.single_cell_meta_country.aggregate(
-                [{"$match": session["query"][0]}, {"$sample": {"size": 10000}}]))
+        searched = session.get("gene_searched")
+        print("Get gene search",searched)
+        ### Edit by junyi 2022 0926, if the condition is gene provided, then search for gene
+        ### Other wise, use original method
+        if (searched == False):
+            print("Search gene not provided, write id, meta...")
+            if isinstance(session["query"], dict):
+                print(session["query"])
+                #meta = mongo.single_cell_meta_country.find(session["query"])
+                meta = list(mongo.single_cell_meta_country.aggregate(
+                    [{"$match": session["query"] }, {"$sample": {"size": 10000}}]))
+            elif  isinstance(session["query"], list) and len(session["query"]) == 1:
+                #meta = mongo.single_cell_meta_country.find(session["query"][0])
+                meta = list(mongo.single_cell_meta_country.aggregate(
+                    [{"$match": session["query"][0]}, {"$sample": {"size": 10000}}]))
+            else:
+                #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+                meta = list(mongo.single_cell_meta_country.aggregate(
+                    [{"$match": {"$and": session["query"] }}, {"$sample": {"size": 10000}}]))
         else:
-            #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
-            meta = list(mongo.single_cell_meta_country.aggregate(
-                [{"$match": {"$and": session["query"] }}, {"$sample": {"size": 10000}}]))
-        # if isinstance(session["query"], dict):
-        #     print("Getting instance of dict")
-        #     pipeline = [
-        #             {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} },
-        #             {"$match": session["query"] },
-        #             {"$project": { "umap": 1, "_id": 0 } },
-        #             {"$unwind": '$umap' },
-        #             {"$replaceRoot": { "newRoot": "$umap" } }
-        #         ]
-        # elif isinstance(session["query"], list) and len(session["query"]) == 1:
-        #     print("Getting instance of list and getting  first element")
-        #     pipeline = [
-        #             {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} },
-        #             {"$match": session["query"][0] },
-        #             {"$project": { "umap": 1, "_id": 0 } },
-        #             {"$unwind": '$umap' },
-        #             {"$replaceRoot": { "newRoot": "$umap" } }
-        #         ]
-        # else:
-        #     pipeline = [
-        #             {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} },
-        #             {"$match": {"$and": session["query"] }  },
-        #             {"$project": { "umap": 1, "_id": 0 } },
-        #             {"$unwind": '$umap' },
-        #             {"$replaceRoot": { "newRoot": "$umap" } }
-        #     ]
-        #umap = mongo.single_cell_meta_country.aggregate(pipeline)
+            print("Search gene provided, write id, meta...")
+            construct_genes = [item for item in session["query"] if "gene_name" in item]
+            construct_main = [item for item in session["query"] if not "gene_name" in item]
+            pipeline = [
+                {"$lookup": {"from": 'single_cell_meta_country', "localField": 'barcode', "foreignField": 'id', "as": 'meta'}},
+                {"$match":  {"$and": construct_genes}},
+                {"$addFields":{"meta.gene_name":"$gene_name"}},
+                {"$unwind": '$meta'},
+                { "$replaceRoot": { "newRoot": "$meta" }}, {"$project":{"_id":0}},
+                {"$match": {"$and": construct_main }  }, 
+                {"$sample": {"size": 10000}}
+            ]
+            #meta = mongo.single_cell_meta_country.find(session["query"])
+            meta = list(mongo.matrix.aggregate(pipeline))
+
+            
         bclist = list(meta)
         bc_list = [x["id"] for x in list(bclist)]
         umap = mongo.umap.find({'id': {'$in': bc_list}})
@@ -601,10 +598,16 @@ def plot_stack_bar(df):
 
 ## Create by junyi
 def plot_umap(cell_color='scClassify_prediction',gene_color=None,tmp_folder="."):
-    df = pd.read_csv(tmp_folder + '/umap.csv', index_col=0)
+
+
+    ## Fixed by junyi in 2022-09-26 
+    ## The meta shape is different due to adding one column of gene name
+    df = pd.read_csv(tmp_folder + '/umap.csv', index_col=0,header=None)
     df.columns = ["umap_0","umap_1"]
-    df_meta = pd.read_csv(tmp_folder + '/meta_sampled.tsv', index_col=1,sep="\t")
+    df_meta = pd.read_csv(tmp_folder + '/meta_sampled.tsv', index_col="id",sep="\t")
     df_plot = df.merge(df_meta, left_index=True, right_index=True)
+
+    print(df_plot.head())
 
 
 
@@ -840,51 +843,44 @@ def write_id_meta(path, towrite):
     return ids
 
 # Write file
-def write_file_meta(path, towrite, filename='meta.tsv'):	
+def write_file_meta(path, towrite, filename='meta.tsv',gene=False):	
     fn = os.path.join(path,filename)
     print('writing meta to' + fn)
-
-    fields = [
-    '_id','id','barcode','meta_dataset','meta_tissue','meta_sample_type',\
-    'meta_protocol','meta_technology','meta_sample_id','meta_patient_id',\
-    'meta_sample_time','meta_disease','meta_severity','meta_WHO_scores',\
-    'meta_outcome','meta_days_from_onset_of_symptoms','meta_ethinicity',\
-    'meta_gender','meta_age','meta_BMI','meta_PreExistingHypertension',\
-    'meta_PreExistingHeartDisease','barcodes','level1','level2','level3',\
-    'meta_sample_id2','meta_age_category', 'country']
+    ## Fixed by junyi in 2022-09-26 
+    ## The meta shape is different due to adding one column of gene name
+    # if gene==False:
+    #     fields = [
+    #     '_id','id','barcode','meta_dataset','meta_tissue','meta_sample_type',\
+    #     'meta_protocol','meta_technology','meta_sample_id','meta_patient_id',\
+    #     'meta_sample_time','meta_disease','meta_severity','meta_WHO_scores',\
+    #     'meta_outcome','meta_days_from_onset_of_symptoms','meta_ethinicity',\
+    #     'meta_gender','meta_age','meta_BMI','meta_PreExistingHypertension',\
+    #     'meta_PreExistingHeartDisease','barcodes','level1','level2','level3',\
+    #     'meta_sample_id2','meta_age_category', 'country']
+    # else:
+    #     fields = [
+    #     '_id','id','barcode','meta_dataset','meta_tissue','meta_sample_type',\
+    #     'meta_protocol','meta_technology','meta_sample_id','meta_patient_id',\
+    #     'meta_sample_time','meta_disease','meta_severity','meta_WHO_scores',\
+    #     'meta_outcome','meta_days_from_onset_of_symptoms','meta_ethinicity',\
+    #     'meta_gender','meta_age','meta_BMI','meta_PreExistingHypertension',\
+    #     'meta_PreExistingHeartDisease','barcodes','level1','level2','level3',\
+    #     'meta_sample_id2','meta_age_category', 'country',gene]
+    inheader = True
     ##text=List of strings to be written to file
     #print(towrite[0])
     with open(fn, 'w') as file:
-        file.write("\t".join(fields))
-        file.write('\n')
-
         # for line in towrite:
         #     file.write("\t".join([str(e) for e in line.values()]))
         #     file.write('\n')
         for num, doc in enumerate(towrite):
+            if(inheader == True):
+                file.write("\t".join([str(e) for e in doc.keys()]))
+                file.write('\n')
+                inheader = False
             # convert ObjectId() to str
             file.write("\t".join([str(e) for e in doc.values()]))
             file.write('\n')
-
-
-    # docs = pd.DataFrame(columns=fields)
-
-    # for num, doc in enumerate(towrite):
-    #     # convert ObjectId() to str
-    #     doc["_id"] = str(doc["_id"])
-    #     # get document _id from dict
-    #     doc_id = doc["_id"]
-    #     # create a Series obj from the MongoDB dict
-    #     series_obj = pd.Series(doc, name=doc_id)
-    #     # append the MongoDB Series obj to the DataFrame obj
-    #     docs = pd.concat( [docs,series_obj] )
-
-    # # export MongoDB documents to CSV
-    # #csv_export = docs.to_csv(sep="\t") # CSV delimited by commas
-    # #print ("\nCSV data:", csv_export)
-    # # export MongoDB documents to a CSV file
-    # docs.to_csv(fn,sep="\t", index=False)
-
 
 def write_umap(path, towrite):
     fn = path + '/umap.csv'
@@ -1375,20 +1371,44 @@ def paginate_skiplimit(page_size, page_no, search_type, search_params):
     elif search_type == "column":
         print(search_params)
         # search construct is a list
+        # if "gene_name" in str(search_params):
+        #     print("searching for genes")
+        #     pipeline = [
+        #         {"$lookup": {"from": 'single_cell_meta_country', "localField": 'barcode', "foreignField": 'id', "as": 'meta'}},
+        #         {"$match":  {"$and": search_params}},
+        #         #{"$addFields":{"meta.expression": "$expression", "meta.gene_name":"$gene_name"}},
+        #         {"$addFields":{"meta.gene_name":"$gene_name"}},
+        #         {"$unwind": '$meta'},
+        #         { "$replaceRoot": { "newRoot": "$meta" }}, {"$project":{"_id":0}}
+        #     ]
+        #     print(pipeline)
+        #     tmp = mongo.matrix.aggregate(pipeline + [ {"$skip": skips}, {"$limit": page_size} ])
+        #     total_records = mongo.matrix.count_documents({"$and": search_params})
+        # else:
+        #     print("search without gene_name")    
+        #     tmp = mongo.single_cell_meta_country.find({"$and": search_params}).skip(skips).limit(page_size)
+        #     total_records = mongo.single_cell_meta_country.count_documents({"$and": search_params}) 
+
+        # search together
         if "gene_name" in str(search_params):
-            print("searching for genes")
+            construct_genes = [item for item in search_params if "gene_name" in item]
+            construct_main = [item for item in search_params if not "gene_name" in item]
+            session["search_genes"] = construct_genes
             pipeline = [
-                {"$lookup": {"from": 'single_cell_meta_country', "localField": 'barcode', "foreignField": 'id', "as": 'meta'}},
-                {"$match":  {"$and": search_params}},
-                #{"$addFields":{"meta.expression": "$expression", "meta.gene_name":"$gene_name"}},
-                {"$addFields":{"meta.gene_name":"$gene_name"}},
-                {"$unwind": '$meta'},
-                { "$replaceRoot": { "newRoot": "$meta" }}, {"$project":{"_id":0}}
-            ]
-            print(pipeline)
+                    {"$lookup": {"from": 'single_cell_meta_country', "localField": 'barcode', "foreignField": 'id', "as": 'meta'}},
+                    {"$match":  {"$and": construct_genes }},
+                    {"$addFields":{"meta.gene_name":"$gene_name"}},
+                    {"$unwind": '$meta'},
+                    {"$replaceRoot": { "newRoot": "$meta" }}, {"$project":{"_id":0}},
+                    {"$match": {"$and": construct_main }  }
+                ]  
+
+            print("search with gene_name")    
+            print(pipeline)    
             tmp = mongo.matrix.aggregate(pipeline + [ {"$skip": skips}, {"$limit": page_size} ])
-            total_records = mongo.matrix.count_documents({"$and": search_params})
+            total_records = mongo.matrix.count_documents({"$and": construct_genes})    
         else:
+            session["gene_search"] = False
             print("search without gene_name")    
             tmp = mongo.single_cell_meta_country.find({"$and": search_params}).skip(skips).limit(page_size)
             total_records = mongo.single_cell_meta_country.count_documents({"$and": search_params}) 
