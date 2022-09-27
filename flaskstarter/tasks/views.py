@@ -1408,7 +1408,7 @@ def paginate_skiplimit(page_size, page_no, search_type, search_params):
                     {"$replaceRoot": { "newRoot": "$meta" }}, {"$project":{"_id":0}},
                     {"$match": {"$and": construct_main }  }
                 ]  
-
+            session["gene_search"] = True
             print("search with gene_name")    
             print(pipeline)    
             tmp = mongo.matrix.aggregate(pipeline + [ {"$skip": skips}, {"$limit": page_size} ])
