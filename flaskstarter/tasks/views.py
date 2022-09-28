@@ -93,7 +93,7 @@ def upload_file():
 # @login_required
 @tasks.route('/show_plot', methods=['GET', 'POST'])
 def show_plot():     
-
+    # This page will show the UMAP plot
     # Add initialization of graphJSON incase that return is not refered
     #graphJSON,graphJSON2 = None,None
     cell_color="level2"
@@ -680,7 +680,13 @@ def download_scClassify():
 
 @tasks.route('/show_search', methods=['POST', 'GET'])
 def show_search():
+    ### This page display the figure when click the search button "Show cell count meta"
     graphJSON = None
+    try:
+        searched = session.get("gene_search")
+    except:
+        searched = False
+    
     try:
         if (session.get("query") == None):
             graphJSON = None
@@ -689,14 +695,27 @@ def show_search():
             graphJSON = None
         # If search box not empty, write id meta umap
         else:
-            print("Search value provided, write id, meta...")
-            if isinstance(session["query"], dict):
-                print(session["query"])
-                meta = mongo.single_cell_meta_country.find(session["query"])
-            elif isinstance(session["query"], list) and len(session["query"]) == 1:
-                meta = mongo.single_cell_meta_country.find(session["query"][0])
+            if(searched == False):
+                print("Search value provided, gene not specified, write id, meta...")
+                if isinstance(session["query"], dict):
+                    print(session["query"])
+                    meta = mongo.single_cell_meta_country.find(session["query"])
+                elif isinstance(session["query"], list) and len(session["query"]) == 1:
+                    meta = mongo.single_cell_meta_country.find(session["query"][0])
+                else:
+                    meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
             else:
-                meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+                print("Search gene provided, write id, meta...")
+                construct_genes = [item for item in session["query"] if "gene_name" in item]
+                construct_main = [item for item in session["query"] if not "gene_name" in item]
+                pipeline = [
+                    {"$lookup": {"from": 'single_cell_meta_country', "localField": 'barcode', "foreignField": 'id', "as": 'meta'}},
+                    {"$match":  {"$and": construct_genes}},
+                    {"$addFields":{"meta.gene_name":"$gene_name"}},
+                    {"$unwind": '$meta'},
+                    { "$replaceRoot": { "newRoot": "$meta" }}, {"$project":{"_id":0}},
+                    {"$match": {"$and": construct_main }  }            ]
+                meta = list(mongo.matrix.aggregate(pipeline))
 
             # Create tmpfolder is not exist
             query_timestamp = session.get("sess_timestamp")
