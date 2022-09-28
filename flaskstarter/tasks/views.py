@@ -789,8 +789,8 @@ def table_view():
     fgender = get_field("meta_gender")
     fcountry = get_field("pbmc.Country")
     #fgene = get_matrix_field("gene_name")
-    fgene = ["AAAS", "A1BG"]
-    print(fgene)
+    fgenepos = ["AAAS", "A1BG", "CAMLG"]
+    fgeneneg = ["AAAS"]
 
 
     # 0831 ADD by JUNYI
@@ -808,7 +808,8 @@ def table_view():
                                    foutcome=foutcome,
                                    fgender=fgender,
                                    fcountry=fcountry,
-                                   fgene=fgene,
+                                   fgenepos=fgenepos,
+                                   fgeneneg=fgeneneg,
                                    link=l)# 0831 ADD by JUNYI
 
     else:
@@ -824,7 +825,8 @@ def table_view():
                            foutcome=foutcome,
                            fgender=fgender,
                            fcountry=fcountry,
-                           fgene=fgene,
+                           fgenepos=fgenepos,
+                           fgeneneg=fgeneneg,
                            link=l)# 0831 ADD by JUNYI
 
 
@@ -1349,7 +1351,7 @@ def query_builder(map):
     print(map)
     re_match = re.compile(r'^-?\d{1,10}\.?\d{0,10}$')
     for k in map:
-        if (k in ["meta_age_category", "meta_sample_id2", "meta_dataset", "level2", "meta_severity", "meta_days_from_onset_of_symptoms", "meta_outcome", "meta_gender", "meta_patient_id", "pbmc.Country","gene_name"]):
+        if (k in ["meta_age_category", "meta_sample_id2", "meta_dataset", "level2", "meta_severity", "meta_days_from_onset_of_symptoms", "meta_outcome", "meta_gender", "meta_patient_id", "pbmc.Country","gene_pos","gene_neg"]):
             l = []
             for ki in map[k]:
                 if re_match.findall(ki):
@@ -1415,23 +1417,67 @@ def paginate_skiplimit(page_size, page_no, search_type, search_params):
         #     total_records = mongo.single_cell_meta_country.count_documents({"$and": search_params}) 
 
         # search together
-        if "gene_name" in str(search_params):
-            construct_genes = [item for item in search_params if "gene_name" in item]
-            construct_main = [item for item in search_params if not "gene_name" in item]
+        if "gene" in str(search_params):
+            print("using gene in search params")
+            print(search_params)
+            construct_genes = [item for item in search_params if "gene_neg" in item or "gene_pos" in item]
+            construct_main = [item for item in search_params if not "gene_neg" in item and not "gene_pos" in item]
+            print(construct_genes)
+            print(construct_main)
             session["search_genes"] = construct_genes
+            
+            gene_pos = []
+            gene_neg = []
+            
+            for i in construct_genes:
+                if "gene_pos" in i.keys():
+                    gene_pos += i["gene_pos"]["$in"]
+                elif "gene_neg" in i.keys():
+                    gene_neg += i["gene_neg"]["$in"]    
+            print("Genes positive: %s" % str(gene_pos))
+            print("Genes negative %s" % str(gene_neg))        
+
+            # method 1
+            # pipeline = [
+            #         {"$lookup": {"from": 'single_cell_meta_country', "localField": 'barcode', "foreignField": 'id', "as": 'meta'}},
+            #         {"$match":  {"gene_name":{"$in": gene_pos, "$nin": gene_neg}}},
+            #         {"$addFields":{"meta.gene_name":"$gene_name"}},
+            #         {"$unwind": '$meta'},
+            #         {"$replaceRoot": { "newRoot": "$meta" }}, {"$project":{"_id":0}},
+            #         {"$match": {"$and": construct_main }  }
+            #     ]  
+            # session["gene_search"] = True
+            # print("search with gene_name")    
+            # print(pipeline)    
+            # tmp = mongo.matrix.aggregate(pipeline + [ {"$skip": skips}, {"$limit": page_size} ])
+            # total_records = mongo.matrix.count_documents({"$and": construct_genes})    
+
+
+            # method 2
+            print("using method 2")
             pipeline = [
                     {"$lookup": {"from": 'single_cell_meta_country', "localField": 'barcode', "foreignField": 'id', "as": 'meta'}},
-                    {"$match":  {"$and": construct_genes }},
+                    {"$match":  {"gene_name":{"$in": gene_pos, "$nin": gene_neg}}},
                     {"$addFields":{"meta.gene_name":"$gene_name"}},
                     {"$unwind": '$meta'},
-                    {"$replaceRoot": { "newRoot": "$meta" }}, {"$project":{"_id":0}},
-                    {"$match": {"$and": construct_main }  }
+                    {"$replaceRoot": { "newRoot": "$meta" }}, {"$project":{"_id":0, "id":1}}
+                    #{"$match": {"$and": construct_main }  }
                 ]  
-            session["gene_search"] = True
-            print("search with gene_name")    
-            print(pipeline)    
-            tmp = mongo.matrix.aggregate(pipeline + [ {"$skip": skips}, {"$limit": page_size} ])
-            total_records = mongo.matrix.count_documents({"$and": construct_genes})    
+            session["gene_search"] = True    
+            print(pipeline + [ {"$skip": skips}, {"$limit": page_size} ])
+            cur = list(mongo.matrix.aggregate(pipeline + [ {"$skip": skips}, {"$limit": page_size} ]))
+            print(cur)
+            print("query finished")
+            #count_cur = list(mongo.matrix.aggregate(pipeline))
+            idlist = [x["id"] for x in cur]
+            print(idlist)
+            #count_idlist = [x["id"] for x in count_cur]
+            print(idlist)
+            tmp = list(mongo.single_cell_meta_country.find({"$and": construct_main + [{'id': {'$in': idlist}}]}))
+            #total_records = mongo.single_cell_meta_country.count_documents({"$and": construct_main + [{'id': {'$in': count_idlist}}]})
+            total_records = 40000
+            print(tmp[:5])
+
         else:
             session["gene_search"] = False
             print("search without gene_name")    
@@ -1549,8 +1595,11 @@ def api_db():
                     search_column = "pbmc.Country"
                     map[search_column] = column_value
                 elif "[11]" in i:
-                    search_column = "gene_name"
-                    map[search_column] = column_value    
+                    search_column = "gene_pos"
+                    map[search_column] = column_value
+                elif "[12]" in i:
+                    search_column = "gene_neg"
+                    map[search_column] = column_value        
 
         if search_value == '':
             # Pagination algorithm 
@@ -1608,7 +1657,8 @@ def api_db():
                 'outcome':"",
                 'gender':"",
                 'country':"",
-                "gene_name":"",
+                "gene_pos":"",
+                "gene_neg":"",
             })
 
         else:
@@ -1626,7 +1676,8 @@ def api_db():
                         'outcome':str(r['meta_outcome']),
                         'gender':r['meta_gender'],
                         'country': r['pbmc'][0]['Country'],
-                        'gene_name':"TBA",
+                        'gene_pos':"(+)",
+                        'gene_neg':"(-)",
                     })
                 else:
                     data.append({
@@ -1641,7 +1692,8 @@ def api_db():
                         'outcome':str(r['meta_outcome']),
                         'gender':r['meta_gender'],
                         'country': r['pbmc'][0]['Country'],
-                        'gene_name':r['gene_name'],
+                        'gene_pos':r['gene_name'],
+                        'gene_neg':r['gene_name'],
                     })
 
 

@@ -107,8 +107,15 @@
                 </select>
             </div>
             <div style="margin: 10px 15px 0px 0px">
-                <select id="opt_gene" class="multibox" multiple="multiple" name="name_tbv_gene" form="scfform">
-                    {% for val in fgene %}
+                <select id="opt_gene_pos" class="multibox" multiple="multiple" name="name_tbv_gene" form="scfform">
+                    {% for val in fgenepos %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin: 10px 15px 0px 0px">
+                <select id="opt_gene_neg" class="multibox" multiple="multiple" name="name_tbv_gene" form="scfform">
+                    {% for val in fgeneneg %}
                     <option value="{{val}}">{{val}}</option>
                     {% endfor %}
                 </select>
@@ -292,7 +299,8 @@
                     <th>Outcome</th>
                     <th>Gender</th>
                     <th>Country</th>
-                    <th>Gene</th>
+                    <th>Gene (+)</th>
+                    <th>Gene (-)</th>
                 </tr>
             </thead>
         </table>
@@ -555,12 +563,22 @@
         });
 
 
-        $('#opt_gene').multiselect({
+        $('#opt_gene_pos').multiselect({
             includeSelectAllOption: true,
             enableFiltering: true,
             enableCaseInsensitiveFiltering: true,
             filterPlaceholder: 'Search for something...',
-            nonSelectedText: 'Gene name',
+            nonSelectedText: 'Gene (+)',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
+
+        $('#opt_gene_neg').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Gene (-)',
             buttonWidth: '150px',
             maxHeight: 450
         });
@@ -597,7 +615,8 @@
                 { data: 'outcome' },
                 { data: 'gender' },
                 { data: 'country' },
-                { data: 'gene_name'},
+                { data: 'gene_pos'},
+                { data: 'gene_neg'}
             ],
             "columnDefs": [
                 { "width": "28%", "targets": 0 },
@@ -612,6 +631,7 @@
                 { "width": "7%", "targets": 9 },
                 { "width": "7%", "targets": 10 },
                 { "width": "7%", "targets": 11 },
+                { "width": "7%", "targets": 12 },
             ],
             initComplete: function () {
                 var input = $('#customSearchBox').unbind(),
@@ -648,7 +668,8 @@
             oTable.columns(8).search($('#opt_outcome').val().join("|"));
             oTable.columns(9).search($('#opt_gender').val().join("|"));
             oTable.columns(10).search($('#opt_country').val().join("|"));
-            oTable.columns(11).search($('#opt_gene').val().join("|"));
+            oTable.columns(11).search($('#opt_gene_pos').val().join("|"));
+            oTable.columns(12).search($('#opt_gene_neg').val().join("|"));
             //hit search on server
             oTable.draw();
         });
@@ -667,7 +688,8 @@
             $('#opt_outcome').multiselect('clearSelection');
             $('#opt_gender').multiselect('clearSelection');
             $('#opt_country').multiselect('clearSelection');
-            $('#opt_gene').multiselect('clearSelection');
+            $('#opt_gene_pos').multiselect('clearSelection');
+            $('#opt_gene_neg').multiselect('clearSelection');
         });
 
     });
