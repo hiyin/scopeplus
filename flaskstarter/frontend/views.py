@@ -37,7 +37,7 @@ def dashboard():
 
 
 def get_all_study_meta():
-    res = list(mongo.pbmc_all_study_meta.find())
+    res = list(mongo.pbmc_all_study_meta_v4.find())
     print(res[1])
     #uniq_field = mongo.single_cell_meta.aggregate([{"$group": {"_id": '$%s' % field_name}}]);
     #key = [r['_id'] for r in uniq_field]
