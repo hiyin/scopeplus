@@ -43,7 +43,6 @@ from concurrent.futures import ThreadPoolExecutor
 import threading
 import subprocess
 import plotly.graph_objects as go
-from shutil import rmtree
 
 
 tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
@@ -128,7 +127,7 @@ def show_plot():
     if(len(session["query"])==0):
         # ID is presented, no meta data:
         if(not (exists(tmp_folder + '/meta_sampled.tsv'))):
-            meta = mongo.single_cell_meta_country.find({})
+            meta = mongo.single_cell_meta_v4.find({})
             write_file_meta(tmp_folder, meta,filename="meta_sampled.tsv")
         
         # If ID is presented, no umap:
@@ -141,7 +140,7 @@ def show_plot():
                 {"$replaceRoot": { "newRoot": "$umap" } }
             ]
 
-            umap = mongo.single_cell_meta_country.aggregate(pipeline)
+            umap = mongo.single_cell_meta_v4.aggregate(pipeline)
 
             write_umap(tmp_folder, umap)
 
@@ -150,16 +149,16 @@ def show_plot():
         print("Search value provided, write id, meta...")
         if isinstance(session["query"], dict):
             print(session["query"])
-            #meta = mongo.single_cell_meta_country.find(session["query"])
-            meta = list(mongo.single_cell_meta_country.aggregate(
+            #meta = mongo.single_cell_meta_v4.find(session["query"])
+            meta = list(mongo.single_cell_meta_v4.aggregate(
                 [{"$match": session["query"] }, {"$sample": {"size": 10000}}]))
         elif  isinstance(session["query"], list) and len(session["query"]) == 1:
-            #meta = mongo.single_cell_meta_country.find(session["query"][0])
-            meta = list(mongo.single_cell_meta_country.aggregate(
+            #meta = mongo.single_cell_meta_v4.find(session["query"][0])
+            meta = list(mongo.single_cell_meta_v4.aggregate(
                 [{"$match": session["query"][0]}, {"$sample": {"size": 10000}}]))
         else:
-            #meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
-            meta = list(mongo.single_cell_meta_country.aggregate(
+            #meta = mongo.single_cell_meta_v4.find({"$and": session["query"]})
+            meta = list(mongo.single_cell_meta_v4.aggregate(
                 [{"$match": {"$and": session["query"] }}, {"$sample": {"size": 10000}}]))
         # if isinstance(session["query"], dict):
         #     print("Getting instance of dict")
@@ -187,7 +186,7 @@ def show_plot():
         #             {"$unwind": '$umap' },
         #             {"$replaceRoot": { "newRoot": "$umap" } }
         #     ]
-        #umap = mongo.single_cell_meta_country.aggregate(pipeline)
+        #umap = mongo.single_cell_meta_v4.aggregate(pipeline)
         bclist = list(meta)
         bc_list = [x["id"] for x in list(bclist)]
         umap = mongo.umap.find({'id': {'$in': bc_list}})
@@ -243,7 +242,7 @@ def show_plot():
                                 { "$replaceRoot": { "newRoot": "$matrix" } } 
                         ]
                     print(pipeline)
-                    #result = mongo.single_cell_meta_country.aggregate(pipeline)
+                    #result = mongo.single_cell_meta_v4.aggregate(pipeline)
                     result = mongo.matrix.find({'barcode': {'$in': bc_list},'gene_name':cell_gene})
                     print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
@@ -305,16 +304,16 @@ def show_scfeature():
             
     ### if ... not ... getting metaset
     ### Junyi's code
-    # fileds_dataset = mongo.single_cell_meta_country.distinct("meta_dataset")
+    # fileds_dataset = mongo.single_cell_meta_v4.distinct("meta_dataset")
     # fileds_celltypes = get_field("level2")
     if isinstance(session["query"], dict):
-        fileds_celltypes = list(mongo.single_cell_meta_country.find(session["query"], {"meta_sample_id2":1,"_id":0}).distinct("level2"))
+        fileds_celltypes = list(mongo.single_cell_meta_v4.find(session["query"], {"meta_sample_id2":1,"_id":0}).distinct("level2"))
     elif isinstance(session["query"], list):
         if len(session["query"]) == 1:
-            fileds_celltypes = list(mongo.single_cell_meta_country.find(session["query"][0], {"meta_sample_id2":1,"_id":0}).distinct("level2"))
+            fileds_celltypes = list(mongo.single_cell_meta_v4.find(session["query"][0], {"meta_sample_id2":1,"_id":0}).distinct("level2"))
         else:
-            fileds_celltypes = list(mongo.single_cell_meta_country.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0}).distinct("level2"))
-    # fileds_dataset_2 = mongo.single_cell_meta_country.aggregate(
+            fileds_celltypes = list(mongo.single_cell_meta_v4.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0}).distinct("level2"))
+    # fileds_dataset_2 = mongo.single_cell_meta_v4.aggregate(
     #         [
     #             {"$match":{"meta_dataset":dataset}},
     #             {"$group": {"_id": {"meta_dataset": "$meta_dataset", "meta_sample_id2": "$meta_sample_id2"}}}
@@ -326,14 +325,14 @@ def show_scfeature():
     ## Angela's attempt
     print(session["query"])
     if isinstance(session["query"], dict):
-        mata_sample_id2 = list(mongo.single_cell_meta_country.find(session["query"], {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
+        mata_sample_id2 = list(mongo.single_cell_meta_v4.find(session["query"], {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
     elif isinstance(session["query"], list):
         if len(session["query"]) == 1:
             print("Getting single column filter")
-            mata_sample_id2 = list(mongo.single_cell_meta_country.find(session["query"][0], {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
+            mata_sample_id2 = list(mongo.single_cell_meta_v4.find(session["query"][0], {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
         else:
             print("Getting multi-column filter")
-            mata_sample_id2 = list(mongo.single_cell_meta_country.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
+            mata_sample_id2 = list(mongo.single_cell_meta_v4.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
     print("Testing Angela's code ...Sample id 2: ",mata_sample_id2)
 
     # datasets = fileds_dataset
@@ -683,11 +682,11 @@ def show_search():
             print("Search value provided, write id, meta...")
             if isinstance(session["query"], dict):
                 print(session["query"])
-                meta = mongo.single_cell_meta_country.find(session["query"])
+                meta = mongo.single_cell_meta_v4.find(session["query"])
             elif isinstance(session["query"], list) and len(session["query"]) == 1:
-                meta = mongo.single_cell_meta_country.find(session["query"][0])
+                meta = mongo.single_cell_meta_v4.find(session["query"][0])
             else:
-                meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+                meta = mongo.single_cell_meta_v4.find({"$and": session["query"]})
 
             # Create tmpfolder is not exist
             query_timestamp = session.get("sess_timestamp")
@@ -795,7 +794,7 @@ def table_view():
                            link=l)# 0831 ADD by JUNYI
 
 
-#ids = [x["_id"] for x in list(db.single_cell_meta_country.find({}, {"_id": 1}))]
+#ids = [x["_id"] for x in list(db.single_cell_meta_v4.find({}, {"_id": 1}))]
 
 data = []
 
@@ -926,8 +925,7 @@ def upload_to_aws(zipfile_path):
         Params={
             'Bucket': 'covid19-cell-atlas-portal',
             'Key': awsfilename
-        },
-        ExpiresIn=604800
+        }
     )
     return url
 
@@ -969,7 +967,7 @@ def write_10x_mtx_small(path, gene_dict, barcode_dict, query):
             {"$unwind": '$matrix'},
             {"$replaceRoot": {"newRoot": "$matrix"}}
         ]
-    mtx = mongo.single_cell_meta_country.aggregate(pipeline, allowDiskUse=True)
+    mtx = mongo.single_cell_meta_v4.aggregate(pipeline, allowDiskUse=True)
     records = 0
     ##text=List of strings to be written to file
     with open(fn + str("data"), 'w') as file:
@@ -1047,7 +1045,7 @@ def write_10x_mtx(path, gene_dict, barcode_dict, doc_count, query, user_email):
                 {"$skip": skip},
                 {"$limit": limit}
             ]
-        cursor = mongo.single_cell_meta_country.aggregate(pipeline, allowDiskUse=True)
+        cursor = mongo.single_cell_meta_v4.aggregate(pipeline, allowDiskUse=True)
         return cursor
 
     def write_file_line(path, query, skip, limit, gene_dict, barcode_dict, count_dict):
@@ -1127,13 +1125,8 @@ def write_10x_mtx(path, gene_dict, barcode_dict, doc_count, query, user_email):
     zip_10x_mtx(abs_path)
 
     url = upload_to_aws(abs_path + "/matrix.zip")
-
     # # send s3 link
     send_s3_link(url, user_email)
-
-    # delete user temp once upload is completed
-    print("delete path recursively..." + abs_path)
-    rmtree(abs_path)
 
 
 # 0816 added by junyi
@@ -1188,12 +1181,12 @@ def download_meta():
     session["tmp_folder"] = tmp_folder
     os.makedirs(tmp_folder, exist_ok=True)
     if isinstance(session["query"], dict):
-        meta = mongo.single_cell_meta_country.find(session["query"]) 
+        meta = mongo.single_cell_meta_v4.find(session["query"]) 
     elif isinstance(session["query"], list) and len(session["query"]) == 1:
         print(session["query"])
-        meta = mongo.single_cell_meta_country.find(session["query"][0])
+        meta = mongo.single_cell_meta_v4.find(session["query"][0])
     else:
-        meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+        meta = mongo.single_cell_meta_v4.find({"$and": session["query"]})
 
 
     print('writing ids to csv file only once, firstly load the data')
@@ -1240,13 +1233,13 @@ def download_matrix():
         # If query is presented, remove the result old queries regardlessly for secure download
         remove_files(tmp_folder)
         if isinstance(session["query"], dict):
-            meta = mongo.single_cell_meta_country.find(session["query"])
+            meta = mongo.single_cell_meta_v4.find(session["query"])
         elif isinstance(session["query"], list):
             if len(session["query"]) == 1:
                 print(session["query"])
-                meta = mongo.single_cell_meta_country.find(session["query"][0])
+                meta = mongo.single_cell_meta_v4.find(session["query"][0])
             else:
-                meta = mongo.single_cell_meta_country.find({"$and": session["query"]})
+                meta = mongo.single_cell_meta_v4.find({"$and": session["query"]})
         write_id_meta(tmp_folder, meta)
     # Down load 10x matrix if not exist
     df_meta = pd.read_csv(tmp_folder + '/meta.tsv', index_col=1, sep="\t")
@@ -1308,7 +1301,7 @@ def download_matrix():
 
         else:
             print("Download job in queue")
-            flash('Download link will be sent to your email within a few hours.')
+            #flash('Download link will be sent to your email within a few hours.')
             write_10x_mtx.delay(tmp_folder, dict_gene, dict_barcode, estimated_expression, session["query"], user_email)
 
         # 0818 commented by junyi
@@ -1355,17 +1348,17 @@ def paginate_skiplimit(page_size, page_no, search_type, search_params):
   
     # search type 1 - no search: by default search value is empty ''
     if search_type == "default":
-        tmp = mongo.single_cell_meta_country.find().skip(skips).limit(page_size)
-        total_records = mongo.command("collstats","single_cell_meta_country")['count']    
+        tmp = mongo.single_cell_meta_v4.find().skip(skips).limit(page_size)
+        total_records = mongo.command("collstats","single_cell_meta_v4")['count']    
 
     # search type 2 - global search: search value is mongo raw query 
     elif search_type == "global":
-        tmp = mongo.single_cell_meta_country.find(json.loads(search_params)).skip(skips).limit(page_size)
-        total_records = mongo.single_cell_meta_country.count_documents(json.loads(search_params))
+        tmp = mongo.single_cell_meta_v4.find(json.loads(search_params)).skip(skips).limit(page_size)
+        total_records = mongo.single_cell_meta_v4.count_documents(json.loads(search_params))
     # search type 3 - multi-column filter
     elif search_type == "column":
-        tmp = mongo.single_cell_meta_country.find({"$and": search_params}).skip(skips).limit(page_size)
-        total_records = mongo.single_cell_meta_country.count_documents({"$and": search_params}) 
+        tmp = mongo.single_cell_meta_v4.find({"$and": search_params}).skip(skips).limit(page_size)
+        total_records = mongo.single_cell_meta_v4.count_documents({"$and": search_params}) 
 
     return tmp, total_records
             
@@ -1378,24 +1371,24 @@ def paginate_lastid(page_size, search_type, search_params, last_id=None):
         if last_id is None:
             # When it is first page
             print("When it is 1st page")
-            tmp = mongo.single_cell_meta_country.find().limit(page_size)
-            total_records = mongo.command("collstats","single_cell_meta_country")['count']   
+            tmp = mongo.single_cell_meta_v4.find().limit(page_size)
+            total_records = mongo.command("collstats","single_cell_meta_v4")['count']   
         else:
             print("When it is 2nd and from on page")
              # search type 1 - no search: by default search value is empty ''
             if search_type == "default":
                 
-                tmp = mongo.single_cell_meta_country.find({'_id': {'$gt': ObjectId(last_id)}}).limit(page_size)
-                total_records = mongo.command("collstats","single_cell_meta_country")['count']    
+                tmp = mongo.single_cell_meta_v4.find({'_id': {'$gt': ObjectId(last_id)}}).limit(page_size)
+                total_records = mongo.command("collstats","single_cell_meta_v4")['count']    
 
             # search type 2 - global search: search value is mongo raw query 
             elif search_type == "global":
-                tmp = mongo.single_cell_meta_country.find(json.loads(search_params), {'_id': {'$gt': ObjectId(last_id)}}).limit(page_size)
-                total_records = mongo.single_cell_meta_country.count_documents(json.loads(search_params))
+                tmp = mongo.single_cell_meta_v4.find(json.loads(search_params), {'_id': {'$gt': ObjectId(last_id)}}).limit(page_size)
+                total_records = mongo.single_cell_meta_v4.count_documents(json.loads(search_params))
             # search type 3 - multi-column filter
             elif search_type == "column":
-                tmp = mongo.single_cell_meta_country.find({"$and": search_params}, {'_id': {'$gt': ObjectId(last_id)}}).limit(page_size)
-                total_records = mongo.single_cell_meta_country.count_documents({"$and": search_params}) 
+                tmp = mongo.single_cell_meta_v4.find({"$and": search_params}, {'_id': {'$gt': ObjectId(last_id)}}).limit(page_size)
+                total_records = mongo.single_cell_meta_v4.count_documents({"$and": search_params}) 
 
         # Get the data      
         data = [x for x in tmp]
@@ -1563,7 +1556,7 @@ def api_db():
 
 
 def get_field(field_name):
-    key = mongo.single_cell_meta_country.distinct(field_name)
+    key = mongo.single_cell_meta_v4.distinct(field_name)
     print("%s has %d uniq fields" % (field_name, len(key)))
     return key
 

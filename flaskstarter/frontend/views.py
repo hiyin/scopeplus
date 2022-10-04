@@ -63,7 +63,7 @@ def get_field_count():
 # Replace old get field count method    
 def get_celltype_count():
     # db.createCollection('stats_celltype_count')
-    # db.stats_celltype_count.insertMany(db.single_cell_meta_country.aggregate([{"$group": {"_id": "$level2", "count":{"$sum": 1}}}]).toArray())
+    # db.stats_celltype_count.insertMany(db.single_cell_meta_v4.aggregate([{"$group": {"_id": "$level2", "count":{"$sum": 1}}}]).toArray())
     collection_name = 'stats_celltype_count'
     res = list(mongo.stats_celltype_count.find())
 
