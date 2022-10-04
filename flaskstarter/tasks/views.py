@@ -354,7 +354,7 @@ def show_scfeature():
         fig.update_xaxes(matches=None)
         fig.update_layout(
              title={
-                'text': "Overview: cell type proportion in " + dataset,
+                'text': "Overview: cell type proportion in dataset" + dataset,
                 'x':0.5,
                 'xanchor': 'center'},
             autosize=True, width=1200, height=600
