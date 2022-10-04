@@ -63,7 +63,7 @@ os.makedirs(user_tmp[-1])
 def make_summary_report(tmp_path):
     print("making summary report")
     code_path = TMP_FOLDER + "/" + "html_codes"
-    cmd = 'rmarkdown::render(input="%s/report_html.Rmd",output_format="html_document",output_file="%s/report.html",params=list(meta_path="%s"))' % (code_path, tmp_path, tmp_path)
+    cmd = 'rmarkdown::render(input="%s/report_html_v2.Rmd",output_format="html_document",output_file="%s/report.html",params=list(meta_path="%s"))' % (code_path, tmp_path, tmp_path)
     print(cmd)
     try:
         subprocess.call("Rscript -e '%s'" % cmd, shell=True)

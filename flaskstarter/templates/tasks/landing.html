@@ -48,7 +48,7 @@
       <table id="distro_data" class="table table-striped">
         <thead>
           <tr>
-            <th>Dataset</th>
+            <th>Data set</th>
             <th>Tissue</th>
             <th>Protocol</th>
             <th>Technology</th>
@@ -207,7 +207,7 @@
   // Configure series
   const polygonTemplate = polygonSeries.mapPolygons.template;
   // %22 is "", %5D is ] %5B is [
-  polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="http://covidsc.d24h.hk/tasks/table_view?main=%7B%22pbmc.Country%22%3A+%7B%22$in%22%3A+%5B%22{dataset}%22%5D%7D%7D">Explore</a>';
+  polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="http://covidsc.d24h.hk/tasks/table_view?main=%7B%22Country%22%3A+%7B%22$in%22%3A+%5B%22{dataset}%22%5D%7D%7D">Explore</a>';
   polygonTemplate.fill = am4core.color("rgba(110, 166, 157, 0.5)");
   //polygonTemplate.tooltipText = '<b>{name}: {value}</b>';
 
