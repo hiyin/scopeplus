@@ -151,11 +151,11 @@
                     onclick="window.location.href='{{ url_for( 'frontend.index') }}';"> Return to home </button>
             </div>
 
-            <div style="margin: 10px 15px 0px 0px;"><button id="btnAdvance" class="mediumButton"
+            <!-- <div style="margin: 10px 15px 0px 0px;"><button id="btnAdvance" class="mediumButton"
                     style="display:inline-block ;" title='Show/Hide Advanced Search'>
                     Advanced
                     search
-                </button></div>
+                </button></div> -->
 
             <div style="margin: 10px 15px 0px 0px;">
                 <form class="download" action="{{ url_for('tasks.download_meta')}}" method="post">
@@ -443,9 +443,9 @@
 
         $("#matrixDownloadButton").hide();
 
-        $("#btnAdvance").click(function () {
-            $("#globalsearch").toggle();
-        });
+        // $("#btnAdvance").click(function () {
+        //     $("#globalsearch").toggle();
+        // });
 
         $('#opt_sampleid').multiselect({
             includeSelectAllOption: true,
@@ -596,10 +596,6 @@
                     $searchButton = $('#btnGSearch')
                         .text('search')
                         .click(function () {
-                            // if( !(input.val()) ) {
-                            //     console.log("input is null")
-                            //     alert("Please select a value from the dropdown box!");
-                            // }
                             self.search(input.val()).draw();
                         }),
                     $clearButton = $('#btnGClear')
