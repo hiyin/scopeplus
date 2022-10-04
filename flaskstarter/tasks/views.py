@@ -602,7 +602,7 @@ def plot_stack_bar(df):
 def plot_umap(cell_color='scClassify_prediction',gene_color=None,tmp_folder="."):
     df = pd.read_csv(tmp_folder + '/umap.csv', index_col=0)
     df.columns = ["umap_0","umap_1"]
-    df_meta = pd.read_csv(tmp_folder + '/meta_sampled.tsv', index_col=1,sep="\t")
+    df_meta = pd.read_csv(tmp_folder + '/meta_sampled.tsv', index_col="id",sep="\t")
     df_plot = df.merge(df_meta, left_index=True, right_index=True)
 
 
@@ -699,36 +699,36 @@ def show_search():
             df_meta = pd.read_csv(tmp_folder + '/meta.tsv', index_col=1, sep="\t")
             #Cell Type
             new_df = df_meta['level2'].value_counts().rename_axis('level2').reset_index(name='counts')
-            fig = px.bar(new_df, x="counts", y="level2", color="counts", orientation='h')
-            fig.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
+            fig = px.bar(new_df, x="counts", y="level2", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
+            fig.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
             graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
             #severity
             new_df2 = df_meta['meta_severity'].value_counts().rename_axis('meta_severity').reset_index(name='counts')
-            fig2 = px.bar(new_df2, x="counts", y="meta_severity", color="counts", orientation='h')
-            fig2.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
+            fig2 = px.bar(new_df2, x="counts", y="meta_severity", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
+            fig2.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
             graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
             #outcome
             new_df3 = df_meta['meta_outcome'].value_counts().rename_axis('meta_outcome').reset_index(name='counts')
-            fig3 = px.bar(new_df3, x="counts", y="meta_outcome", color="counts", orientation='h')
-            fig3.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
+            fig3 = px.bar(new_df3, x="counts", y="meta_outcome", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
+            fig3.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
             graphJSON3 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
             #Gender
             new_df6 = df_meta['meta_gender'].value_counts().rename_axis('meta_gender').reset_index(name='counts')
-            fig6 = px.bar(new_df6, x="counts", y="meta_gender", color="counts", orientation='h')
-            fig6.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
+            fig6 = px.bar(new_df6, x="counts", y="meta_gender", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
+            fig6.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
             graphJSON6 = json.dumps(fig6, cls=plotly.utils.PlotlyJSONEncoder)
 
             # Age
             new_df4 = df_meta['meta_age_category'].value_counts().rename_axis('meta_age_category').reset_index(name='counts')
-            fig4 = px.bar(new_df4, x="counts", y="meta_age_category", color="counts", orientation='h')
-            fig4.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
+            fig4 = px.bar(new_df4, x="counts", y="meta_age_category", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
+            fig4.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
             graphJSON4= json.dumps(fig4, cls=plotly.utils.PlotlyJSONEncoder)
 
             #meta_days_from_onset_of_symptoms
             # new_df4 = df_meta['meta_days_from_onset_of_symptoms'].value_counts().rename_axis('meta_days_from_onset_of_symptoms').reset_index(name='counts')
             # fig4 = px.bar(new_df4, x="counts", y="meta_days_from_onset_of_symptoms", color="counts", orientation='h')
             # fig4.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
-            fig5 = px.histogram(df_meta, x="meta_days_from_onset_of_symptoms")
+            fig5 = px.histogram(df_meta, x="meta_days_from_onset_of_symptoms",template="plotly_white",color_discrete_sequence=sns.color_palette("tab20").as_hex())
             graphJSON5 = json.dumps(fig5, cls=plotly.utils.PlotlyJSONEncoder)
 
     except Exception as e:
@@ -758,7 +758,7 @@ def table_view():
     fonset = get_field("meta_days_from_onset_of_symptoms")
     foutcome = get_field("meta_outcome")
     fgender = get_field("meta_gender")
-    fcountry = get_field("pbmc.Country")
+    fcountry = get_field("Country")
 
 
     # 0831 ADD by JUNYI
@@ -834,51 +834,44 @@ def write_id_meta(path, towrite):
     return ids
 
 # Write file
-def write_file_meta(path, towrite, filename='meta.tsv'):	
+def write_file_meta(path, towrite, filename='meta.tsv',gene=False):	
     fn = os.path.join(path,filename)
     print('writing meta to' + fn)
-
-    fields = [
-    '_id','id','barcode','meta_dataset','meta_tissue','meta_sample_type',\
-    'meta_protocol','meta_technology','meta_sample_id','meta_patient_id',\
-    'meta_sample_time','meta_disease','meta_severity','meta_WHO_scores',\
-    'meta_outcome','meta_days_from_onset_of_symptoms','meta_ethinicity',\
-    'meta_gender','meta_age','meta_BMI','meta_PreExistingHypertension',\
-    'meta_PreExistingHeartDisease','barcodes','level1','level2','level3',\
-    'meta_sample_id2','meta_age_category', 'country']
+    ## Fixed by junyi in 2022-09-26 
+    ## The meta shape is different due to adding one column of gene name
+    # if gene==False:
+    #     fields = [
+    #     '_id','id','barcode','meta_dataset','meta_tissue','meta_sample_type',\
+    #     'meta_protocol','meta_technology','meta_sample_id','meta_patient_id',\
+    #     'meta_sample_time','meta_disease','meta_severity','meta_WHO_scores',\
+    #     'meta_outcome','meta_days_from_onset_of_symptoms','meta_ethinicity',\
+    #     'meta_gender','meta_age','meta_BMI','meta_PreExistingHypertension',\
+    #     'meta_PreExistingHeartDisease','barcodes','level1','level2','level3',\
+    #     'meta_sample_id2','meta_age_category', 'country']
+    # else:
+    #     fields = [
+    #     '_id','id','barcode','meta_dataset','meta_tissue','meta_sample_type',\
+    #     'meta_protocol','meta_technology','meta_sample_id','meta_patient_id',\
+    #     'meta_sample_time','meta_disease','meta_severity','meta_WHO_scores',\
+    #     'meta_outcome','meta_days_from_onset_of_symptoms','meta_ethinicity',\
+    #     'meta_gender','meta_age','meta_BMI','meta_PreExistingHypertension',\
+    #     'meta_PreExistingHeartDisease','barcodes','level1','level2','level3',\
+    #     'meta_sample_id2','meta_age_category', 'country',gene]
+    inheader = True
     ##text=List of strings to be written to file
     #print(towrite[0])
     with open(fn, 'w') as file:
-        file.write("\t".join(fields))
-        file.write('\n')
-
         # for line in towrite:
         #     file.write("\t".join([str(e) for e in line.values()]))
         #     file.write('\n')
         for num, doc in enumerate(towrite):
+            if(inheader == True):
+                file.write("\t".join([str(e) for e in doc.keys()]))
+                file.write('\n')
+                inheader = False
             # convert ObjectId() to str
             file.write("\t".join([str(e) for e in doc.values()]))
             file.write('\n')
-
-
-    # docs = pd.DataFrame(columns=fields)
-
-    # for num, doc in enumerate(towrite):
-    #     # convert ObjectId() to str
-    #     doc["_id"] = str(doc["_id"])
-    #     # get document _id from dict
-    #     doc_id = doc["_id"]
-    #     # create a Series obj from the MongoDB dict
-    #     series_obj = pd.Series(doc, name=doc_id)
-    #     # append the MongoDB Series obj to the DataFrame obj
-    #     docs = pd.concat( [docs,series_obj] )
-
-    # # export MongoDB documents to CSV
-    # #csv_export = docs.to_csv(sep="\t") # CSV delimited by commas
-    # #print ("\nCSV data:", csv_export)
-    # # export MongoDB documents to a CSV file
-    # docs.to_csv(fn,sep="\t", index=False)
-
 
 def write_umap(path, towrite):
     fn = path + '/umap.csv'
@@ -1314,7 +1307,7 @@ def query_builder(map):
     print(map)
     re_match = re.compile(r'^-?\d{1,10}\.?\d{0,10}$')
     for k in map:
-        if (k in ["meta_age_category", "meta_sample_id2", "meta_dataset", "level2", "meta_severity", "meta_days_from_onset_of_symptoms", "meta_outcome", "meta_gender", "meta_patient_id", "pbmc.Country"]):
+        if (k in ["meta_age_category", "meta_sample_id2", "meta_dataset", "level2", "meta_severity", "meta_days_from_onset_of_symptoms", "meta_outcome", "meta_gender", "meta_patient_id", "Country"]):
             l = []
             for ki in map[k]:
                 if re_match.findall(ki):
@@ -1468,7 +1461,7 @@ def api_db():
                     search_column = "meta_gender"
                     map[search_column] = column_value
                 elif "[10]" in i:
-                    search_column = "pbmc.Country"
+                    search_column = "Country"
                     map[search_column] = column_value
 
         if search_value == '':
@@ -1542,7 +1535,7 @@ def api_db():
                         'onset':r['meta_days_from_onset_of_symptoms'],
                         'outcome':str(r['meta_outcome']),
                         'gender':r['meta_gender'],
-                        'country': r['pbmc'][0]['Country']
+                        'country': r['Country']
                     })
 
         response = {
