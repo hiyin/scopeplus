@@ -1182,7 +1182,7 @@ def download_meta():
         print("No query is made")
     finally:
         if(query==None):
-            response = make_response(send_file("meta.csv", as_attachment=True))
+            response = make_response(send_file("/home/d24h_prog5/data/meta/meta.csv", as_attachment=True))
             print("setting cookies")
             response.set_cookie(key='downloadID', value=user_id, max_age=1)
             return response
