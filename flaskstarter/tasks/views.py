@@ -1172,6 +1172,21 @@ def download_meta():
     # user_id = str(current_user.id)
     tmp_folder = os.path.join(user_tmp[-1],user_id,user_timestamp)
     session["tmp_folder"] = tmp_folder
+
+    ## If no query is made, return 
+    ## Added by junyi 1006
+    query = None
+    try:
+        query = session.get("query")
+    except:
+        print("No query is made")
+    finally:
+        if(query==None):
+            response = make_response(send_file("meta.csv", as_attachment=True))
+            print("setting cookies")
+            response.set_cookie(key='downloadID', value=user_id, max_age=1)
+            return response
+
     os.makedirs(tmp_folder, exist_ok=True)
     if isinstance(session["query"], dict):
         meta = mongo.single_cell_meta_v4.find(session["query"]) 
