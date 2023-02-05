@@ -1120,6 +1120,8 @@ def write_10x_mtx(path, gene_dict, barcode_dict, doc_count, query, user_email):
     url = upload_to_aws(abs_path + "/matrix.zip")
     # # send s3 link
     send_s3_link(url, user_email)
+    # remove a directory recursively without errors
+    shutil.rmtree(abs_path, ignore_errors=True)
 
 
 # 0816 added by junyi
