@@ -127,13 +127,24 @@
   </div>
 </div>
 
+<div class="card cookie-alert">
+  <div class="card-body">
+    <h5 class="card-title">&#x1F36A; Do you like cookies?</h5>
+    <p class="card-text">We use cookies to ensure you get the best experience on our website.</p>
+    <div class="btn-toolbar justify-content-end">
+      <a href="http://cookiesandyou.com/" target="_blank" class="btn btn-link">Learn more</a>
+      <a href="#" class="btn btn-primary accept-cookies">Accept</a>
+    </div>
+  </div>
+</div>
+
 <div class="section02" hidden>
   <div class="container flex-column">
     <div class="regularS22">D²4H Single-cell Data Share Life Cycle</div>
     <div class="intro-c">
       The D²4H Single-cell Data Share provides a platform for sharing
       single-cell data. We welcome anyone to contribute on our data sharing
-      coummuniaty.
+      coummunity.
     </div>
     <div class="d-flex justify-content-center">
       <table class="intro-tb">
@@ -363,5 +374,46 @@
     $('#distro_data').DataTable();
   });
 
+  (function () {
+    "use strict";
+
+    var cookieAlert = document.querySelector(".cookie-alert");
+    var acceptCookies = document.querySelector(".accept-cookies");
+
+    cookieAlert.offsetHeight; // Force browser to trigger reflow (https://stackoverflow.com/a/39451131)
+
+    if (!getCookie("acceptCookies")) {
+        cookieAlert.classList.add("show");
+    }
+
+    acceptCookies.addEventListener("click", function () {
+        setCookie("acceptCookies", true, 60);
+        cookieAlert.classList.remove("show");
+    });
+})();
+
+// Cookie functions stolen from w3schools
+function setCookie(cname, cvalue, exdays) {
+    var d = new Date();
+    d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+    var expires = "expires=" + d.toUTCString();
+    document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+}
+
+function getCookie(cname) {
+    var name = cname + "=";
+    var decodedCookie = decodeURIComponent(document.cookie);
+    var ca = decodedCookie.split(';');
+    for (var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) === ' ') {
+            c = c.substring(1);
+        }
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+    return "";
+}
 </script>
 {% endblock %}

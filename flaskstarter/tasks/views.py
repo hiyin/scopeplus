@@ -325,16 +325,49 @@ def show_scfeature():
     ## Angela's attempt
     print(session["query"])
     if isinstance(session["query"], dict):
-        mata_sample_id2 = list(mongo.single_cell_meta_v4.find(session["query"], {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
+        # Junyi 0314 Add limit to only show 100000 records
+        mata_sample_id2 = list(mongo.single_cell_meta_v4.find(session["query"], {"meta_sample_id2":1,"_id":0}).limit(100000).distinct("meta_sample_id2"))
+        # mata_sample_id2 = list(
+        #         mongo.single_cell_meta_v4.aggregate(
+        #         [
+        #             {"$match": session["query"]}, 
+        #             {"$sample": {"size": 100}},
+        #             {"$project":{"meta_sample_id2":1,"_id":0}},
+        #         ]
+        #         )#.distinct("meta_sample_id2")
+        #     )
     elif isinstance(session["query"], list):
         if len(session["query"]) == 1:
             print("Getting single column filter")
-            mata_sample_id2 = list(mongo.single_cell_meta_v4.find(session["query"][0], {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
+            mata_sample_id2 = list(mongo.single_cell_meta_v4.find(session["query"][0], {"meta_sample_id2":1,"_id":0}).limit(100000).distinct("meta_sample_id2"))
+            # mata_sample_id2 = list(
+            #     mongo.single_cell_meta_v4.aggregate(
+            #     [
+            #         {"$match": session["query"][0]}, 
+            #         {"$sample": {"size": 100}},
+            #         {"$project":{"meta_sample_id2":1,"_id":0}},
+            #     ]
+            #     )#.distinct("meta_sample_id2")
+            # )
         else:
             print("Getting multi-column filter")
-            mata_sample_id2 = list(mongo.single_cell_meta_v4.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0}).distinct("meta_sample_id2"))
+            mata_sample_id2 = list(mongo.single_cell_meta_v4.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0}).limit(100000).distinct("meta_sample_id2"))
+            # mata_sample_id2 = list(
+            #     mongo.single_cell_meta_v4.aggregate(
+            #     [
+            #         {"$and": session["query"][0]}, 
+            #         {"$sample": {"size": 100}},
+            #         {"$project":{"meta_sample_id2":1,"_id":0}},
+            #     ]
+            #     )#.distinct("meta_sample_id2")
+            # )
+
+                #meta = mongo.single_cell_meta_v4.find(session["query"])
+
     print("Testing Angela's code ...Sample id 2: ",mata_sample_id2)
 
+    ## Edit by junyi 0314 only show the first 100 sample id
+    mata_sample_id2=mata_sample_id2[:100]
     # datasets = fileds_dataset
     #dataset =  " ".join(mata_sample_id2)
     dataset= ""
@@ -343,11 +376,20 @@ def show_scfeature():
     features = []
     
     try:
-        # Query propotion
+        # Query propotion edit by junyi
         propotion = scfeature.proportion_raw.find({'meta_dataset': {'$in': mata_sample_id2}})
+        # propotion = scfeature.proportion_raw.aggregate(
+        #         [
+        #             {"$match": {'meta_dataset': {'$in': mata_sample_id2}} }, 
+        #             {"$sample": {"size": 100}}]
+        #         )
+
         df_propotion = pd.DataFrame(list(propotion))
         df_propotion.to_csv(user_tmp[-1]+"/df_proportion_raw_"+dataset+".csv")
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
+
+        # 0314 edited by junyi
+        #df_d=df_d.head(50)
         df_melt=df_d.melt(id_vars=['meta_dataset','meta_severity'],value_name="propotion",var_name="cell_type")
         fig = px.bar(df_melt, x="meta_dataset", y="propotion", color="cell_type",facet_col = "meta_severity",template="plotly_white",
         color_discrete_sequence=sns.color_palette("tab20").as_hex())
