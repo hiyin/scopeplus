@@ -124,150 +124,151 @@ def show_plot():
     print(session["user_id"])
     print(session["query"])
     # Search box is empty
+    print("Deugg AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA")
+
+    print("Search value provided, write id, meta...")
     if(len(session["query"])==0):
+        print("Deugg")
+        # 0321 COMMENT BY junyi
         # ID is presented, no meta data:
-        if(not (exists(tmp_folder + '/meta_sampled.tsv'))):
-            meta = mongo.single_cell_meta_v4.find({})
-            write_file_meta(tmp_folder, meta,filename="meta_sampled.tsv")
-        
-        # If ID is presented, no umap:
-        elif(not (exists(tmp_folder + '/umap.csv'))):
-
-            pipeline = [
-                {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} }, 
-                {"$project": { "umap": 1, "_id": 0 } }, 
-                {"$unwind": '$umap' }, 
-                {"$replaceRoot": { "newRoot": "$umap" } }
+        meta = list(mongo.single_cell_meta_v4.aggregate(
+            [ 
+                {"$sample": {"size": 10000}}
             ]
-
-            umap = mongo.single_cell_meta_v4.aggregate(pipeline)
-
-            write_umap(tmp_folder, umap)
-
-    # If search box not empty, write id meta umap
+            ))
+            #write_file_meta(tmp_folder, meta,filename="meta_sampled.tsv")
+        print(meta[:3])
+    elif isinstance(session["query"], dict):
+        print(session["query"])
+        #meta = mongo.single_cell_meta_v4.find(session["query"])
+        meta = list(mongo.single_cell_meta_v4.aggregate(
+            [{"$match": session["query"] }, {"$sample": {"size": 10000}}]))
+    elif  isinstance(session["query"], list) and len(session["query"]) == 1:
+        #meta = mongo.single_cell_meta_v4.find(session["query"][0])
+        meta = list(mongo.single_cell_meta_v4.aggregate(
+            [{"$match": session["query"][0]}, {"$sample": {"size": 10000}}]))
     else:
-        print("Search value provided, write id, meta...")
-        if isinstance(session["query"], dict):
-            print(session["query"])
-            #meta = mongo.single_cell_meta_v4.find(session["query"])
-            meta = list(mongo.single_cell_meta_v4.aggregate(
-                [{"$match": session["query"] }, {"$sample": {"size": 10000}}]))
-        elif  isinstance(session["query"], list) and len(session["query"]) == 1:
-            #meta = mongo.single_cell_meta_v4.find(session["query"][0])
-            meta = list(mongo.single_cell_meta_v4.aggregate(
-                [{"$match": session["query"][0]}, {"$sample": {"size": 10000}}]))
-        else:
-            #meta = mongo.single_cell_meta_v4.find({"$and": session["query"]})
-            meta = list(mongo.single_cell_meta_v4.aggregate(
-                [{"$match": {"$and": session["query"] }}, {"$sample": {"size": 10000}}]))
-        # if isinstance(session["query"], dict):
-        #     print("Getting instance of dict")
-        #     pipeline = [
-        #             {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} },
-        #             {"$match": session["query"] },
-        #             {"$project": { "umap": 1, "_id": 0 } },
-        #             {"$unwind": '$umap' },
-        #             {"$replaceRoot": { "newRoot": "$umap" } }
-        #         ]
-        # elif isinstance(session["query"], list) and len(session["query"]) == 1:
-        #     print("Getting instance of list and getting  first element")
-        #     pipeline = [
-        #             {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} },
-        #             {"$match": session["query"][0] },
-        #             {"$project": { "umap": 1, "_id": 0 } },
-        #             {"$unwind": '$umap' },
-        #             {"$replaceRoot": { "newRoot": "$umap" } }
-        #         ]
-        # else:
-        #     pipeline = [
-        #             {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} },
-        #             {"$match": {"$and": session["query"] }  },
-        #             {"$project": { "umap": 1, "_id": 0 } },
-        #             {"$unwind": '$umap' },
-        #             {"$replaceRoot": { "newRoot": "$umap" } }
-        #     ]
-        #umap = mongo.single_cell_meta_v4.aggregate(pipeline)
-        bclist = list(meta)
-        bc_list = [x["id"] for x in list(bclist)]
-        umap = mongo.umap.find({'id': {'$in': bc_list}})
-        write_file_meta(tmp_folder, meta,filename="meta_sampled.tsv")
-        write_umap(tmp_folder, umap)
-        # Assume ids,meta files are provided
-        # No cell color is provided
-        if(cell_color is None):
-            cell_color="level2"
-        if(cell_gene is None):
-            print("----No gene selected")
-        else:
-            print("----Gene is selected")
+        #meta = mongo.single_cell_meta_v4.find({"$and": session["query"]})
+        meta = list(mongo.single_cell_meta_v4.aggregate(
+            [{"$match": {"$and": session["query"] }}, {"$sample": {"size": 10000}}]))
+    # if isinstance(session["query"], dict):
+    #     print("Getting instance of dict")
+    #     pipeline = [
+    #             {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} },
+    #             {"$match": session["query"] },
+    #             {"$project": { "umap": 1, "_id": 0 } },
+    #             {"$unwind": '$umap' },
+    #             {"$replaceRoot": { "newRoot": "$umap" } }
+    #         ]
+    # elif isinstance(session["query"], list) and len(session["query"]) == 1:
+    #     print("Getting instance of list and getting  first element")
+    #     pipeline = [
+    #             {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} },
+    #             {"$match": session["query"][0] },
+    #             {"$project": { "umap": 1, "_id": 0 } },
+    #             {"$unwind": '$umap' },
+    #             {"$replaceRoot": { "newRoot": "$umap" } }
+    #         ]
+    # else:
+    #     pipeline = [
+    #             {"$lookup": { "from": 'umap', "localField": 'id', "foreignField": 'id', "as": 'umap'} },
+    #             {"$match": {"$and": session["query"] }  },
+    #             {"$project": { "umap": 1, "_id": 0 } },
+    #             {"$unwind": '$umap' },
+    #             {"$replaceRoot": { "newRoot": "$umap" } }
+    #     ]
+    #umap = mongo.single_cell_meta_v4.aggregate(pipeline)
+    bclist = list(meta)
+    bc_list = [x["id"] for x in list(bclist)]
+    umap = mongo.umap.find({'id': {'$in': bc_list}})
+    write_file_meta(tmp_folder, meta,filename="meta_sampled.tsv")
+    write_umap(tmp_folder, umap)
+    print("Deugg writing finished")
+    # Assume ids,meta files are provided
+    # No cell color is provided
+    if(cell_color is None):
+        cell_color="level2"
+    if(cell_gene is None):
+        print("----No gene selected")
+    else:
+        print("----Gene is selected")
 
-            # The gene name selected is avaliable
-            if(cell_gene in df_genes.values):
-                # Lookup gene in default dir or user dir based on condition
-                flag_same_query =  is_same_query(tmp_folder+"/meta.tsv",collection_searched)
-                # Gene table is not cached or the query is differen from the previous
-                if((not exists(tmp_folder + '/'+cell_gene+'.tsv')) or 
-                (flag_same_query == False)):
-                    print("Querying matrix collection...")
-                    checkpoint_time = time.time()
-                    # use join table - aggregation with matrix table - get gene info
-                    if isinstance(session["query"], dict):
-                        print("Getting instance of dict")
+        # The gene name selected is avaliable
+        if(cell_gene in df_genes.values):
+            # Lookup gene in default dir or user dir based on condition
+            flag_same_query =  is_same_query(tmp_folder+"/meta.tsv",collection_searched)
+            # Gene table is not cached or the query is differen from the previous
+            if((not exists(tmp_folder + '/'+cell_gene+'.tsv')) or 
+            (flag_same_query == False)):
+                print("Querying matrix collection...")
+                checkpoint_time = time.time()
+                # use join table - aggregation with matrix table - get gene info
+                if isinstance(session["query"], dict):
+                    print("Getting instance of dict")
+                    pipeline = [
+                            { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
+                            { "$match": session["query"]  }, 
+                            { "$unwind": "$matrix" }, 
+                            { "$match": { "matrix.gene_name": cell_gene }}, 
+                            { "$project":  { "matrix": 1, "_id": 0 } },
+                            { "$replaceRoot": { "newRoot": "$matrix" } } 
+                    ]
+
+                elif isinstance(session["query"], list) and len(session["query"]) == 1:
+                    print("Getting instance of list and getting  first element")
+                    pipeline = [
+                            { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
+                            { "$match": session["query"][0]  }, 
+                            { "$unwind": "$matrix" }, 
+                            { "$match": { "matrix.gene_name": cell_gene }}, 
+                            { "$project":  { "matrix": 1, "_id": 0 } },
+                            { "$replaceRoot": { "newRoot": "$matrix" } } 
+                    ]
+                #0321 added by junyi            
+                elif len(session["query"]==0):
+                    pipeline = [
+                            { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
+                            { "$unwind": "$matrix" }, 
+                            { "$match": { "matrix.gene_name": cell_gene }}, 
+                            { "$project":  { "matrix": 1, "_id": 0 } },
+                            { "$replaceRoot": { "newRoot": "$matrix" } } 
+                    ]
+                else:
                         pipeline = [
-                                { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
-                                { "$match": session["query"]  }, 
-                                { "$unwind": "$matrix" }, 
-                                { "$match": { "matrix.gene_name": cell_gene }}, 
-                                { "$project":  { "matrix": 1, "_id": 0 } },
-                                { "$replaceRoot": { "newRoot": "$matrix" } } 
-                        ]
+                            { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
+                            { "$match": {"$and": session["query"] }  }, 
+                            { "$unwind": "$matrix" }, 
+                            { "$match": { "matrix.gene_name": cell_gene }}, 
+                            { "$project":  { "matrix": 1, "_id": 0 } },
+                            { "$replaceRoot": { "newRoot": "$matrix" } } 
+                    ]
+                print(pipeline)
+                #result = mongo.single_cell_meta_v4.aggregate(pipeline)
+                result = mongo.matrix.find({'barcode': {'$in': bc_list},'gene_name':cell_gene})
+                print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
-                    elif isinstance(session["query"], list) and len(session["query"]) == 1:
-                        print("Getting instance of list and getting  first element")
-                        pipeline = [
-                                { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
-                                { "$match": session["query"][0]  }, 
-                                { "$unwind": "$matrix" }, 
-                                { "$match": { "matrix.gene_name": cell_gene }}, 
-                                { "$project":  { "matrix": 1, "_id": 0 } },
-                                { "$replaceRoot": { "newRoot": "$matrix" } } 
-                        ]            
-                    else:
-                         pipeline = [
-                                { "$lookup": { "from": 'matrix', "localField": 'id', "foreignField": 'barcode', "as": 'matrix' } }, 
-                                { "$match": {"$and": session["query"] }  }, 
-                                { "$unwind": "$matrix" }, 
-                                { "$match": { "matrix.gene_name": cell_gene }}, 
-                                { "$project":  { "matrix": 1, "_id": 0 } },
-                                { "$replaceRoot": { "newRoot": "$matrix" } } 
-                        ]
-                    print(pipeline)
-                    #result = mongo.single_cell_meta_v4.aggregate(pipeline)
-                    result = mongo.matrix.find({'barcode': {'$in': bc_list},'gene_name':cell_gene})
-                    print("query finished --- %s seconds ---" % (time.time() - checkpoint_time))
-
-                    ##text=List of strings to be written to file
-                    # Force to write to the user folder
-                    with open(tmp_folder + '/'+cell_gene+'.tsv', 'w') as file:
-                        file.write("\t".join(["_id","gene","barcode",cell_gene]))
+                ##text=List of strings to be written to file
+                # Force to write to the user folder
+                with open(tmp_folder + '/'+cell_gene+'.tsv', 'w') as file:
+                    file.write("\t".join(["_id","gene","barcode",cell_gene]))
+                    file.write('\n')
+                    for line in result:
+                        file.write("\t".join([str(e) for e in line.values()]))
                         file.write('\n')
-                        for line in result:
-                            file.write("\t".join([str(e) for e in line.values()]))
-                            file.write('\n')
 
-                    checkpoint_time = time.time()
-                    print("write finished --- %s seconds ---" % (time.time() - checkpoint_time))
-            else:
-                cell_gene = None
-                print("Gene not found")
-        # Plot umap
-        checkpoint_time = time.time()
-        graphJSON,graphJSON2,df_plot = plot_umap(cell_color,cell_gene,tmp_folder)
-        print("Plot finished --- %s seconds ---" % (time.time() - checkpoint_time))
+                checkpoint_time = time.time()
+                print("write finished --- %s seconds ---" % (time.time() - checkpoint_time))
+        else:
+            cell_gene = None
+            print("Gene not found")
+    # Plot umap
+    checkpoint_time = time.time()
+    graphJSON,graphJSON2,df_plot = plot_umap(cell_color,cell_gene,tmp_folder)
+    print("Plot finished --- %s seconds ---" % (time.time() - checkpoint_time))
 
-        # Pass color options to the html
-        colors = list(df_plot.columns.values.ravel())
-        genes = df_genes.iloc[:,0].values.ravel()
+    # Pass color options to the html
+    colors = list(df_plot.columns.values.ravel())
+    genes = df_genes.iloc[:,0].values.ravel()
     return render_template('tasks/show_plot.html', graphJSON=graphJSON,graphJSON2=graphJSON2,colors=colors,genes=genes)
 
 @tasks.route('/show_scfeature', methods=['GET', 'POST'])
@@ -306,11 +307,14 @@ def show_scfeature():
     ### Junyi's code
     # fileds_dataset = mongo.single_cell_meta_v4.distinct("meta_dataset")
     # fileds_celltypes = get_field("level2")
+
     if isinstance(session["query"], dict):
         fileds_celltypes = list(mongo.single_cell_meta_v4.find(session["query"], {"meta_sample_id2":1,"_id":0}).distinct("level2"))
     elif isinstance(session["query"], list):
         if len(session["query"]) == 1:
             fileds_celltypes = list(mongo.single_cell_meta_v4.find(session["query"][0], {"meta_sample_id2":1,"_id":0}).distinct("level2"))
+        if len(session["query"]) == 0:
+            fileds_celltypes = list(mongo.single_cell_meta_v4.find({}, {"meta_sample_id2":1,"_id":0}).distinct("level2"))
         else:
             fileds_celltypes = list(mongo.single_cell_meta_v4.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0}).distinct("level2"))
     # fileds_dataset_2 = mongo.single_cell_meta_v4.aggregate(
@@ -349,6 +353,10 @@ def show_scfeature():
             #     ]
             #     )#.distinct("meta_sample_id2")
             # )
+        elif len(session["query"]) == 0:
+            print("Getting single column filter")
+            mata_sample_id2 = list(mongo.single_cell_meta_v4.find({},{"meta_sample_id2":1,"_id":0}).limit(100000).distinct("meta_sample_id2"))
+
         else:
             print("Getting multi-column filter")
             mata_sample_id2 = list(mongo.single_cell_meta_v4.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0}).limit(100000).distinct("meta_sample_id2"))
@@ -712,66 +720,81 @@ def download_scClassify():
 
 @tasks.route('/show_search', methods=['POST', 'GET'])
 def show_search():
-    graphJSON = None
+    graphJSON =graphJSON2 =graphJSON3 =graphJSON4 =graphJSON5 =graphJSON6 = None
     try:
-        if (session.get("query") == None):
-            graphJSON = None
-        elif (len(session["query"]) == 0):
-            # ID is presented, no meta data:
-            graphJSON = None
+        # if (session.get("query") == None):
+        #     graphJSON = None
+        # elif (len(session["query"]) == 0):
+        #     # ID is presented, no meta data:
+        #     graphJSON = None
         # If search box not empty, write id meta umap
+        # else:
+        print("Search value provided, write id, meta...")
+        if isinstance(session["query"], dict):
+            print(session["query"])
+            meta = mongo.single_cell_meta_v4.find(session["query"])
+        elif isinstance(session["query"], list) and len(session["query"]) == 1:
+            meta = mongo.single_cell_meta_v4.find(session["query"][0])
         else:
-            print("Search value provided, write id, meta...")
-            if isinstance(session["query"], dict):
-                print(session["query"])
-                meta = mongo.single_cell_meta_v4.find(session["query"])
-            elif isinstance(session["query"], list) and len(session["query"]) == 1:
-                meta = mongo.single_cell_meta_v4.find(session["query"][0])
+            if session["query"] == []:
+                #meta = mongo.single_cell_meta_v4.find().limit(100000)
+                # meta = (mongo.single_cell_meta_v4.aggregate(
+                #     [ {"$sample": {"size": 100000}}])
+                # )
+                print("No search")
+
             else:
                 meta = mongo.single_cell_meta_v4.find({"$and": session["query"]})
+        # else:
+        #     meta = mongo.single_cell_meta_v4.find({"$and": session["query"]})
 
-            # Create tmpfolder is not exist
-            query_timestamp = session.get("sess_timestamp")
-            print("Checking user information")
-            user_id = session["user_id"]
-            print(user_id)
-            tmp_folder = os.path.join(user_tmp[-1], user_id, query_timestamp)
-            os.makedirs(tmp_folder, exist_ok=True)
+        # Create tmpfolder is not exist
+        query_timestamp = session.get("sess_timestamp")
+        print("Checking user information")
+        user_id = session["user_id"]
+        print(user_id)
+        tmp_folder = os.path.join(user_tmp[-1], user_id, query_timestamp)
+        os.makedirs(tmp_folder, exist_ok=True)
+
+        if(session["query"] != []):
             write_file_meta(tmp_folder, meta)
             df_meta = pd.read_csv(tmp_folder + '/meta.tsv', index_col=1, sep="\t")
-            #Cell Type
-            new_df = df_meta['level2'].value_counts().rename_axis('level2').reset_index(name='counts')
-            fig = px.bar(new_df, x="counts", y="level2", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
-            fig.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
-            graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
-            #severity
-            new_df2 = df_meta['meta_severity'].value_counts().rename_axis('meta_severity').reset_index(name='counts')
-            fig2 = px.bar(new_df2, x="counts", y="meta_severity", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
-            fig2.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
-            graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
-            #outcome
-            new_df3 = df_meta['meta_outcome'].value_counts().rename_axis('meta_outcome').reset_index(name='counts')
-            fig3 = px.bar(new_df3, x="counts", y="meta_outcome", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
-            fig3.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
-            graphJSON3 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
-            #Gender
-            new_df6 = df_meta['meta_gender'].value_counts().rename_axis('meta_gender').reset_index(name='counts')
-            fig6 = px.bar(new_df6, x="counts", y="meta_gender", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
-            fig6.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
-            graphJSON6 = json.dumps(fig6, cls=plotly.utils.PlotlyJSONEncoder)
+        else:
+            df_meta = pd.read_csv('/home/d24h_prog5/data/meta/meta.tsv', index_col="barcode", sep="\t")
 
-            # Age
-            new_df4 = df_meta['meta_age_category'].value_counts().rename_axis('meta_age_category').reset_index(name='counts')
-            fig4 = px.bar(new_df4, x="counts", y="meta_age_category", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
-            fig4.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
-            graphJSON4= json.dumps(fig4, cls=plotly.utils.PlotlyJSONEncoder)
+        #Cell Type
+        new_df = df_meta['level2'].value_counts().rename_axis('level2').reset_index(name='counts')
+        fig = px.bar(new_df, x="counts", y="level2", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
+        fig.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
+        graphJSON = json.dumps(fig, cls=plotly.utils.PlotlyJSONEncoder)
+        #severity
+        new_df2 = df_meta['meta_severity'].value_counts().rename_axis('meta_severity').reset_index(name='counts')
+        fig2 = px.bar(new_df2, x="counts", y="meta_severity", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
+        fig2.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
+        graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
+        #outcome
+        new_df3 = df_meta['meta_outcome'].value_counts().rename_axis('meta_outcome').reset_index(name='counts')
+        fig3 = px.bar(new_df3, x="counts", y="meta_outcome", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
+        fig3.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
+        graphJSON3 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
+        #Gender
+        new_df6 = df_meta['meta_gender'].value_counts().rename_axis('meta_gender').reset_index(name='counts')
+        fig6 = px.bar(new_df6, x="counts", y="meta_gender", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
+        fig6.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
+        graphJSON6 = json.dumps(fig6, cls=plotly.utils.PlotlyJSONEncoder)
 
-            #meta_days_from_onset_of_symptoms
-            # new_df4 = df_meta['meta_days_from_onset_of_symptoms'].value_counts().rename_axis('meta_days_from_onset_of_symptoms').reset_index(name='counts')
-            # fig4 = px.bar(new_df4, x="counts", y="meta_days_from_onset_of_symptoms", color="counts", orientation='h')
-            # fig4.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
-            fig5 = px.histogram(df_meta, x="meta_days_from_onset_of_symptoms",template="plotly_white",color_discrete_sequence=sns.color_palette("tab20").as_hex())
-            graphJSON5 = json.dumps(fig5, cls=plotly.utils.PlotlyJSONEncoder)
+        # Age
+        new_df4 = df_meta['meta_age_category'].value_counts().rename_axis('meta_age_category').reset_index(name='counts')
+        fig4 = px.bar(new_df4, x="counts", y="meta_age_category", color="counts", orientation='h',template="plotly_white",color_continuous_scale=sns.color_palette("tab20").as_hex())
+        fig4.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'},coloraxis_showscale=False)
+        graphJSON4= json.dumps(fig4, cls=plotly.utils.PlotlyJSONEncoder)
+
+        #meta_days_from_onset_of_symptoms
+        # new_df4 = df_meta['meta_days_from_onset_of_symptoms'].value_counts().rename_axis('meta_days_from_onset_of_symptoms').reset_index(name='counts')
+        # fig4 = px.bar(new_df4, x="counts", y="meta_days_from_onset_of_symptoms", color="counts", orientation='h')
+        # fig4.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
+        fig5 = px.histogram(df_meta, x="meta_days_from_onset_of_symptoms",template="plotly_white",color_discrete_sequence=sns.color_palette("tab20").as_hex())
+        graphJSON5 = json.dumps(fig5, cls=plotly.utils.PlotlyJSONEncoder)
 
     except Exception as e:
         print(e)
@@ -1228,14 +1251,18 @@ def download_meta():
         print("No query is made")
     finally:
         if(query==None):
-            response = make_response(send_file("/home/d24h_prog5/data/meta/meta.csv", as_attachment=True))
-            print("setting cookies")
-            response.set_cookie(key='downloadID', value=user_id, max_age=1)
-            return response
+            # response = make_response(send_file("/home/d24h_prog5/data/meta/meta.csv", as_attachment=True))
+            # print("setting cookies")
+            # response.set_cookie(key='downloadID', value=user_id, max_age=1)
+            # return response
+            return redirect("https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/meta.csv?response-content-disposition=attachment&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDmFwLW5vcnRoZWFzdC0yIkgwRgIhAOBkoo35ZiO%2FJ0LLOapiFZNNI%2FELcR8mSQ%2B5A4L8km5%2FAiEAnb1K9ZqkLvosPGRLu5U9ETjad%2BjyQpzqvuo1lodfq48qjgMIg%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw3OTU0NjUzNDE3NjAiDEV6asltw2gzGbFGZiriAuyAtwZ4AT2ttm5VRX4LG1I8G9xtYBZRB19EYmWSzf%2FH8i6s3U7PHc26CPonjsWy8keuHfMG1d%2B31pIZigYInQ%2BPw%2F8wiOz5KvEB6Qylv9NrCSSMtsjelQmWmXZWBsmyfIPfMDxm6MjxNa2A9bquTAzklIAOGjJh1I0%2FJoq4%2Ban8p6xSxCkVg6zAjIjQyQkXyKNZgsry55r26Kyk%2BbT5%2FrgrdG8friI0tiSgRi21cziyXIgB8NETFP3YkhbIyh0mUIZDu3iIYAZacYBJlCd6H9sjulPE7VghSmsQamDCOFq4LxzeEgl0MhDkDMeq%2Bbx%2Fw6XaOxDhSX8cx%2Fq6B7jJxbsw3nykKFlpurpT9yKHy%2Fe1I%2FvtsE7KK%2Be2DYwC60vAKXXzMOHt%2F3WZHFE063c%2ByMD2L6MNy%2BoTfaY0RjA6q5suFWGzNAs1yjEpPj%2FmoWH%2F7GonHN%2BS6kwbTaQMQBDoiX%2BSizD4p%2BSgBjqyAl%2F5ZX57SwJ9Yzx7w5tXX849rD0XyMImkvlAUimrFKOm6v8HPgKLO0Xr%2Bb4Q%2F67icLKDcR0WtU2hQnTj9plMFs9yYRwTDDY3Bz9RSA6gF5KSfCIPxx%2Fq5PSUEJ%2FgemP6Hy4dSoop1Vceh2NtsrtdNOvcQaDRVaOc3r5ScXh%2BJ%2FOnans1%2BN8Ke%2F8A4%2Ffa5K7673HQlLRCAemLC9sJlKS%2B0ACOOjKUVLIUpMj95YN6dKg3H%2FI7lEwzu2aNn%2BN4Ud%2BtiIJN1YD8%2BhqAb7VqcYxPGSPhGb2SnNgXv%2Fum9vht3A0Kaj9Sid6ZlwJ290pmE03ukR7z%2BIIwS3izgchkWlLehX%2FSqa3KnZsokyw7tQ5oBuvY6RpGB6eC00Ym%2F7CD%2FSNL7QhQEcn8qEGpfmBH%2FNwFBiEe6g%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20230321T071358Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIA3SNLN3NANAYZWG6Y%2F20230321%2Fap-east-1%2Fs3%2Faws4_request&X-Amz-Signature=35d8a4859e3e1ddf93cef5cef4e3cc482122e2bd8660f51fa97fab60bd212731")
+
 
     os.makedirs(tmp_folder, exist_ok=True)
     if isinstance(session["query"], dict):
         meta = mongo.single_cell_meta_v4.find(session["query"]) 
+    elif isinstance(session["query"], list) and len(session["query"]) == 0:
+        return redirect("https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/meta.csv?response-content-disposition=attachment&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDmFwLW5vcnRoZWFzdC0yIkgwRgIhAOBkoo35ZiO%2FJ0LLOapiFZNNI%2FELcR8mSQ%2B5A4L8km5%2FAiEAnb1K9ZqkLvosPGRLu5U9ETjad%2BjyQpzqvuo1lodfq48qjgMIg%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw3OTU0NjUzNDE3NjAiDEV6asltw2gzGbFGZiriAuyAtwZ4AT2ttm5VRX4LG1I8G9xtYBZRB19EYmWSzf%2FH8i6s3U7PHc26CPonjsWy8keuHfMG1d%2B31pIZigYInQ%2BPw%2F8wiOz5KvEB6Qylv9NrCSSMtsjelQmWmXZWBsmyfIPfMDxm6MjxNa2A9bquTAzklIAOGjJh1I0%2FJoq4%2Ban8p6xSxCkVg6zAjIjQyQkXyKNZgsry55r26Kyk%2BbT5%2FrgrdG8friI0tiSgRi21cziyXIgB8NETFP3YkhbIyh0mUIZDu3iIYAZacYBJlCd6H9sjulPE7VghSmsQamDCOFq4LxzeEgl0MhDkDMeq%2Bbx%2Fw6XaOxDhSX8cx%2Fq6B7jJxbsw3nykKFlpurpT9yKHy%2Fe1I%2FvtsE7KK%2Be2DYwC60vAKXXzMOHt%2F3WZHFE063c%2ByMD2L6MNy%2BoTfaY0RjA6q5suFWGzNAs1yjEpPj%2FmoWH%2F7GonHN%2BS6kwbTaQMQBDoiX%2BSizD4p%2BSgBjqyAl%2F5ZX57SwJ9Yzx7w5tXX849rD0XyMImkvlAUimrFKOm6v8HPgKLO0Xr%2Bb4Q%2F67icLKDcR0WtU2hQnTj9plMFs9yYRwTDDY3Bz9RSA6gF5KSfCIPxx%2Fq5PSUEJ%2FgemP6Hy4dSoop1Vceh2NtsrtdNOvcQaDRVaOc3r5ScXh%2BJ%2FOnans1%2BN8Ke%2F8A4%2Ffa5K7673HQlLRCAemLC9sJlKS%2B0ACOOjKUVLIUpMj95YN6dKg3H%2FI7lEwzu2aNn%2BN4Ud%2BtiIJN1YD8%2BhqAb7VqcYxPGSPhGb2SnNgXv%2Fum9vht3A0Kaj9Sid6ZlwJ290pmE03ukR7z%2BIIwS3izgchkWlLehX%2FSqa3KnZsokyw7tQ5oBuvY6RpGB6eC00Ym%2F7CD%2FSNL7QhQEcn8qEGpfmBH%2FNwFBiEe6g%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20230321T071358Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIA3SNLN3NANAYZWG6Y%2F20230321%2Fap-east-1%2Fs3%2Faws4_request&X-Amz-Signature=35d8a4859e3e1ddf93cef5cef4e3cc482122e2bd8660f51fa97fab60bd212731")
     elif isinstance(session["query"], list) and len(session["query"]) == 1:
         print(session["query"])
         meta = mongo.single_cell_meta_v4.find(session["query"][0])
@@ -1365,6 +1392,17 @@ def download_matrix():
 # Constructor for column-filter after multi-select
 def query_builder(map):
     construct = []
+    lengthmap={
+        "level2":20,
+        "meta_age_category": 9,
+        "meta_severity": 7,
+        "meta_dataset": 20,
+        "meta_days_from_onset_of_symptoms": 75,
+        "meta_outcome": 6,
+        "meta_gender": 3,
+        "Country": 8
+
+    }
     print(map)
     re_match = re.compile(r'^-?\d{1,10}\.?\d{0,10}$')
     for k in map:
@@ -1387,7 +1425,11 @@ def query_builder(map):
                     l.append(ki)
             q = {k: {"$in": l}}
             print(q)
-            construct.append(q)
+            #construct.append(q)
+            if ( len(l) >= lengthmap[k]):
+                print("Maximum selection selected in celltype...")
+            else:      
+                construct.append(q)
         else:
             print(map[k])
 
@@ -1558,7 +1600,11 @@ def api_db():
             print(session["query"])
             # Pagination algorithm
             # Calculate number of documents to skip
-            tmp, total_records = paginate_skiplimit(rowperpage, page_no, "column", construct)
+            if construct:
+                tmp, total_records = paginate_skiplimit(rowperpage, page_no, "column", construct)
+            else:
+                tmp, total_records = paginate_skiplimit(rowperpage, page_no, "default", search_value)
+            #tmp, total_records = paginate_skiplimit(rowperpage, page_no, "column", construct)
 
 
             checkpoint_time = time.time()
