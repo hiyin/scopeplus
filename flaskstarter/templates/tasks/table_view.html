@@ -32,7 +32,8 @@
                 value="Clear Search Filed" id="btnGClear" />
         </div>
         <div class="row justify-content-start" style="margin: 24px -15px 0px 0px;">
-            <div style="margin: 10px 15px 0px 0px">
+            <!-- 0312 hide by junyi -->
+            <div style="margin: 10px 15px 0px 0px" hidden> 
                 <select id="opt_sampleid" class="multibox" multiple="multiple" name="name_tbv_sample" form="scfform">
                     {% for val in fsampleid %}
                     <option value="{{val}}">{{val}}</option>
@@ -55,7 +56,8 @@
                     {% endfor %}
                 </select>
             </div>
-            <div style="margin: 10px 15px 0px 0px">
+            <div style="margin: 10px 15px 0px 0px" hidden>
+                <!-- 0312 hide by junyi -->
                 <select id="opt_donor" class="multibox" multiple="multiple" name="name_tbv_donor" form="scfform">
                     {% for val in fdonor %}
                     <option value="{{val}}">{{val}}</option>
@@ -119,28 +121,28 @@
             <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
             </form>
             <div style="margin-top: 10px;">
-                <button class="lightButton" name="show_plot" style="display:inline-block ; margin-right: 15px;"
+                <button id="charabutton" class="lightButton" name="show_chara" style="display:inline-block ; margin-right: 15px; " hidden
                     title='Bar Charts of cell type, severity, days from onset and outcome' onclick="showSearchPlot()">
                     Show data characteristics
                 </button>
             </div>
             <div style="margin-top: 10px; margin-right: 15px;">
-                <div style="display:inline-block;">
-                    <button id="scfbutton" class="lightButton" name="show_scfeature" form="scfform" onclick="loading()"
+                <div id="test" style="display:inline-block;">
+                    <button id="scfbutton" class="lightButton" name="show_scfeature" form="scfform" onclick="loading()" hidden
                         title='Select more than 2 items in each of Sample ID + Cell Type OR Dataset + Cell Type & Search before clicking this button (Sample IDs should come from more than 1 dataset)'>
                         Show scFeature plot
                     </button>
                 </div>
                 <div style="display:inline-block; vertical-align:top; margin-top:-5px">
-                    <a href="#scfeatureGuide" onclick="showGuide()"><img
+                    <a id="scfnotify" href="#scfeatureGuide" onclick="showGuide()"><img
                             src="{{url_for('static', filename='exclamation-mark-64.png')}}" width="20"
                             height="20" /></a>
                 </div>
             </div>
             <div style="margin-top: 10px;">
-                <button class="lightButton" name="show_plot" type="submit"
-                    style="display:inline-block; margin-right: 15px;" onclick="showplot()"
-                    title='Select 1 sell type & search before clicking this button'> Show UMAP plot
+                <button id="UMAPbutton" class="lightButton" name="show_plot" type="submit"
+                    style="display:inline-block; margin-right: 15px;" onclick="showplot()" hidden
+                    title='Select 1 sell type & search before clicking this button' > Show UMAP plot
                 </button>
             </div>
         </div>
@@ -159,8 +161,8 @@
 
             <div style="margin: 10px 15px 0px 0px;">
                 <form class="download" action="{{ url_for('tasks.download_meta')}}" method="post">
-                    <button class="mediumButton download" name="download_meta" type="submit"
-                        style="display:inline-block;">
+                    <button id="mdownloadbutton" class="mediumButton download" name="download_meta" type="submit"
+                        style="display:inline-block;" hidden>
                         Download metadata </button>
                 </form>
             </div>
@@ -172,11 +174,12 @@
                         matrix</a>
                 </div>
             </div> -->
-            <div id="matrixDownloadButton" style="margin: 10px 15px 0px 0px;">
+            <!-- Hide by junyi 0321 -->
+            <!-- <div id="matrixDownloadButton" style="margin: 10px 15px 0px 0px;">
                 <button class="mediumButton download" name="download_matrix" type="submit" style="display:inline-block;"
                     form="downloadMatrix">
                     Download matrix </button>
-            </div>
+            </div> -->
         </div>
 
         <div class="overlay" id="DownloadMatrixForm">
@@ -627,6 +630,7 @@
             oTable.columns(10).search($('#opt_country').val().join("|"));
             //hit search on server
             oTable.draw();
+            //document.getElementById("test").style.visibility = "visible";
         });
 
         $('#btnClear').click(function () {
@@ -728,7 +732,35 @@
         $("#scfeatureGuide").css("display", "block")
     }
 
+    // 0321 Added by junyi to hid button
+    $("#btnSearch").click(function(){
 
+        var myButtonArray = [ "UMAPbutton", "mdownloadbutton", "charabutton","scfbutton","scfnotify" ];
+
+        $.each(myButtonArray, function( index, value ){
+
+            let element = document.getElementById(value);
+            element.setAttribute("hidden", "hidden");
+            let hidden = element.getAttribute("hidden");
+            if (hidden) {
+                element.removeAttribute("hidden");
+            }
+        });
+    })
+    $("#btnClear").click(function(){
+
+        var myButtonArray = [ "UMAPbutton", "mdownloadbutton", "charabutton","scfbutton","scfnotify" ];
+
+        $.each(myButtonArray, function( index, value ){
+
+            let element = document.getElementById(value);
+            //element.setAttribute("hidden", "hidden");
+            let hidden = element.getAttribute("hidden");
+            element.setAttribute("hidden", "hidden");
+            
+            // console.log( index + ": " + value );
+        });
+    })
 </script>
 
 
