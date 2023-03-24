@@ -347,6 +347,7 @@
             var entrieString = $('#empTable_info').text();
             var entries = entrieString.split('of ').pop().split(' entries')[0];
             entries = entries.replaceAll(',', '');
+            console.log("hello",entries);
             if (Number(entries) > 2000) {
                 e.preventDefault();
                 $.ajax({
@@ -709,8 +710,18 @@
             $("#matrixDownloadButton").hide();
             $('#emailInput').attr('required', 'required');
         }
+        //0324 EDIT by junyi
+        if (Number(entries) < 1) {
+            var myButtonArray = [ "UMAPbutton", "mdownloadbutton", "charabutton","scfbutton","scfnotify" ];
 
-        console.log(Number(entries))
+            $.each(myButtonArray, function( index, value ){
+
+                let element = document.getElementById(value);
+                element.setAttribute("hidden", "hidden");
+            });
+
+        }
+        console.log("Number of queired records",Number(entries))
 
         return Number(entries);
     }
@@ -737,7 +748,12 @@
 
         var myButtonArray = [ "UMAPbutton", "mdownloadbutton", "charabutton","scfbutton","scfnotify" ];
 
-        $.each(myButtonArray, function( index, value ){
+        var entrieString = $('#empTable_info').text();
+        var entries = entrieString.split('of ').pop().split(' entries')[0];
+        entries = entries.replaceAll(',', '');
+        console.log("Number of selected records",entries);
+        if(Number(entries)>1){
+            $.each(myButtonArray, function( index, value ){
 
             let element = document.getElementById(value);
             element.setAttribute("hidden", "hidden");
@@ -745,7 +761,10 @@
             if (hidden) {
                 element.removeAttribute("hidden");
             }
-        });
+            });
+
+        };
+
     })
     $("#btnClear").click(function(){
 
