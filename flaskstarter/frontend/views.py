@@ -104,6 +104,11 @@ def index():
 def tutorial():
     return render_template('frontend/tutorial.html')
 
+
+@frontend.route('/data', methods=['GET', 'POST'])
+def data():
+    return render_template('frontend/data.html')    
+
 @frontend.route('/contact-us', methods=['GET', 'POST'])
 def contact_us():
     form = ContactUsForm()
