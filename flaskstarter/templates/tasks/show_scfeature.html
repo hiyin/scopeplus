@@ -43,16 +43,16 @@
       </form>
       <div style="width: 200px !important; overflow:visible">
         <select id="opt_celltype" name="name_opt_celltype" class="form-control selectpicker" title="Cell Type"
-          form="form_sCf" style="width:300px;" data-live-search=“true”>
+          form="form_sCf" style="width:300px;" data-live-search="true">
           {% for val in celltypes %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
         </select>
       </div>
 
-      <div style="width: 200px !important; overflow:visible !important;">
+      <div id="featurediv" style="width: 200px !important; overflow:visible !important;" hidden>
         <select id="opt_feature" name="name_opt_feature" class="form-control selectpicker" title="Pathways"
-          form="form_sCf" style="width:300px; margin-left:16px;" data-live-search=“true”>
+          form="form_sCf" style="width:300px; margin-left:16px;" data-live-search="true" >
           {% for val in features %}
           <option value="{{val}}">{{val}}</option>
           {% endfor %}
@@ -61,7 +61,7 @@
 
       <button id="idbtnSelectcolor" name="btnSelectcolor" type="submit" onclick="loading();" class="darkButton"
         style="margin-left:16px;" form="form_sCf">
-        Select both</button>
+        Display</button>
     </div>
 
     <div class="row" style="border: 0.5px solid #B4B6B8; width: 100vw; margin-left:-200px"></div>
@@ -153,7 +153,12 @@
   }
 // ]]></script>
 
-
+<script>
+  if(document.getElementById("opt_feature").options.length > 1){
+    document.getElementById("featurediv").removeAttribute("hidden");
+  }
+</script>
+  
 <!-- Show loading box -->
 <script type="text/javascript">// <![CDATA[
   function show_byid(id) {

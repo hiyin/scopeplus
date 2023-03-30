@@ -9,12 +9,27 @@
     <div class="row justify-content-center">
       <div class="boldauto36" style="margin-bottom: 50px;">Data</div>
     </div>
+
+
+  <div class="container tutorialCard collapsible" style="padding: 0px; margin-bottom: 24px;">
+    <div class="row tutorialTitle boldH160">Our complete data sets ("raw" and "integrated") can be downloaded below:</div>
+    <div class="row container collapsible-text"
+      style="padding: 30px 40px 30px 40px; border-top: 1px solid #B4B6B8;">
+      <div class="row tutorialContent regularauto16">
+      </div>
+      <div class="row tutorialContent regularauto16">
+        <p>You can generate a 10X-like summary report with our metadata after downloading it, using our code 
+            <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/html_codes.zip">here</a>
+        </p>
+      </div>
+    </div>
+
+ 
   <div id="searchPage" class="container" style="padding: 0px;"></div>
-    <div class="row tutorialTitle boldH160">Our data can be downloaded following the links below: </div>
         <table id="data_download_links" class="table table-hover table-striped" style="width:100%; padding:0px;">
                 <thead><tr><th title="Field #1">Category</th>
                 <th title="Field #2">Subcategory</th>
-                <th title="Field #3">Item</th>
+                <th title="Field #3">Description</th>
                 <th title="Field #4">Raw data - download link</th>
                 <th title="Field #5">Integrated data - download link</th>
                 </tr></thead>
@@ -446,7 +461,8 @@
                 <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhu/matrix.mtx.gz</td>
                 </tr>
                 </tbody></table>
-  </div>   
+    </div>   
+  </div>
 </div>
 {% endblock %}
 

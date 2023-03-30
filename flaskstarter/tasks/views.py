@@ -329,15 +329,18 @@ def show_scfeature():
     # fileds_dataset = mongo.single_cell_meta_v4.distinct("meta_dataset")
     # fileds_celltypes = get_field("level2")
 
-    if isinstance(session["query"], dict):
-        fileds_celltypes = list(mongo.single_cell_meta_v4.find(session["query"], {"meta_sample_id2":1,"_id":0}).distinct("level2"))
-    elif isinstance(session["query"], list):
-        if len(session["query"]) == 1:
-            fileds_celltypes = list(mongo.single_cell_meta_v4.find(session["query"][0], {"meta_sample_id2":1,"_id":0}).distinct("level2"))
-        if len(session["query"]) == 0:
+    if isinstance(session.get("query"), dict):
+        fileds_celltypes = list(mongo.single_cell_meta_v4.find(session.get("query"), {"meta_sample_id2":1,"_id":0}).distinct("level2"))
+    elif isinstance(session.get("query"), list):
+        if len(session.get("query")) == 1:
+            fileds_celltypes = list(mongo.single_cell_meta_v4.find(session.get("query")[0], {"meta_sample_id2":1,"_id":0}).distinct("level2"))
+        if len(session.get("query")) == 0:
             fileds_celltypes = list(mongo.single_cell_meta_v4.find({}, {"meta_sample_id2":1,"_id":0}).distinct("level2"))
         else:
-            fileds_celltypes = list(mongo.single_cell_meta_v4.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0}).distinct("level2"))
+            fileds_celltypes = list(mongo.single_cell_meta_v4.find({"$and": session.get("query")}, {"meta_sample_id2":1,"_id":0}).distinct("level2"))
+    else:
+        fileds_celltypes = list(mongo.single_cell_meta_v4.find({}, {"meta_sample_id2":1,"_id":0}).distinct("level2"))
+
     # fileds_dataset_2 = mongo.single_cell_meta_v4.aggregate(
     #         [
     #             {"$match":{"meta_dataset":dataset}},
@@ -348,50 +351,53 @@ def show_scfeature():
     print(fileds_celltypes)
     #mata_sample_id2 = [x["_id"]["meta_sample_id2"] for x in list(fileds_dataset_2)]
     ## Angela's attempt
-    print(session["query"])
-    if isinstance(session["query"], dict):
+    print(session.get("query"))
+    if isinstance(session.get("query"), dict):
         # Junyi 0314 Add limit to only show 100000 records
-        mata_sample_id2 = list(mongo.single_cell_meta_v4.find(session["query"], {"meta_sample_id2":1,"_id":0}).limit(100000).distinct("meta_sample_id2"))
+        mata_sample_id2 = list(mongo.single_cell_meta_v4.find(session.get("query"), {"meta_sample_id2":1,"_id":0}).limit(100000).distinct("meta_sample_id2"))
         # mata_sample_id2 = list(
         #         mongo.single_cell_meta_v4.aggregate(
         #         [
-        #             {"$match": session["query"]}, 
+        #             {"$match": session.get("query")}, 
         #             {"$sample": {"size": 100}},
         #             {"$project":{"meta_sample_id2":1,"_id":0}},
         #         ]
         #         )#.distinct("meta_sample_id2")
         #     )
-    elif isinstance(session["query"], list):
-        if len(session["query"]) == 1:
+    elif isinstance(session.get("query"), list):
+        if len(session.get("query")) == 1:
             print("Getting single column filter")
-            mata_sample_id2 = list(mongo.single_cell_meta_v4.find(session["query"][0], {"meta_sample_id2":1,"_id":0}).limit(100000).distinct("meta_sample_id2"))
+            mata_sample_id2 = list(mongo.single_cell_meta_v4.find(session.get("query")[0], {"meta_sample_id2":1,"_id":0}).limit(100000).distinct("meta_sample_id2"))
             # mata_sample_id2 = list(
             #     mongo.single_cell_meta_v4.aggregate(
             #     [
-            #         {"$match": session["query"][0]}, 
+            #         {"$match": session.get("query")[0]}, 
             #         {"$sample": {"size": 100}},
             #         {"$project":{"meta_sample_id2":1,"_id":0}},
             #     ]
             #     )#.distinct("meta_sample_id2")
             # )
-        elif len(session["query"]) == 0:
+        elif len(session.get("query")) == 0:
             print("Getting single column filter")
             mata_sample_id2 = list(mongo.single_cell_meta_v4.find({},{"meta_sample_id2":1,"_id":0}).limit(100000).distinct("meta_sample_id2"))
 
         else:
             print("Getting multi-column filter")
-            mata_sample_id2 = list(mongo.single_cell_meta_v4.find({"$and": session["query"]}, {"meta_sample_id2":1,"_id":0}).limit(100000).distinct("meta_sample_id2"))
+            mata_sample_id2 = list(mongo.single_cell_meta_v4.find({"$and": session.get("query")}, {"meta_sample_id2":1,"_id":0}).limit(100000).distinct("meta_sample_id2"))
             # mata_sample_id2 = list(
             #     mongo.single_cell_meta_v4.aggregate(
             #     [
-            #         {"$and": session["query"][0]}, 
+            #         {"$and": session.get("query")[0]}, 
             #         {"$sample": {"size": 100}},
             #         {"$project":{"meta_sample_id2":1,"_id":0}},
             #     ]
             #     )#.distinct("meta_sample_id2")
             # )
 
-                #meta = mongo.single_cell_meta_v4.find(session["query"])
+                #meta = mongo.single_cell_meta_v4.find(session.get("query"))
+    else:
+        print("Getting single column filter")
+        mata_sample_id2 = list(mongo.single_cell_meta_v4.find({},{"meta_sample_id2":1,"_id":0}).limit(100000).distinct("meta_sample_id2"))
 
     print("Testing Angela's code ...Sample id 2: ",mata_sample_id2)
 
