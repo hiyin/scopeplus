@@ -274,7 +274,28 @@ def show_plot():
 @tasks.route('/show_scfeature', methods=['GET', 'POST'])
 def show_scfeature():     
 
-    
+    # Get tempfolder, if empty then create one junyi 0330
+    try:
+        user_tmpfolder = session.get("tmp_folder")
+        if(user_tmpfolder==None):
+            print(e+"Cannot get temp folder")
+            user_timestamp = session.get("sess_timestamp")
+            user_id = session["user_id"]
+            # user_id = str(current_user.id)
+            tmp_folder = os.path.join(user_tmp[-1], user_id, user_timestamp)
+            session["tmp_folder"] = tmp_folder
+            os.makedirs(tmp_folder, exist_ok=True)
+            user_tmpfolder = tmp_folder
+    except Exception as e:
+        print(str(e)+"Cannot get temp folder")
+        user_timestamp = session.get("sess_timestamp")
+        user_id = session["user_id"]
+        # user_id = str(current_user.id)
+        tmp_folder = os.path.join(user_tmp[-1], user_id, user_timestamp)
+        session["tmp_folder"] = tmp_folder
+        os.makedirs(tmp_folder, exist_ok=True)
+        user_tmpfolder = tmp_folder
+
 
     # Get params from html
     #<!-- Change by junyi 2022 0620-->
@@ -393,7 +414,7 @@ def show_scfeature():
         #         )
 
         df_propotion = pd.DataFrame(list(propotion))
-        df_propotion.to_csv(user_tmp[-1]+"/df_proportion_raw_"+dataset+".csv")
+        df_propotion.to_csv(user_tmpfolder+"/df_proportion_raw_"+dataset+".csv")
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
 
         # 0314 edited by junyi
@@ -422,7 +443,7 @@ def show_scfeature():
             print("Getting dendrogram information from db")
             gene_prop_celltype = scfeature.gene_prop_celltype.find({'meta_dataset': {'$in': mata_sample_id2}})
             df_gene_prop_celltype = pd.DataFrame(list(gene_prop_celltype))
-            df_gene_prop_celltype.to_csv(user_tmp[-1]+"/df_gene_prop_celltype_"+dataset+".csv")
+            df_gene_prop_celltype.to_csv(user_tmpfolder+"/df_gene_prop_celltype_"+dataset+".csv")
             df_gene_prop_celltype = df_gene_prop_celltype.drop(columns=["_id"])
             if(not(cell_type in celltypes)):
                 graphJSON2 = None
@@ -440,7 +461,7 @@ def show_scfeature():
         pathway_mean = scfeature.pathway_mean.find({'meta_dataset': {'$in': mata_sample_id2}})
         print("Getting pathway mean information into dataframe")
         df_pathway_mean = pd.DataFrame(list(pathway_mean))
-        df_pathway_mean.to_csv(user_tmp[-1]+"/df_pathway_mean_"+dataset+".csv")
+        df_pathway_mean.to_csv(user_tmpfolder+"/df_pathway_mean_"+dataset+".csv")
         df_pathway_mean = df_pathway_mean.drop(columns=["_id"])
         print("Getting boxplot")
         print(cell_type)
@@ -721,7 +742,6 @@ def download_scClassify():
 @tasks.route('/show_search', methods=['POST', 'GET'])
 def show_search():
     graphJSON =graphJSON2 =graphJSON3 =graphJSON4 =graphJSON5 =graphJSON6 = None
-    try:
         # if (session.get("query") == None):
         #     graphJSON = None
         # elif (len(session["query"]) == 0):
@@ -729,38 +749,60 @@ def show_search():
         #     graphJSON = None
         # If search box not empty, write id meta umap
         # else:
-        print("Search value provided, write id, meta...")
-        if isinstance(session["query"], dict):
-            print(session["query"])
-            meta = mongo.single_cell_meta_v4.find(session["query"])
-        elif isinstance(session["query"], list) and len(session["query"]) == 1:
-            meta = mongo.single_cell_meta_v4.find(session["query"][0])
+
+    # Create tmpfolder is not exist
+    query_timestamp = session.get("sess_timestamp")
+    user_id = session.get("user_id")
+    tmp_folder = os.path.join(user_tmp[-1], user_id, query_timestamp)
+    os.makedirs(tmp_folder, exist_ok=True)
+    print("Checking user information and make directory in show search finished")
+    print("759 print")
+    print(session.get("query"))
+
+    try:
+        print("761 try")
+        if isinstance(session.get("query"), dict):
+            print("765 if")
+            meta = mongo.single_cell_meta_v4.find(session.get("query"))
+            
+        elif isinstance(session.get("query"), list) and len(session.get("query")) == 1:
+
+            print("769 elif")
+            meta = mongo.single_cell_meta_v4.find(session.get("query")[0])
+
         else:
-            if session["query"] == []:
-                #meta = mongo.single_cell_meta_v4.find().limit(100000)
+            print("775 else")
+            if(session.get("query") == [] or session.get("query") ==None):
+                print("778 if load pre-compute graph")
+
+                # meta = mongo.single_cell_meta_v4.find().limit(100000)
                 # meta = (mongo.single_cell_meta_v4.aggregate(
-                #     [ {"$sample": {"size": 100000}}])
-                # )
-                print("No search")
+                #      [ {"$sample": {"size": 100000}}])
+                #  )
+                #df_meta = pd.read_csv("/home/d24h_prog5/data/meta/meta.tsv", index_col="barcode", sep="\t")
+                with open("/home/d24h_prog5/data/meta/JSONsnew.txt") as file:
+                    lines = file.readlines()
+
+                graphJSON = lines[0]
+                graphJSON2 = lines[1]
+                graphJSON3 = lines[2]
+                graphJSON4 = lines[3]
+                graphJSON5 = lines[4]
+                graphJSON6 = lines[5]
+                return render_template('tasks/show_search_plot.html', graphJSON=graphJSON, graphJSON2=graphJSON2, graphJSON3=graphJSON3, graphJSON4=graphJSON4,graphJSON5=graphJSON5,graphJSON6=graphJSON6)
 
             else:
-                meta = mongo.single_cell_meta_v4.find({"$and": session["query"]})
+                print("789 if")
+                meta = mongo.single_cell_meta_v4.find({"$and": session.get("query")})
         # else:
-        #     meta = mongo.single_cell_meta_v4.find({"$and": session["query"]})
+        #     meta = mongo.single_cell_meta_v4.find({"$and": session.get("query")})
 
-        # Create tmpfolder is not exist
-        query_timestamp = session.get("sess_timestamp")
-        print("Checking user information")
-        user_id = session["user_id"]
-        print(user_id)
-        tmp_folder = os.path.join(user_tmp[-1], user_id, query_timestamp)
-        os.makedirs(tmp_folder, exist_ok=True)
-
-        if(session["query"] != []):
+        if(session.get("query") != [] and session.get("query") != None):
             write_file_meta(tmp_folder, meta)
             df_meta = pd.read_csv(tmp_folder + '/meta.tsv', index_col=1, sep="\t")
         else:
-            df_meta = pd.read_csv('/home/d24h_prog5/data/meta/meta.tsv', index_col="barcode", sep="\t")
+            print("use default meta.tsv")
+            df_meta = pd.read_csv("/home/d24h_prog5/data/meta/meta.tsv", index_col="barcode", sep="\t")
 
         #Cell Type
         new_df = df_meta['level2'].value_counts().rename_axis('level2').reset_index(name='counts')
@@ -795,9 +837,14 @@ def show_search():
         # fig4.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
         fig5 = px.histogram(df_meta, x="meta_days_from_onset_of_symptoms",template="plotly_white",color_discrete_sequence=sns.color_palette("tab20").as_hex())
         graphJSON5 = json.dumps(fig5, cls=plotly.utils.PlotlyJSONEncoder)
+        # with open("/home/d24h_prog5/data/meta/JSONsnew.txt", 'w') as file:
+        #     for line in [graphJSON,graphJSON2,graphJSON3,graphJSON4,graphJSON5,graphJSON6]:
+        #         file.write(line)
+        #         file.write('\n')
+
 
     except Exception as e:
-        print(e)
+        print("Show chara error"+str(e))
         graphJSON = None
         graphJSON2 = None
         graphJSON3 = None
@@ -1282,17 +1329,44 @@ def download_meta():
 # Download big file
 @tasks.route('/download_scfeature',methods=['POST'])
 def download_scfeature():
-    list_files = glob.glob( user_tmp[-1]+"/*_gene_prop_celltype*.csv")+\
-    glob.glob( user_tmp[-1]+"/*_pathway_mean*.csv")+\
-    glob.glob( user_tmp[-1]+"/*_proportion_raw*.csv")
 
-    if(not (exists(user_tmp[-1] + '/scfeature.zip'))):
-        with zipfile.ZipFile(user_tmp[-1] + '/scfeature.zip', 'w') as zipMe:        
+    # Change tmp folder
+    try:
+        user_tmpfolder = session.get("tmp_folder")
+        if(user_tmpfolder==None):
+            print(e+"Cannot get temp folder")
+            user_timestamp = session.get("sess_timestamp")
+            user_id = session["user_id"]
+            # user_id = str(current_user.id)
+            tmp_folder = os.path.join(user_tmp[-1], user_id, user_timestamp)
+            session["tmp_folder"] = tmp_folder
+            os.makedirs(tmp_folder, exist_ok=True)
+            user_tmpfolder = tmp_folder
+    except Exception as e:
+        print(str(e)+"Cannot get temp folder")
+        user_timestamp = session.get("sess_timestamp")
+        user_id = session["user_id"]
+        # user_id = str(current_user.id)
+        tmp_folder = os.path.join(user_tmp[-1], user_id, user_timestamp)
+        session["tmp_folder"] = tmp_folder
+        os.makedirs(tmp_folder, exist_ok=True)
+        user_tmpfolder = tmp_folder
+
+    list_files = glob.glob( user_tmpfolder+"/*_gene_prop_celltype*.csv")+\
+    glob.glob( user_tmpfolder+"/*_pathway_mean*.csv")+\
+    glob.glob( user_tmpfolder+"/*_proportion_raw*.csv")
+    print(list_files)
+    print(user_tmpfolder)
+    print("debugging download scfeature")
+    if(not (exists(user_tmpfolder + '/scfeature.zip'))):
+        with zipfile.ZipFile(user_tmpfolder + '/scfeature.zip', 'w') as zipMe:        
             for file in list_files:
-                if(exists(file)):
-                    zipMe.write(file,arcname=basename(file), compress_type=zipfile.ZIP_DEFLATED)
+                print("file exists...zip in")
+                zipMe.write(file,arcname=os.path.basename(file), compress_type=zipfile.ZIP_DEFLATED)
 
-    return send_file(user_tmp[-1] + '/scfeature.zip', as_attachment=True)
+     
+
+    return send_file(user_tmpfolder + '/scfeature.zip', as_attachment=True)
 
 
 @tasks.route('/download_matrix', methods=['POST'])
