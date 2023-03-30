@@ -771,10 +771,10 @@ def show_search():
             meta = mongo.single_cell_meta_v4.find(session.get("query")[0])
 
         else:
-            print("775 else")
+            #print("775 else")
             if(session.get("query") == [] or session.get("query") ==None):
                 print("778 if load pre-compute graph")
-
+                ## The precomputed graphes are stored at "/home/d24h_prog5/data/meta"
                 # meta = mongo.single_cell_meta_v4.find().limit(100000)
                 # meta = (mongo.single_cell_meta_v4.aggregate(
                 #      [ {"$sample": {"size": 100000}}])
@@ -782,7 +782,7 @@ def show_search():
                 #df_meta = pd.read_csv("/home/d24h_prog5/data/meta/meta.tsv", index_col="barcode", sep="\t")
                 with open("/home/d24h_prog5/data/meta/JSONsnew.txt") as file:
                     lines = file.readlines()
-
+                # 
                 graphJSON = lines[0]
                 graphJSON2 = lines[1]
                 graphJSON3 = lines[2]
@@ -832,9 +832,6 @@ def show_search():
         graphJSON4= json.dumps(fig4, cls=plotly.utils.PlotlyJSONEncoder)
 
         #meta_days_from_onset_of_symptoms
-        # new_df4 = df_meta['meta_days_from_onset_of_symptoms'].value_counts().rename_axis('meta_days_from_onset_of_symptoms').reset_index(name='counts')
-        # fig4 = px.bar(new_df4, x="counts", y="meta_days_from_onset_of_symptoms", color="counts", orientation='h')
-        # fig4.update_layout(barmode='stack', yaxis={'categoryorder':'total ascending'})
         fig5 = px.histogram(df_meta, x="meta_days_from_onset_of_symptoms",template="plotly_white",color_discrete_sequence=sns.color_palette("tab20").as_hex())
         graphJSON5 = json.dumps(fig5, cls=plotly.utils.PlotlyJSONEncoder)
         # with open("/home/d24h_prog5/data/meta/JSONsnew.txt", 'w') as file:
