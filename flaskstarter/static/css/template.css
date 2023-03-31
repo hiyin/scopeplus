@@ -861,7 +861,7 @@ body {
 
 #empTable_paginate {
     display: flex;
-    justify-content: end;
+    justify-content: flex-end;
     margin-top: 80px;
     color: #045547;
 }
