@@ -481,11 +481,13 @@ def show_scfeature():
         print(cell_type)
         print(dataset)
         print(feature)
-        fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature,title="Pathway mean scores of: "+ str(cell_type) + " cells in dataset "+ dataset)
+        fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature,title="Pathway mean scores of: "+ str(cell_type) + " in selected datasets")
 
         if(feature is None):
             graphJSON3 = None
         elif(not(feature in features)):
+            graphJSON3 = None
+        elif(not(cell_type in celltypes)):
             graphJSON3 = None
         else:
             graphJSON3 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
@@ -659,10 +661,16 @@ def process_boxplot(input_data,cell_type,plot_type="gene",feature=None,title="Ti
     data=data.melt(id_vars=['patient','condition'])
     data = data[data["variable"].str.contains(feature) ]
 
+    # fig = px.box(data,  x="variable", y="value",color="condition",color_discrete_sequence=
+    #         ['#3D9970','#FF851B','#FF4136'],template="plotly_white",
+    #         category_orders={'condition': ['Healthy','Mild/Moderate','Severe/Critical']},
+    #         )
+
     fig = px.box(data,  x="variable", y="value",color="condition",color_discrete_sequence=
-            ['#3D9970','#FF851B','#FF4136'],template="plotly_white",
+            ['#3D9970','#FF851B','#FF4136']+px.colors.qualitative.G10[5:],template="plotly_white",
             category_orders={'condition': ['Healthy','Mild/Moderate','Severe/Critical']},
             )
+
     fig.update_layout(
             title={
                 'text': title,
