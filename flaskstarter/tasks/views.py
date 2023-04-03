@@ -459,7 +459,7 @@ def show_scfeature():
                 graphJSON2 = None
             else:
                 select_type = cell_type
-                fig2 = process_dendrogram(df_gene_prop_celltype,select_type,title="Marker gene proportions of" + str(cell_type) + " cells")
+                fig2 = process_dendrogram(df_gene_prop_celltype,select_type,title="Marker gene proportions of " + str(cell_type) + " cells")
                 graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
 
 
@@ -576,6 +576,16 @@ def process_dendrogram(data,cell_type,plot_type="gene",title="Title"):
         hidden_labels = "row"
     else:
         hidden_labels = "row"
+
+    if(plot_type=="gene"):
+        celltype = df.columns.values
+        features = np.array([x.split('--')[1] for x in celltype] )
+        df.columns = features
+
+    else:
+        celltype = df.columns.values
+        features = np.array([x.split('--')[0] for x in celltype] )
+        df.columns = features
     
     fig2 = dash_bio.Clustergram(
         data=df,
