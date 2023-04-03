@@ -422,6 +422,7 @@ def show_scfeature():
         df_propotion = pd.DataFrame(list(propotion))
         df_propotion.to_csv(user_tmpfolder+"/df_proportion_raw_"+dataset+".csv")
         df_d = df_propotion.drop(columns=["_id","meta_scfeature_id"])
+        print("Getting boxplot")
 
         # 0314 edited by junyi
         #df_d=df_d.head(50)
@@ -431,7 +432,7 @@ def show_scfeature():
         fig.update_xaxes(matches=None)
         fig.update_layout(
              title={
-                'text': "Overview: cell type proportion for first 100 patients in dataset" + dataset,
+                'text': "Cell type proportion of the first 100 patients in selected cells" + dataset,
                 'x':0.5,
                 'xanchor': 'center'},
             autosize=True, width=1200, height=600
@@ -451,16 +452,15 @@ def show_scfeature():
             df_gene_prop_celltype = pd.DataFrame(list(gene_prop_celltype))
             df_gene_prop_celltype.to_csv(user_tmpfolder+"/df_gene_prop_celltype_"+dataset+".csv")
             df_gene_prop_celltype = df_gene_prop_celltype.drop(columns=["_id"])
+            colnames_pcelltype = [ name.replace("HALLMARK-","") for name in df_gene_prop_celltype.columns]
+            df_gene_prop_celltype.columns = colnames_pcelltype
+
             if(not(cell_type in celltypes)):
                 graphJSON2 = None
             else:
                 select_type = cell_type
-                fig2 = process_dendrogram(df_gene_prop_celltype,select_type,title="Marker gene proportions of cell types in " + dataset)
+                fig2 = process_dendrogram(df_gene_prop_celltype,select_type,title="Marker gene proportions of" + str(cell_type) + " cells")
                 graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
-                with open("/home/d24h_prog5/data/meta/JSONscf.txt", 'w') as file:
-                    for line in [graphJSON2]:
-                        file.write(line)
-                        file.write('\n')
 
 
         except Exception as e:
@@ -475,11 +475,13 @@ def show_scfeature():
         df_pathway_mean = pd.DataFrame(list(pathway_mean))
         df_pathway_mean.to_csv(user_tmpfolder+"/df_pathway_mean_"+dataset+".csv")
         df_pathway_mean = df_pathway_mean.drop(columns=["_id"])
+        colnames_pathmean = [ name.replace("HALLMARK-","") for name in df_pathway_mean.columns]
+        df_pathway_mean.columns = colnames_pathmean
         print("Getting boxplot")
         print(cell_type)
         print(dataset)
         print(feature)
-        fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature,title="Pathway mean scores of: "+ cell_type + " cell types in dataset "+ dataset)
+        fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature,title="Pathway mean scores of: "+ str(cell_type) + " cells in dataset "+ dataset)
 
         if(feature is None):
             graphJSON3 = None
@@ -494,7 +496,7 @@ def show_scfeature():
             graphJSON4 = None
         else:
             select_type = cell_type
-            fig4 = process_dendrogram(df_pathway_mean,select_type,plot_type="pathway",title="Pathway mean scores in dataset" + dataset)
+            fig4 = process_dendrogram(df_pathway_mean,select_type,plot_type="pathway",title="Pathway mean scores in " + str(cell_type) + " cells")
             graphJSON4 = json.dumps(fig4, cls=plotly.utils.PlotlyJSONEncoder)
 
     except Exception as e:
@@ -545,8 +547,12 @@ def process_dendrogram(data,cell_type,plot_type="gene",title="Title"):
 
     data["condition"] = condition
     my_palette = dict(zip( set(condition ) , condition_colour[0:len(set(condition))]))
-    my_palette = {'Mild/Moderate': '#ff8019', 'Sepsis': '#581845', 'Severe/Critical': '#f00314', 'NA': '#aeb6bf', 'Healthy': '#3bb5ff'}
+    print(my_palette)
+    my_palette = {'Mild/Moderate': '#ff8019', 'Severe/Critical': '#f00314', 'NA': '#aeb6bf', 'Healthy': '#3bb5ff'}
     # {'Mild/Moderate': '#f00314', 'Sepsis': '#ff8019', 'Severe/Critical': '#3bb5ff', 'NA': '#0500c7', 'Healthy': '#5c03fa'}
+    for c in set(condition ):
+        if(not(c in my_palette.keys())):
+            my_palette[c]='#581845'
 
     print("Pallate")
     print(my_palette)
