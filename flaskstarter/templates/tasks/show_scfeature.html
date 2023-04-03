@@ -84,14 +84,36 @@
     <div class="row justify-content-center" style="padding-top: 30px">
       <div id="chart4" class="chart"></div>
     </div>
-
+    <div id="chart4legend" class="row justify-content-center" style="padding-top: 10px" hidden>
+      <p>
+        Patient status:
+        Healthy <span style="color:#3bb5ff;"> ◼ </span> 
+        Mild/Moderate <span style="color:#ff8019;">	◼ </span>  
+        Severe/Critical <span style="color:#f00314;">	◼ </span>  
+        Sepsis <span style="color:#581845;">	◼ </span>  
+        NA <span style="color:#aeb6bf;">	◼ </span>  
+      </p>
+      
+    </div>
     <div class="row justify-content-center" style="padding-top: 30px">
       <div id="chart2" class="chart"></div>
+    </div>
+    <div id="chart2legend" class="row justify-content-center" style="padding-top: 10px" hidden>
+      <p>
+        Patient status:
+        Healthy <span style="color:#3bb5ff;"> ◼ </span> 
+        Mild/Moderate <span style="color:#ff8019;">	◼ </span>  
+        Severe/Critical <span style="color:#f00314;">	◼ </span>  
+        Sepsis <span style="color:#581845;">	◼ </span>  
+        NA <span style="color:#aeb6bf;">	◼ </span>  
+      </p>
+      
     </div>
 
     <div class="row justify-content-center" style="padding-top: 30px">
       <div id="chart3" class="chart"></div>
     </div>
+
 
   </div>
 
@@ -127,6 +149,7 @@
   var graph2 = {{ graphJSON2 | safe }};
 
   Plotly.plot('chart2', graph2, {});
+  document.getElementById("chart2legend").removeAttribute("hidden");
 
 </script>
 
@@ -141,8 +164,9 @@
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script type="text/javascript">
   var graph4 = {{ graphJSON4 | safe }};
-
   Plotly.plot('chart4', graph4, {});
+  document.getElementById("chart4legend").removeAttribute("hidden");
+
 
 </script>
 

@@ -457,6 +457,12 @@ def show_scfeature():
                 select_type = cell_type
                 fig2 = process_dendrogram(df_gene_prop_celltype,select_type,title="Marker gene proportions of cell types in " + dataset)
                 graphJSON2 = json.dumps(fig2, cls=plotly.utils.PlotlyJSONEncoder)
+                with open("/home/d24h_prog5/data/meta/JSONscf.txt", 'w') as file:
+                    for line in [graphJSON2]:
+                        file.write(line)
+                        file.write('\n')
+
+
         except Exception as e:
             graphJSON2 = None
             print("Error generating figure dendrogram",e)
@@ -539,6 +545,11 @@ def process_dendrogram(data,cell_type,plot_type="gene",title="Title"):
 
     data["condition"] = condition
     my_palette = dict(zip( set(condition ) , condition_colour[0:len(set(condition))]))
+    my_palette = {'Mild/Moderate': '#ff8019', 'Sepsis': '#581845', 'Severe/Critical': '#f00314', 'NA': '#aeb6bf', 'Healthy': '#3bb5ff'}
+    # {'Mild/Moderate': '#f00314', 'Sepsis': '#ff8019', 'Severe/Critical': '#3bb5ff', 'NA': '#0500c7', 'Healthy': '#5c03fa'}
+
+    print("Pallate")
+    print(my_palette)
     col_colors = data.condition.map(my_palette)
 
     data = data.drop('condition', 1)
@@ -558,7 +569,8 @@ def process_dendrogram(data,cell_type,plot_type="gene",title="Title"):
     if(len(list(df.index))>30):
         hidden_labels = "row"
     else:
-        hidden_labels = None
+        hidden_labels = "row"
+    
     fig2 = dash_bio.Clustergram(
         data=df,
         column_labels=list(df.columns.values),
@@ -1305,14 +1317,14 @@ def download_meta():
             # print("setting cookies")
             # response.set_cookie(key='downloadID', value=user_id, max_age=1)
             # return response
-            return redirect("https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/meta.csv?response-content-disposition=attachment&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDmFwLW5vcnRoZWFzdC0yIkgwRgIhAOBkoo35ZiO%2FJ0LLOapiFZNNI%2FELcR8mSQ%2B5A4L8km5%2FAiEAnb1K9ZqkLvosPGRLu5U9ETjad%2BjyQpzqvuo1lodfq48qjgMIg%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw3OTU0NjUzNDE3NjAiDEV6asltw2gzGbFGZiriAuyAtwZ4AT2ttm5VRX4LG1I8G9xtYBZRB19EYmWSzf%2FH8i6s3U7PHc26CPonjsWy8keuHfMG1d%2B31pIZigYInQ%2BPw%2F8wiOz5KvEB6Qylv9NrCSSMtsjelQmWmXZWBsmyfIPfMDxm6MjxNa2A9bquTAzklIAOGjJh1I0%2FJoq4%2Ban8p6xSxCkVg6zAjIjQyQkXyKNZgsry55r26Kyk%2BbT5%2FrgrdG8friI0tiSgRi21cziyXIgB8NETFP3YkhbIyh0mUIZDu3iIYAZacYBJlCd6H9sjulPE7VghSmsQamDCOFq4LxzeEgl0MhDkDMeq%2Bbx%2Fw6XaOxDhSX8cx%2Fq6B7jJxbsw3nykKFlpurpT9yKHy%2Fe1I%2FvtsE7KK%2Be2DYwC60vAKXXzMOHt%2F3WZHFE063c%2ByMD2L6MNy%2BoTfaY0RjA6q5suFWGzNAs1yjEpPj%2FmoWH%2F7GonHN%2BS6kwbTaQMQBDoiX%2BSizD4p%2BSgBjqyAl%2F5ZX57SwJ9Yzx7w5tXX849rD0XyMImkvlAUimrFKOm6v8HPgKLO0Xr%2Bb4Q%2F67icLKDcR0WtU2hQnTj9plMFs9yYRwTDDY3Bz9RSA6gF5KSfCIPxx%2Fq5PSUEJ%2FgemP6Hy4dSoop1Vceh2NtsrtdNOvcQaDRVaOc3r5ScXh%2BJ%2FOnans1%2BN8Ke%2F8A4%2Ffa5K7673HQlLRCAemLC9sJlKS%2B0ACOOjKUVLIUpMj95YN6dKg3H%2FI7lEwzu2aNn%2BN4Ud%2BtiIJN1YD8%2BhqAb7VqcYxPGSPhGb2SnNgXv%2Fum9vht3A0Kaj9Sid6ZlwJ290pmE03ukR7z%2BIIwS3izgchkWlLehX%2FSqa3KnZsokyw7tQ5oBuvY6RpGB6eC00Ym%2F7CD%2FSNL7QhQEcn8qEGpfmBH%2FNwFBiEe6g%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20230321T071358Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIA3SNLN3NANAYZWG6Y%2F20230321%2Fap-east-1%2Fs3%2Faws4_request&X-Amz-Signature=35d8a4859e3e1ddf93cef5cef4e3cc482122e2bd8660f51fa97fab60bd212731")
+            return redirect("https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/meta.csv")
 
 
     os.makedirs(tmp_folder, exist_ok=True)
     if isinstance(session["query"], dict):
         meta = mongo.single_cell_meta_v4.find(session["query"]) 
     elif isinstance(session["query"], list) and len(session["query"]) == 0:
-        return redirect("https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/meta.csv?response-content-disposition=attachment&X-Amz-Security-Token=IQoJb3JpZ2luX2VjELr%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDmFwLW5vcnRoZWFzdC0yIkgwRgIhAOBkoo35ZiO%2FJ0LLOapiFZNNI%2FELcR8mSQ%2B5A4L8km5%2FAiEAnb1K9ZqkLvosPGRLu5U9ETjad%2BjyQpzqvuo1lodfq48qjgMIg%2F%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FARAAGgw3OTU0NjUzNDE3NjAiDEV6asltw2gzGbFGZiriAuyAtwZ4AT2ttm5VRX4LG1I8G9xtYBZRB19EYmWSzf%2FH8i6s3U7PHc26CPonjsWy8keuHfMG1d%2B31pIZigYInQ%2BPw%2F8wiOz5KvEB6Qylv9NrCSSMtsjelQmWmXZWBsmyfIPfMDxm6MjxNa2A9bquTAzklIAOGjJh1I0%2FJoq4%2Ban8p6xSxCkVg6zAjIjQyQkXyKNZgsry55r26Kyk%2BbT5%2FrgrdG8friI0tiSgRi21cziyXIgB8NETFP3YkhbIyh0mUIZDu3iIYAZacYBJlCd6H9sjulPE7VghSmsQamDCOFq4LxzeEgl0MhDkDMeq%2Bbx%2Fw6XaOxDhSX8cx%2Fq6B7jJxbsw3nykKFlpurpT9yKHy%2Fe1I%2FvtsE7KK%2Be2DYwC60vAKXXzMOHt%2F3WZHFE063c%2ByMD2L6MNy%2BoTfaY0RjA6q5suFWGzNAs1yjEpPj%2FmoWH%2F7GonHN%2BS6kwbTaQMQBDoiX%2BSizD4p%2BSgBjqyAl%2F5ZX57SwJ9Yzx7w5tXX849rD0XyMImkvlAUimrFKOm6v8HPgKLO0Xr%2Bb4Q%2F67icLKDcR0WtU2hQnTj9plMFs9yYRwTDDY3Bz9RSA6gF5KSfCIPxx%2Fq5PSUEJ%2FgemP6Hy4dSoop1Vceh2NtsrtdNOvcQaDRVaOc3r5ScXh%2BJ%2FOnans1%2BN8Ke%2F8A4%2Ffa5K7673HQlLRCAemLC9sJlKS%2B0ACOOjKUVLIUpMj95YN6dKg3H%2FI7lEwzu2aNn%2BN4Ud%2BtiIJN1YD8%2BhqAb7VqcYxPGSPhGb2SnNgXv%2Fum9vht3A0Kaj9Sid6ZlwJ290pmE03ukR7z%2BIIwS3izgchkWlLehX%2FSqa3KnZsokyw7tQ5oBuvY6RpGB6eC00Ym%2F7CD%2FSNL7QhQEcn8qEGpfmBH%2FNwFBiEe6g%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20230321T071358Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIA3SNLN3NANAYZWG6Y%2F20230321%2Fap-east-1%2Fs3%2Faws4_request&X-Amz-Signature=35d8a4859e3e1ddf93cef5cef4e3cc482122e2bd8660f51fa97fab60bd212731")
+        return redirect("https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/meta.csv")
     elif isinstance(session["query"], list) and len(session["query"]) == 1:
         print(session["query"])
         meta = mongo.single_cell_meta_v4.find(session["query"][0])

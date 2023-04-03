@@ -19,17 +19,23 @@
 </div>
 
 <div class="section03" style="padding-left: 120px; padding-right: 120px;">
+
     <div id="searchPage" class="container" style="padding: 0px;">
+
         <div class="row justify-content-start">
             <div class="boldauto36" style="padding-bottom: 30px; text-transform:none;">Explore scRNA-seq data</div>
         </div>
-        <div class="row" id="globalsearch">
+        <!-- <div class="row" id="globalsearch">
             <input style="width: 50%; height: 48px; display:inline-block" class="form-control" id="customSearchBox"
                 placeholder="Global Search" />
             <input type="button" style="display:inline-block;margin-left: 16px;" class="darkButton" value="Search All"
                 id="btnGSearch" />
             <input type="button" style="display:inline-block;margin-left: 16px;" class="lightButton"
                 value="Clear Search Filed" id="btnGClear" />
+        </div> -->
+
+        <div class="row tutorialContent regularauto16">
+            <p>Please select the filters from dropdown boxes below to begin your search: </p>
         </div>
         <div class="row justify-content-start" style="margin: 24px -15px 0px 0px;">
             <!-- 0312 hide by junyi -->
@@ -40,14 +46,14 @@
                     {% endfor %}
                 </select>
             </div>
-            <div style="margin: 10px 15px 0px 0px">
+            <div style="margin: 10px 15px 0px 0px" id="opt_age_box">
                 <select id="opt_age" class="multibox" multiple="multiple" name="name_tbv_age" form="scfform">
                     {% for val in fage %}
                     <option value="{{val}}">{{val}}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div style="margin: 10px 15px 0px 0px">
+            <div style="margin: 10px 15px 0px 0px" id="opt_prediction_box">
                 <!-- Change by junyi 2022 0620-->
                 <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype"
                     form="scfform">
@@ -57,35 +63,35 @@
                 </select>
             </div>
             <div style="margin: 10px 15px 0px 0px" hidden>
-                <!-- 0312 hide by junyi -->
+                // 0312 hide by junyi 
                 <select id="opt_donor" class="multibox" multiple="multiple" name="name_tbv_donor" form="scfform">
                     {% for val in fdonor %}
                     <option value="{{val}}">{{val}}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div style="margin: 10px 15px 0px 0px">
+            <div style="margin: 10px 15px 0px 0px" id="opt_status_box">
                 <select id="opt_status" class="multibox" multiple="multiple" name="name_tbv_status" form="scfform">
                     {% for val in fstatus %}
                     <option value="{{val}}">{{val}}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div style="margin: 10px 15px 0px 0px">
+            <div style="margin: 10px 15px 0px 0px" id="opt_dataset_box">
                 <select id="opt_dataset" class="multibox" multiple="multiple" name="name_tbv_dataset" form="scfform">
                     {% for val in fdataset %}
                     <option value="{{val}}">{{val}}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div style="margin: 10px 15px 0px 0px">
+            <div style="margin: 10px 15px 0px 0px" id="opt_onset_box">
                 <select id="opt_onset" class="multibox" multiple="multiple" name="name_tbv_onset" form="scfform">
                     {% for val in fonset %}
                     <option value="{{val}}">{{val}}</option>
                     {% endfor %}
                 </select>
             </div>
-            <div style="margin: 10px 15px 0px 0px">
+            <div style="margin: 10px 15px 0px 0px" id="opt_outcome_box">
                 <select id="opt_outcome" class="multibox" multiple="multiple" name="name_tbv_outcome" form="scfform">
                     {% for val in foutcome %}
                     <option value="{{val}}">{{val}}</option>
@@ -93,7 +99,7 @@
                 </select>
             </div>
 
-            <div style="margin: 10px 15px 0px 0px">
+            <div style="margin: 10px 15px 0px 0px" id="opt_gender_box">
                 <select id="opt_gender" class="multibox" multiple="multiple" name="name_tbv_gender" form="scfform">
                     {% for val in fgender %}
                     <option value="{{val}}">{{val}}</option>
@@ -101,7 +107,7 @@
                 </select>
             </div>
 
-            <div style="margin: 10px 15px 0px 0px">
+            <div style="margin: 10px 15px 0px 0px" id="opt_country_box">
                 <select id="opt_country" class="multibox" multiple="multiple" name="name_tbv_country" form="scfform">
                     {% for val in fcountry %}
                     <option value="{{val}}">{{val}}</option>
@@ -780,6 +786,8 @@
             // console.log( index + ": " + value );
         });
     })
+
+
 </script>
 
 
