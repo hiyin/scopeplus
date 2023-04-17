@@ -23,8 +23,7 @@ __all__ = ['create_app']
 DEFAULT_BLUEPRINTS = (
     frontend,
     settings,
-    tasks,
-    naso
+    tasks
 )
 
 logging.basicConfig(level=logging.DEBUG,
