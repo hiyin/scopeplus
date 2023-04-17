@@ -6,7 +6,6 @@ from .config import DefaultConfig
 from .user import Users, UsersAdmin
 from .settings import settings
 from .tasks import tasks
-from .naso_tableview import naso
 from .frontend import frontend, ContactUsAdmin
 from .extensions import db, mail, cache, login_manager, admin, mongo
 from .utils import pretty_date
