@@ -12,7 +12,7 @@
 
 
   <div class="container tutorialCard collapsible" style="padding: 0px; margin-bottom: 24px;">
-    <div class="row tutorialTitle boldH160">Our complete data sets ("raw" and "integrated") can be downloaded below:</div>
+    <div class="row tutorialTitle boldH160">Our complete data sets (meta data, raw count data and integrated count data) can be downloaded below:</div>
     <div class="row container collapsible-text"
       style="padding: 30px 40px 30px 40px; border-top: 1px solid #B4B6B8;">
       <div class="row tutorialContent regularauto16">
@@ -30,435 +30,315 @@
                 <thead><tr><th title="Field #1">Category</th>
                 <th title="Field #2">Subcategory</th>
                 <th title="Field #3">Description</th>
-                <th title="Field #4">Raw data - download link</th>
-                <th title="Field #5">Integrated data - download link</th>
+                <th title="Field #4">Raw data</th>
+                <th title="Field #5">Integrated data</th>
                 </tr></thead>
                 <tbody><tr>
                 <td>Metadata</td>
                 <td>-</td>
                 <td>meta.csv</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/meta.csv</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/meta.csv</td>
+                <td><a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/meta.csv">meta.csv</a></td>
+                <td><a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/meta.csv">meta.csv</a></td>
                 </tr>
                 <tr>
                 <td>Count data</td>
                 <td>Arunachalam</td>
-                <td>arunachalam/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/arunachalam/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/arunachalam/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>arunachalam/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/arunachalam/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/arunachalam/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>arunachalam/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/arunachalam/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/arunachalam/matrix.mtx.gz</td>
+                <td>arunachalam</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/arunachalam/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/arunachalam/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/arunachalam/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/arunachalam/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/arunachalam/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/arunachalam/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Bost</td>
-                <td>bost/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/bost/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/bost/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>bost/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/bost/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/bost/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>bost/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/bost/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/bost/matrix.mtx.gz</td>
+                <td>bost</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/bost/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/bost/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/bost/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/bost/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/bost/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/bost/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Combat</td>
-                <td>combat/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combat/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combat/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>combat/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combat/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combat/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>combat/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combat/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combat/matrix.mtx.gz</td>
+                <td>combat</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combat/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combat/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combat/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combat/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combat/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combat/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Combes</td>
-                <td>combes/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combes/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combes/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>combes/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combes/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combes/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>combes/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combes/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combes/matrix.mtx.gz</td>
+                <td>combes</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combes/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combes/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combes/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combes/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combes/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combes/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Hoehn</td>
-                <td>hoehn/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/hoehn/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/hoehn/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>hoehn/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/hoehn/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/hoehn/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>hoehn/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/hoehn/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/hoehn/matrix.mtx.gz</td>
+                <td>hoehn</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/hoehn/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/hoehn/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/hoehn/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/hoehn/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/hoehn/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/hoehn/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Lee</td>
-                <td>lee/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/lee/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/lee/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>lee/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/lee/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/lee/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>lee/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/lee/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/lee/matrix.mtx.gz</td>
+                <td>lee</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/lee/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/lee/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/lee/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/lee/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/lee/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/lee/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Liu</td>
-                <td>liu/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/liu/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/liu/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>liu/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/liu/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/liu/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>liu/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/liu/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/liu/matrix.mtx.gz</td>
+                <td>liu</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/liu/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/liu/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/liu/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/liu/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/liu/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/liu/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Ramaswamy</td>
-                <td>ramaswamy/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ramaswamy/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ramaswamy/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>ramaswamy/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ramaswamy/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ramaswamy/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>ramaswamy/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ramaswamy/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ramaswamy/matrix.mtx.gz</td>
+                <td>ramaswamy</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ramaswamy/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ramaswamy/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ramaswamy/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ramaswamy/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ramaswamy/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ramaswamy/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Ren</td>
-                <td>ren/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ren/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ren/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>ren/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ren/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ren/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>ren/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ren/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ren/matrix.mtx.gz</td>
+                <td>ren</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ren/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ren/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ren/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ren/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ren/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ren/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Schulte-schrepping</td>
-                <td>schulte-schrepping/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schulte-schrepping/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schulte-schrepping/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>schulte-schrepping/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schulte-schrepping/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schulte-schrepping/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>schulte-schrepping/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schulte-schrepping/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schulte-schrepping/matrix.mtx.gz</td>
+                <td>schulte-schrepping</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schulte-schrepping/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schulte-schrepping/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schulte-schrepping/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schulte-schrepping/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schulte-schrepping/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schulte-schrepping/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Schuurman</td>
-                <td>schuurman/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schuurman/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schuurman/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>schuurman/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schuurman/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schuurman/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>schuurman/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schuurman/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schuurman/matrix.mtx.gz</td>
+                <td>schuurman</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schuurman/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schuurman/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schuurman/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schuurman/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schuurman/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schuurman/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Sinha</td>
-                <td>sinha/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/sinha/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/sinha/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>sinha/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/sinha/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/sinha/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>sinha/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/sinha/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/sinha/matrix.mtx.gz</td>
+                <td>sinha</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/sinha/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/sinha/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/sinha/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/sinha/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/sinha/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/sinha/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Stephenson</td>
-                <td>stephenson/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/stephenson/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/stephenson/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>stephenson/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/stephenson/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/stephenson/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>stephenson/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/stephenson/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/stephenson/matrix.mtx.gz</td>
+                <td>stephenson</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/stephenson/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/stephenson/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/stephenson/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/stephenson/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/stephenson/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/stephenson/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Su</td>
-                <td>su/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/su/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/su/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>su/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/su/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/su/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>su/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/su/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/su/matrix.mtx.gz</td>
+                <td>su</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/su/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/su/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/su/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/su/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/su/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/su/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Thompson</td>
-                <td>thompson/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/thompson/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/thompson/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>thompson/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/thompson/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/thompson/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>thompson/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/thompson/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/thompson/matrix.mtx.gz</td>
+                <td>thompson</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/thompson/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/thompson/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/thompson/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/thompson/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/thompson/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/thompson/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Unterman</td>
-                <td>unterman/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/unterman/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/unterman/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>unterman/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/unterman/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/unterman/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>unterman/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/unterman/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/unterman/matrix.mtx.gz</td>
+                <td>unterman</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/unterman/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/unterman/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/unterman/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/unterman/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/unterman/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/unterman/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Wilk</td>
-                <td>wilk/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/wilk/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/wilk/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>wilk/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/wilk/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/wilk/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>wilk/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/wilk/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/wilk/matrix.mtx.gz</td>
+                <td>wilk</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/wilk/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/wilk/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/wilk/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/wilk/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/wilk/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/wilk/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Yao</td>
-                <td>yao/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/yao/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/yao/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>yao/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/yao/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/yao/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>yao/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/yao/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/yao/matrix.mtx.gz</td>
+                <td>yao</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/yao/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/yao/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/yao/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/yao/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/yao/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/yao/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Zhao</td>
-                <td>zhao/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhao/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhao/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>zhao/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhao/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhao/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>zhao/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhao/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhao/matrix.mtx.gz</td>
+                <td>zhao</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhao/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhao/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhao/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhao/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhao/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhao/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 <tr>
                 <td> </td>
                 <td>Zhu</td>
-                <td>zhu/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhu/barcodes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhu/barcodes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>zhu/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhu/genes.tsv.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhu/genes.tsv.gz</td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td> </td>
-                <td>zhu/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhu/matrix.mtx.gz</td>
-                <td>https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhu/matrix.mtx.gz</td>
+                <td>zhu</td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhu/barcodes.tsv.gz">barcodes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhu/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhu/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
+                <td>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhu/barcodes.tsv.gz">barcoes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhu/genes.tsv.gz">genes.tsv.gz</a>
+                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhu/matrix.mtx.gz">matrix.mtx.gz</a>
+                </td>
                 </tr>
                 </tbody></table>
     </div>   
@@ -472,6 +352,7 @@ $(document).ready(function () {
     $('#data_download_links').DataTable({
         // order by first column
         order: [[0, 'desc']],
+        "pageLength": 50,
     });
   });
 </script>    
