@@ -481,13 +481,11 @@ def show_scfeature():
         print(cell_type)
         print(dataset)
         print(feature)
-        fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature,title="Pathway mean scores of: "+ str(cell_type) + " in selected datasets")
+        fig3,features = process_boxplot(df_pathway_mean,cell_type,plot_type="pathway",feature=feature,title="Pathway mean scores of: "+ str(feature) + " in " + str(cell_type) + " cells")
 
         if(feature is None):
             graphJSON3 = None
-        elif(not(feature in features)):
-            graphJSON3 = None
-        elif(not(cell_type in celltypes)):
+        elif(not(feature in features) or not(cell_type in celltypes)):
             graphJSON3 = None
         else:
             graphJSON3 = json.dumps(fig3, cls=plotly.utils.PlotlyJSONEncoder)
