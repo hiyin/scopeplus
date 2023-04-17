@@ -134,8 +134,7 @@
             </div>
             <div style="margin-top: 10px; margin-right: 15px;">
                 <div id="test" style="display:inline-block;">
-                    <button id="scfbutton" class="lightButton" name="show_scfeature" form="scfform" onclick="loading()" hidden
-                        title='Select more than 2 items in each of Sample ID + Cell Type OR Dataset + Cell Type & Search before clicking this button (Sample IDs should come from more than 1 dataset)'>
+                    <button id="scfbutton" class="lightButton" name="show_scfeature" form="scfform" onclick="loading()" hidden>
                         Show scFeature plot
                     </button>
                 </div>
@@ -232,20 +231,19 @@
                 <div class="filterContent row justify-content-center">
                     <div class="filterContainer justify-content-center">
                         <div class="row mediumauto16" style="text-align:start">
-                            <ol>
-                                <li>Select more than 2 items in each of the following filter options: <br>
-                                    <div style="padding: 5px 0px 10px 0px">Sample id + Cell type<br>
-                                        (Sample ids should come from more
-                                        than 1 dataset)<br>
-                                        OR<br>
-                                        Dataset + Cell type
-                                    </div>
-                                </li>
-                                <li>
-                                    Press "Filter search" button.
-                                </li>
-                                <li>Press "Show scFeature plot" to generate scFeature plot.</li>
-                            </ol>
+                            <ul>
+                                <li>scFeature is a tool that generates multi-view representations of single-cell and spatial data
+                                    through the construction of a total of 17 feature types belonging to the following six categories: <br>
+                                <ol>  
+                                <li>cell type proportions </li>
+                                <li>cell type specific gene expressions </li>
+                                <li>cell type specific pathway expressions </li>
+                                <li>cell type specific cell-cell interaction (CCI) scores </li>
+                                <li>overall aggregated gene expressions </li>
+                                <li>spatial metrics </li>
+                                
+                                </ol>
+                            </ul>
                         </div>
                     </div>
                 </div>
