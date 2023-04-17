@@ -57,7 +57,7 @@
             <th>Country</th>
             <th>Published date</th>
             <th>Journal</th>
-            <th>Link</th>
+            <!-- <th>Link</th> -->
           </tr>
         </thead>
         <tbody>
@@ -72,7 +72,7 @@
             <td>{{item.Country}}</td>
             <td>{{item.Published_Date}}</td>
             <td>{{item.Journal}}</td>
-            <td><a href='{{url_for("tasks.table_view", main={"meta_dataset": item.meta_dataset}|tojson)}}'>Link</a></td>
+            <!-- <td><a href='{{url_for("tasks.table_view", main={"meta_dataset": item.meta_dataset}|tojson)}}'>Link</a></td> -->
           </tr>
 
           {% endfor %}
@@ -236,7 +236,8 @@
   // Configure series
   const polygonTemplate = polygonSeries.mapPolygons.template;
   // %22 is "", %5D is ] %5B is [
-  polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="http://covidsc.d24h.hk/tasks/table_view?main=%7B%22Country%22%3A+%7B%22$in%22%3A+%5B%22{dataset}%22%5D%7D%7D">Explore</a>';
+  // Hide "explore" tooltip by Angela 041723  
+  // polygonTemplate.tooltipHTML = '<b>{name}: {value}</b><br><a href="http://covidsc.d24h.hk/tasks/table_view?main=%7B%22Country%22%3A+%7B%22$in%22%3A+%5B%22{dataset}%22%5D%7D%7D">Explore</a>';
   polygonTemplate.fill = am4core.color("rgba(110, 166, 157, 0.5)");
   //polygonTemplate.tooltipText = '<b>{name}: {value}</b>';
 
@@ -382,7 +383,7 @@
   series.tooltip.keepTargetHover = true;
   series.tooltip.getFillFromObject = false;
   series.tooltip.background.fill = am4core.color("#FFFFFF");
-  series.columns.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://covidsc.d24h.hk/tasks/table_view?main=%7B%22level2%22%3A+%22{type}%22%7D">Explore</a>';
+  //series.columns.template.tooltipHTML = '<b>{type}: {pieces}</b><br><a href="http://covidsc.d24h.hk/tasks/table_view?main=%7B%22level2%22%3A+%22{type}%22%7D">Explore</a>';
   series.tooltip.autoTextColor = false;
   series.tooltip.label.fill = am4core.color("#045547");
 }); // end am4core.ready()
