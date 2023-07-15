@@ -15,3 +15,8 @@ numpy
 pymongo
 shortuuid
 gunicorn
+seaborn
+dash_bio
+tqdm
+boto3
+celery

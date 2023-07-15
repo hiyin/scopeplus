@@ -1,47 +1,68 @@
 {% from "macros/_form.html" import render_form %}
 
-{% set page_title = 'Contact Us' %}
+{% set page_title = 'Contact us' %}
 
 {% extends 'layouts/base.html' %}
 
 {% block body %}
 <div class="d-flex flex-column justify-content-center" id="banner">
-  <div id="projectAim0" class="d-flex justify-content-center">
-    <h1>CONTACT US</h1>
+  <div class="d-flex justify-content-center boldH72">
+    <h1>Contact us</h1>
   </div>
-  <div id="projectDisp" class="d-flex justify-content-center">
+  <div class="d-flex justify-content-center regularH20">
     <h5 class="text-center">For enquiries, comments or collaboration opportunities, <br>
       please feel free to contact us through the following ways.</h5>
   </div>
 </div>
-<div id="contact" class="d-flex justify-content-center">
+<div id="contact" class="justify-content-center">
   <div class="contactboard">
-    <div class="contact-row">
-      <div class="contact-item">
-        <h2>TEL</h2>
-        <hr>
-        <p>+852 3910 3800</p>
+    <div class="row" style="padding-bottom:40px">
+      <div class="col-lg">
+        <div class="row" style="padding-bottom: 30px;">
+          <div class="col-4 mediumH22">
+            Tel
+          </div>
+          <div class="col-8 regularH160 justify-content-start">
+            +852 3910 3800
+          </div>
+        </div>
+        <div class="row" style="padding-bottom: 30px;">
+          <div class="col-4 mediumH22">
+            Fax
+          </div>
+          <div class="col-8 regularH160 justify-content-start">
+            +852 2793 3233
+          </div>
+        </div>
+        <div class="row" style="padding-bottom: 30px;">
+          <div class="col-4 mediumH22">
+            Email
+          </div>
+          <div class="col-8 regularH160 justify-content-start">
+            covidscope@gmail.com
+          </div>
+        </div>
+        <div class="row" style="padding-bottom: 30px;">
+          <div class="col-4 mediumH22">
+            Website
+          </div>
+          <div class="col-8 regularH160 justify-content-start">
+            <a href="https://www.d24h.hk/" style="color: #000000" target="_blank">https://www.d24h.hk/</a>
+          </div>
+        </div>
       </div>
-      <div class="contact-item">
-        <h2>FAX</h2>
-        <hr>
-        <p>+852 2793 3233</p>
-      </div>
-      <div class="contact-item">
-        <h2>EMAIL</h2>
-        <hr>
-        <p>info@d24h.hk</p>
+      <div class="col-lg">
+        <div class="mediumH22">
+          Address
+          <hr style="border: 1px solid #045547;">
+        </div>
+        <div class="regularH160">Units 1201-1206, 1223 & 1225, 12/F, Building 19W, 19 Science Park West Avenue, Hong
+          Kong Science Park,
+          Pak Shek Kok, New Territories, Hong Kong.</div>
+
       </div>
     </div>
-    <div class="contact-row">
-      <div class="contact-item">
-        <h2>ADDRESS</h2>
-        <hr>
-        <p>Units 1201-1206, 1223 & 1225, 12/F, Building 19W, 19 Science Park West Avenue, <br>Hong Kong Science Park,
-          Pak Shek Kok, New Territories, Hong Kong.</p>
-      </div>
-    </div>
-    <div class="contact-row"><iframe
+    <div class="row justify-content-center"><iframe
         src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3688.041067853891!2d114.20601421494844!3d22.427480043933667!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3404090e338ac047%3A0x38c13308a5ff95c4!2sLaboratory%20of%20Data%20Discovery%20for%20Health%20Limited!5e0!3m2!1szh-TW!2shk!4v1647903842096!5m2!1szh-TW!2shk"
         width="750" height="560" style="border:0;" allowfullscreen="" loading="lazy"></iframe></div>
   </div>

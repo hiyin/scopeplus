@@ -5,15 +5,14 @@ from flask import Flask
 from .config import DefaultConfig
 from .user import Users, UsersAdmin
 from .settings import settings
-from .tasks import tasks, MyTaskModelAdmin
+from .tasks import tasks
 from .frontend import frontend, ContactUsAdmin
-from .sample_meta_all import SampleMetaAllModel, SampleMetaAllAdmin
-from .covid2k_meta import covid2k_metaModel, covid2k_metaAdmin
-from .covid2k_dense import covid2k_denseModel, covid2k_denseAdmin
 from .extensions import db, mail, cache, login_manager, admin, mongo
 from .utils import pretty_date
 import logging
 import os
+from datetime import timedelta
+
 from pymongo import MongoClient
 from .model.umap import UmapView
 from .model.meta import MetaView
@@ -45,6 +44,11 @@ def create_app(config=None, app_name=None, blueprints=None):
 
     app = Flask(app_name,
                 instance_relative_config=True)
+
+    # Add 0627 by junyi
+    # app.config['LOGIN_DISABLED'] = True
+    app.config['SECRET_KEY'] = os.urandom(24)
+    app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
     # add db
 
@@ -89,13 +93,10 @@ def configure_extensions(app):
     # sqlite db data
     admin.add_view(ContactUsAdmin(db.session))
     admin.add_view(UsersAdmin(db.session))
-    admin.add_view(MyTaskModelAdmin(db.session))
-    admin.add_view(SampleMetaAllAdmin(db.session))
-    admin.add_view(covid2k_metaAdmin(db.session))
-    admin.add_view(covid2k_denseAdmin(db.session))
+
     # mongo db data
     admin.add_view(UmapView(mongo['umap']))
-    admin.add_view(MetaView(mongo['single_cell_meta']))
+    admin.add_view(MetaView(mongo['single_cell_meta_country']))
 
     admin.init_app(app)
 

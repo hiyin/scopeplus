@@ -1,5 +1,12 @@
+.DS_Store
 venv/
 *.sh
 __pycache__/
 db.sqlite
 cov192kaxis.csv
+.idea/
+*.log
+dump.rdb
+dump.rdb
+dump.rdb
+*.rdb

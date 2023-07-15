@@ -1,0 +1,115 @@
+{% from "macros/_form.html" import render_form %}
+
+{% set page_title = 'Cell count meta' %}
+
+{% extends 'layouts/base.html' %}
+
+{% block body %}
+
+<div class="section03" style="padding-top:0px;">
+  <div class="container" style="margin:0px; padding: 0px;">
+    <div class="row">
+      <div class="col-lg justify-content-center">
+        <div class="row justify-content-center" style="padding-top: 100px">
+          <div class="boldauto36">Barplot of Cell Type Counts</div>
+        </div>
+        <div class="row justify-content-center">
+          <div id="chart" class="chart"></div>
+        </div>
+      </div>
+      <div class="col-lg justify-content-center">
+        <div class="row justify-content-center" style="padding-top: 100px">
+          <div class="boldauto36">Barplot of Severity Counts</div>
+        </div>
+        <div class="row justify-content-center">
+          <div id="chart2" class="chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg justify-content-center">
+        <div class="row justify-content-center" style="padding-top: 100px">
+          <div class="boldauto36">Barplot of Disease Outcome Counts</div>
+        </div>
+        <div class="row justify-content-center">
+          <div id="chart3" class="chart"></div>
+        </div>
+      </div>
+      <div class="col-lg justify-content-center">
+        <div class="row justify-content-center" style="padding-top: 100px">
+          <div class="boldauto36">Barplot of Gender Counts</div>
+        </div>
+        <div class="row justify-content-center">
+          <div id="chart6" class="chart"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-lg justify-content-center">
+        <div class="row justify-content-center" style="padding-top: 100px">
+          <div class="boldauto36">Barplot of Age Counts</div>
+        </div>
+        <div class="row justify-content-center">
+          <div id="chart4" class="chart"></div>
+        </div>
+      </div>
+      <div class="col-lg justify-content-center">
+        <div class="row justify-content-center" style="padding-top: 100px">
+          <div class="boldauto36">Histogram of Days from Onset of Symptoms</div>
+        </div>
+        <div class="row justify-content-center">
+          <div id="chart5" class="chart"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+  var graphs = {{ graphJSON | safe }};
+
+  Plotly.plot('chart', graphs, {});
+
+</script>
+
+<script type="text/javascript">
+  var graphs = {{ graphJSON2 | safe }};
+
+  Plotly.plot('chart2', graphs, {});
+
+</script>
+
+<script type="text/javascript">
+  var graphs = {{ graphJSON3 | safe }};
+
+  Plotly.plot('chart3', graphs, {});
+
+</script>
+
+<script type="text/javascript">
+  var graphs = {{ graphJSON4 | safe }};
+
+  Plotly.plot('chart4', graphs, {});
+
+</script>
+<script type="text/javascript">
+  var graphs = {{ graphJSON5 | safe }};
+
+  Plotly.plot('chart5', graphs, {});
+
+</script>
+
+<script type="text/javascript">
+  var graphs = {{ graphJSON6 | safe }};
+
+  Plotly.plot('chart6', graphs, {});
+
+</script>
+
+{% endblock %}

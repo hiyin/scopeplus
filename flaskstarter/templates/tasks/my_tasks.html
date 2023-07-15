@@ -269,106 +269,106 @@
         </div>
       </div>
 
-        <br>
+      <br>
 
-        <table id="data" class="table table-hover">
-          <thead>
-            <tr>
-              <th>Sample ID</th>
-              <th>Donor</th>
-              <th>Predicted Cell Type</th>
-              <th>Age</th>
-              <th>Status</th>
-              <th>Dataset</th>
-            </tr>
-          </thead>
-          <tbody>
+      <table id="data" class="table table-hover">
+        <thead>
+          <tr>
+            <th>Sample ID</th>
+            <th>Donor</th>
+            <th>Predicted Cell Type</th>
+            <th>Age</th>
+            <th>Status</th>
+            <th>Dataset</th>
+          </tr>
+        </thead>
+        <tbody>
 
-            {% for task in all_tasks %}
-            <tr>
-              <td>{{ task.sample_id }}</td>
-              <td>{{ task.donor }}</td>
-              <td>{{ task.X }}</td>
-              <td>{{ task.age }}</td>
-              <td>{{ task.Status_on_day_collection_summary }}</td>
-              <td>{{ task.dataset }}</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
+          {% for task in all_tasks %}
+          <tr>
+            <td>{{ task.sample_id }}</td>
+            <td>{{ task.donor }}</td>
+            <td>{{ task.X }}</td>
+            <td>{{ task.age }}</td>
+            <td>{{ task.Status_on_day_collection_summary }}</td>
+            <td>{{ task.dataset }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
     </div>
-
-    <div class="button d-flex justify-content-center">
-      <form action="{{ url_for('tasks.download')}}" method="post" style="display:inline-block">
-        <button class="btn btn-outline-success" name="download" type="submit"> Download Full-set / Sub-set Data
-        </button>
-      </form>
-    </div>
-
   </div>
-  {% endblock %}
+
+  <div class="button d-flex justify-content-center">
+    <form action="{{ url_for('tasks.download')}}" method="post" style="display:inline-block">
+      <button class="btn btn-outline-success" name="download" type="submit"> Download Full-set / Sub-set Data
+      </button>
+    </form>
+  </div>
+
+</div>
+{% endblock %}
 
 
-  {% block scripts %}
-  <script>
-    $(document).ready(function () {
-      $('#data').DataTable();
-    });
+{% block scripts %}
+<script>
+  $(document).ready(function () {
+    $('#data').DataTable();
+  });
 
-    $('select').selectpicker();
+  $('select').selectpicker();
 
-    document.getElementById('select').onclick = function () {
-      var selected = [];
-      for (var option of document.getElementById('multiselect').options) {
-        if (option.selected) {
-          selected.push(option.value);
-        }
+  document.getElementById('select').onclick = function () {
+    var selected = [];
+    for (var option of document.getElementById('multiselect').options) {
+      if (option.selected) {
+        selected.push(option.value);
       }
-      alert("Successfully selected the following donors for filtering" + selected);
+    }
+    alert("Successfully selected the following donors for filtering" + selected);
 
-    }
+  }
 
-  </script>
-  <script>
-    function copy() {
-      var $temp = $("<input>");
-      $("body").append($temp);
-      $temp.val(
-          "2.5 million Single Cell (2022, February 23). The Laboratory of Data Discovery for Health. https://www.d24.hk/"
-        )
-        .select();
-      document.execCommand("copy");
-      $temp.remove();
-      alert("copied")
+</script>
+<script>
+  function copy() {
+    var $temp = $("<input>");
+    $("body").append($temp);
+    $temp.val(
+      "5.0 million Single Cell (2022, February 23). The Laboratory of Data Discovery for Health. https://www.d24.hk/"
+    )
+      .select();
+    document.execCommand("copy");
+    $temp.remove();
+    alert("copied")
 
-    }
-  </script>
-  <script>
-    function openForm() {
-      document.getElementById("myForm").style.display = "block";
-    }
+  }
+</script>
+<script>
+  function openForm() {
+    document.getElementById("myForm").style.display = "block";
+  }
 
-    function closeForm() {
-      document.getElementById("myForm").style.display = "none";
-    }
-  </script>
-  <script>
-    function openForm2() {
-      document.getElementById("myForm2").style.display = "block";
-    }
+  function closeForm() {
+    document.getElementById("myForm").style.display = "none";
+  }
+</script>
+<script>
+  function openForm2() {
+    document.getElementById("myForm2").style.display = "block";
+  }
 
-    function closeForm2() {
-      document.getElementById("myForm2").style.display = "none";
-    }
-  </script>
-  <script>
-    function openForm3() {
-      document.getElementById("myForm3").style.display = "block";
-    }
+  function closeForm2() {
+    document.getElementById("myForm2").style.display = "none";
+  }
+</script>
+<script>
+  function openForm3() {
+    document.getElementById("myForm3").style.display = "block";
+  }
 
-    function closeForm3() {
-      document.getElementById("myForm3").style.display = "none";
-    }
-  </script>
-  {% endblock %}
+  function closeForm3() {
+    document.getElementById("myForm3").style.display = "none";
+  }
+</script>
+{% endblock %}

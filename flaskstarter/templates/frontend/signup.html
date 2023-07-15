@@ -1,15 +1,14 @@
 {% from "macros/_form.html" import render_form %}
 
-{% set page_title = 'Sign Up' %}
+{% set page_title = 'Sign up' %}
 
 {% extends 'layouts/base.html' %}
 
 {% block body %}
 <div class="sign-up">
   <div class="log-container flex-column">
-    <h3>Sign Up</h3>
+    <h3>Sign up</h3>
     {{ render_form(url_for('frontend.signup'), form)}}
   </div>
 </div>
-{% include 'layouts/footer.html' %}
 {% endblock %}

@@ -92,12 +92,6 @@ d24h_prog5@d24hp5ubuntu:~/covid19_cell_atlas_portal$ tree -I "venv|__pycache__"
 ├── flaskstarter
 │   ├── app.py
 │   ├── config.py
-│   ├── covid2k_dense
-│   │   ├── __init__.py
-│   │   └── models.py
-│   ├── covid2k_meta
-│   │   ├── __init__.py
-│   │   └── models.py
 │   ├── decorators.py
 │   ├── emails
 │   │   └── __init__.py
@@ -111,12 +105,6 @@ d24h_prog5@d24hp5ubuntu:~/covid19_cell_atlas_portal$ tree -I "venv|__pycache__"
 │   ├── model
 │   │   ├── meta.py
 │   │   └── umap.py
-│   ├── naso_tableview
-│   │   ├── __init__.py
-│   │   └── views.py
-│   ├── sample_meta_all
-│   │   ├── __init__.py
-│   │   └── models.py
 │   ├── settings
 │   │   ├── forms.py
 │   │   ├── __init__.py
@@ -180,7 +168,6 @@ d24h_prog5@d24hp5ubuntu:~/covid19_cell_atlas_portal$ tree -I "venv|__pycache__"
 │   │       ├── edit_task.html
 │   │       ├── landing.html
 │   │       ├── my_tasks.html
-│   │       ├── naso_tableview.html
 │   │       ├── show_plot.html
 │   │       ├── show_scfeature.html
 │   │       ├── table_view.html

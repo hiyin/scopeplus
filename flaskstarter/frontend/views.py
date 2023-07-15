@@ -12,7 +12,7 @@ from flask_login import (login_required, login_user, current_user,
 
 from ..tasks import MyTaskForm
 from ..user import Users, ACTIVE
-from ..extensions import db, login_manager
+from ..extensions import db, login_manager, mongo
 from .forms import (SignupForm, LoginForm, RecoverPasswordForm,
                     ChangePasswordForm, ContactUsForm)
 from .models import ContactUs
@@ -21,6 +21,9 @@ from ..emails import send_async_email
 import sqlite3
 from datetime import datetime
 import os
+import pandas as pd
+from bson.son import SON
+import pprint
 
 frontend = Blueprint('frontend', __name__)
 
@@ -33,18 +36,78 @@ def dashboard():
     return render_template('dashboard/dashboard.html', task_form=_task_form, _active_dash=True)
 
 
-@frontend.route('/')
+def get_all_study_meta():
+    res = list(mongo.pbmc_all_study_meta_v4.find())
+    print(res[1])
+    #uniq_field = mongo.single_cell_meta.aggregate([{"$group": {"_id": '$%s' % field_name}}]);
+    #key = [r['_id'] for r in uniq_field]
+    
+    return res
+
+
+def get_field_count():
+    pipeline = [
+        {"$unwind": "$level2"},
+        {"$group": {"_id": "$level2", "count": {"$sum": 1}}},
+        {"$project": SON([("count", 1), ("_id", 1)])}
+    ]
+
+    res = list(mongo.single_cell_meta.aggregate(pipeline))
+
+    # for item in res:
+    #     print(item)
+    #     print(item['_id'])
+    #     print(item["count"])
+    return res
+    
+# Replace old get field count method    
+def get_celltype_count():
+    # db.createCollection('stats_celltype_count')
+    # db.stats_celltype_count.insertMany(db.single_cell_meta_v4.aggregate([{"$group": {"_id": "$level2", "count":{"$sum": 1}}}]).toArray())
+    collection_name = 'stats_celltype_count'
+    res = list(mongo.stats_celltype_count.find())
+
+    return res
+
+def get_overview():
+    res = list(mongo.stats_meta_overview.find())
+
+    return res
+
+# Load landing page data
+filepath = os.path.abspath(os.getcwd())
+filename = os.path.join(
+    filepath, 'flaskstarter/PBMC_study_meta/PBMC_study_meta.csv')
+df = pd.read_csv(filename)
+df = df.dropna(subset=['Country Code'])
+
+@frontend.route('/', methods=["GET", "POST"])
 def index():
-    # current_app.logger.debug('debug')
+    data = df.to_dict()
+    fdataset = get_all_study_meta()
+    res = get_celltype_count()
+    counting = get_overview()
+    counts = counting
+    #pprint.pprint(res)
     if current_user.is_authenticated:
-        return redirect(url_for('tasks.table_view'))
+        return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res, counting=counting, counts=counts)
+    return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res, counting=counting, counts=counts)
+# @frontend.route('/')
+# def index():
+#     # current_app.logger.debug('debug')
+#     if current_user.is_authenticated:
+#         return redirect(url_for('tasks.table_view'))
 
-    return render_template('tasks/landing.html', _active_home=True)
+#     return render_template('tasks/landing.html', _active_home=True)
 
-#@frontend.route('/home')
-#def home():
+@frontend.route('/tutorial', methods=['GET', 'POST'])
+def tutorial():
+    return render_template('frontend/tutorial.html')
 
-#   return render_template('frontend/landing.html', _active_home=True)
+
+@frontend.route('/data', methods=['GET', 'POST'])
+def data():
+    return render_template('frontend/data.html')    
 
 @frontend.route('/contact-us', methods=['GET', 'POST'])
 def contact_us():
@@ -70,9 +133,13 @@ def login():
 
     form = LoginForm(login=request.args.get('login', None),
                      next=request.args.get('next', None))
+    print("Debug login")   
+    print(request)                 
 
     if form.validate_on_submit():
         user, authenticated = Users.authenticate(form.login.data, form.password.data)
+        print(request.form)
+        print(request.args)            
 
         if user and authenticated:
 
@@ -117,7 +184,7 @@ def signup():
 
         confirm_user_mail(form.name.data, form.email.data)
 
-        flash(u'Confirmation email sent to ' + form.email.data + ' Please verify!', 'success')
+        flash(u'Registration successful! Please verify!', 'success')
         return redirect(url_for('frontend.login'))
 
     return render_template('frontend/signup.html', form=form,

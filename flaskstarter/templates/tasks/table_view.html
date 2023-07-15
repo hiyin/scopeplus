@@ -1,236 +1,841 @@
 {% from "macros/_form.html" import render_form %}
 
-{% set page_title = 'My Tasks' %}
+{% set page_title = 'Explore' %}
 
 {% extends 'layouts/base.html' %}
 
 {% block body %}
-{% include 'layouts/banner.html' %}
 <script src="https://use.fontawesome.com/bbc48b41d3.js"></script>
-<div class="container">
-   <div class="row justify-content-center">
-        <h2>Explore Data</h2>
-   </div>
-   <div class="jumbotron">
-    <h4>
-       Global Search
-    </h4>
-    <input class="form-control" id="customSearchBox"/>
-    <input type="button" value="Search all" id="btnGSearch" />
-    <input type="button" value="Clear all" id="btnGClear" />
-   </div>
+
+<div id="message" class="section01 row justify-content-center" style="margin:0px; padding:10px; display:none;">
+    <div id="message-text">Please wait...</div>
+</div>
+
+<div class="container" id="loadingbox" style="display:none;">
+    <div class="row justify-content-center">
+        <div id="loading"></div>
+    </div>
+    <div class="row justify-content-center" style="padding: 10px 0px 0px 10px;">Loading...</div>
+</div>
+
+<div class="section03" style="padding-left: 120px; padding-right: 120px;">
+
+    <div id="searchPage" class="container" style="padding: 0px;">
+
+        <div class="row justify-content-start">
+            <div class="boldauto36" style="padding-bottom: 30px; text-transform:none;">Explore scRNA-seq data</div>
+        </div>
+        <!-- <div class="row" id="globalsearch">
+            <input style="width: 50%; height: 48px; display:inline-block" class="form-control" id="customSearchBox"
+                placeholder="Global Search" />
+            <input type="button" style="display:inline-block;margin-left: 16px;" class="darkButton" value="Search All"
+                id="btnGSearch" />
+            <input type="button" style="display:inline-block;margin-left: 16px;" class="lightButton"
+                value="Clear Search Filed" id="btnGClear" />
+        </div> -->
+
+        <div class="row tutorialContent regularauto16">
+            <p>Please select the filters from dropdown boxes below to begin your search: </p>
+        </div>
+        <div class="row justify-content-start" style="margin: 24px -15px 0px 0px;">
+            <!-- 0312 hide by junyi -->
+            <div style="margin: 10px 15px 0px 0px" hidden> 
+                <select id="opt_sampleid" class="multibox" multiple="multiple" name="name_tbv_sample" form="scfform">
+                    {% for val in fsampleid %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin: 10px 15px 0px 0px" id="opt_age_box">
+                <select id="opt_age" class="multibox" multiple="multiple" name="name_tbv_age" form="scfform">
+                    {% for val in fage %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin: 10px 15px 0px 0px" id="opt_prediction_box">
+                <!-- Change by junyi 2022 0620-->
+                <select id="opt_prediction" class="multibox" multiple="multiple" name="name_tbv_celltype"
+                    form="scfform">
+                    {% for val in fprediction %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin: 10px 15px 0px 0px" hidden>
+                // 0312 hide by junyi 
+                <select id="opt_donor" class="multibox" multiple="multiple" name="name_tbv_donor" form="scfform">
+                    {% for val in fdonor %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin: 10px 15px 0px 0px" id="opt_status_box">
+                <select id="opt_status" class="multibox" multiple="multiple" name="name_tbv_status" form="scfform">
+                    {% for val in fstatus %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin: 10px 15px 0px 0px" id="opt_dataset_box">
+                <select id="opt_dataset" class="multibox" multiple="multiple" name="name_tbv_dataset" form="scfform">
+                    {% for val in fdataset %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin: 10px 15px 0px 0px" id="opt_onset_box">
+                <select id="opt_onset" class="multibox" multiple="multiple" name="name_tbv_onset" form="scfform">
+                    {% for val in fonset %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div style="margin: 10px 15px 0px 0px" id="opt_outcome_box">
+                <select id="opt_outcome" class="multibox" multiple="multiple" name="name_tbv_outcome" form="scfform">
+                    {% for val in foutcome %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="margin: 10px 15px 0px 0px" id="opt_gender_box">
+                <select id="opt_gender" class="multibox" multiple="multiple" name="name_tbv_gender" form="scfform">
+                    {% for val in fgender %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="margin: 10px 15px 0px 0px" id="opt_country_box">
+                <select id="opt_country" class="multibox" multiple="multiple" name="name_tbv_country" form="scfform">
+                    {% for val in fcountry %}
+                    <option value="{{val}}">{{val}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row justify-content-start" style="margin-top: 24px;">
+            <div><input type="button" class="darkButton" style="display:inline-block;" value="Filter search"
+                    id="btnSearch" />
+            </div>
+            <div><input type="button" class="lightButton" style="display:inline-block; margin-left: 15px;"
+                    value="Clear filter" id="btnClear" /></div>
+        </div>
+        <div class="row justify-content-end" style="margin: 24px -15px 0px 0px;">
+            <form id="scfform" action="{{ url_for('tasks.show_scfeature')}}" method="post" style="display:inline-block">
+            </form>
+            <div style="margin-top: 10px;">
+                <button id="charabutton" class="lightButton" name="show_chara" style="display:inline-block ; margin-right: 15px; " hidden
+                    title='Bar Charts of cell type, severity, days from onset and outcome' onclick="showSearchPlot()">
+                    Show data characteristics
+                </button>
+            </div>
+            <div style="margin-top: 10px; margin-right: 15px;">
+                <div id="test" style="display:inline-block;">
+                    <button id="scfbutton" class="lightButton" name="show_scfeature" form="scfform" onclick="loading()" hidden>
+                        Show scFeature plot
+                    </button>
+                </div>
+                <div style="display:inline-block; vertical-align:top; margin-top:-5px">
+                    <a id="scfnotify" href="#scfeatureGuide" onclick="showGuide()" hidden><img
+                            src="{{url_for('static', filename='exclamation-mark-64.png')}}" width="20"
+                            height="20" /></a>
+                </div>
+            </div>
+            <div style="margin-top: 10px;">
+                <button id="UMAPbutton" class="lightButton" name="show_plot" type="submit"
+                    style="display:inline-block; margin-right: 15px;" onclick="showplot()" hidden
+                    title='Select 1 sell type & search before clicking this button' > Show UMAP plot
+                </button>
+            </div>
+        </div>
+
+        <div class="row justify-content-end" style="margin: 14px -15px 30px 0px;">
+            <div style="margin: 10px 15px 0px 0px;" hidden>
+                <button class="mediumButton" id="return_home" type="submit" style="display:inline-block ;"
+                    onclick="window.location.href='{{ url_for( 'frontend.index') }}';"> Return to home </button>
+            </div>
+
+            <!-- <div style="margin: 10px 15px 0px 0px;"><button id="btnAdvance" class="mediumButton"
+                    style="display:inline-block ;" title='Show/Hide Advanced Search'>
+                    Advanced
+                    search
+                </button></div> -->
+
+            <div style="margin: 10px 15px 0px 0px;">
+                <form class="download" action="{{ url_for('tasks.download_meta')}}" method="post">
+                    <button id="mdownloadbutton" class="mediumButton download" name="download_meta" type="submit"
+                        style="display:inline-block;" hidden>
+                        Download metadata </button>
+                </form>
+            </div>
+            <!-- <div id="matrixFormButton" style="margin: 10px 15px 0px 0px;">
+                <form id="downloadMatrix" class="download" action="{{ url_for('tasks.download_matrix')}}" method="post">
+                </form>
+                <div class="mediumButton" style="display:inline-block;" onclick="showDLform()"><a
+                        href="#DownloadMatrixForm">Download
+                        matrix</a>
+                </div>
+            </div> -->
+            <!-- Hide by junyi 0321 -->
+            <!-- <div id="matrixDownloadButton" style="margin: 10px 15px 0px 0px;">
+                <button class="mediumButton download" name="download_matrix" type="submit" style="display:inline-block;"
+                    form="downloadMatrix">
+                    Download matrix </button>
+            </div> -->
+        </div>
+
+        <div class="overlay" id="DownloadMatrixForm">
+            <div class="wrapper container justify-content-center">
+                <div style="margin-right: auto;">
+                    <a href="javascript:history.back()" class="close">&times;</a>
+                </div>
+                <div class="row justify-content-center">
+                    <div class=" boldauto36">
+                        Download form
+                    </div>
+                </div>
+                <div class="filterContent row justify-content-center">
+                    <div class="filterContainer justify-content-center">
+                        <div class="row justify-content-center">
+                            <label form="downloadMatrix" class="mediumauto16" for="name">Email
+                                address for receiving
+                                file: </label>
+                        </div>
+                        <div class="row justify-content-center" style="margin-bottom: 40px">
+                            <input id="emailInput" form="downloadMatrix" class="form-control" type="text" name="address"
+                                id="address" placeholder="Email address" required>
+                        </div>
+                        <div class="row justify-content-center">
+                            <button id="dowloadSubmitButton" class="mediumButton" name="download_matrix" type="submit"
+                                style="display:inline-block;" form="downloadMatrix">
+                                Download matrix </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="overlay" id="scfeatureGuide">
+            <div class="wrapper container justify-content-center">
+                <div style="margin-right: auto;">
+                    <a href="javascript:history.back()" class="close">&times;</a>
+                </div>
+                <div class="row justify-content-center">
+                    <div class="boldauto36">
+                        scFeature plot
+                    </div>
+                </div>
+                <div class="filterContent row justify-content-center">
+                    <div class="filterContainer justify-content-center">
+                        <div class="row mediumauto16" style="text-align:start">
+                            <ul>
+                                <li>scFeature is a tool that generates multi-view representations of single-cell and spatial data
+                                    through the construction of a total of 17 feature types belonging to the following six categories: <br>
+                                <ol>  
+                                <li>cell type proportions </li>
+                                <li>cell type specific gene expressions </li>
+                                <li>cell type specific pathway expressions </li>
+                                <li>cell type specific cell-cell interaction (CCI) scores </li>
+                                <li>overall aggregated gene expressions </li>
+                                <li>spatial metrics </li>
+                                
+                                </ol>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
 
-   <div  class="jumbotron" style="padding:20px">
-        <h3>Search Panel</h3>
-        <table>
-            <tbody>
+        <div class="row" style="border: 0.5px solid #B4B6B8; width: 100vw; margin: 0px 0px 70px -150px;"></div>
+
+        <div class="row" style="margin-top: 70px;" hidden>
+            <table style="width:100%">
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="input-group mb-3"><input class="form-control" type="text" id="txt_id"
+                                    placeholder="Search id" /></div>
+                        </td>
+                        <!-- <td>                    
+                        <form action="{{ url_for('tasks.show_scfeature')}}" method="get" style="display:inline-block">
+                            <button class="btn btn-primary" name="show_scfeature2" type="submit"> Show scFeature plot </button>
+                        </form>
+                    </td>     -->
+                    </tr>
+                    <tr>
+
+                    </tr>
+                    <td>
+                        <button class="btn btn-primary" style="display:inline-block" id="btnAdvance">Advanced
+                            Search</button>
+                    </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+
+        <table id="empTable" class="table table-hover table-striped table-responsive" style="width:100%; padding:0px;">
+            <thead>
                 <tr>
-                    <td>Id</td>
-                    <td><input type="text" id="txt_id" /></td>
+                    <th>Id</th>
+                    <th>Sample id</th>
+                    <th>Age</th>
+                    <th>Prediction</th>
+                    <th>Donor</th>
+                    <th>Dataset</th>
+                    <th>Status</th>
+                    <th>Days from onset</th>
+                    <th>Outcome</th>
+                    <th>Gender</th>
+                    <th>Country</th>
                 </tr>
-                <tr>
-                    <td>Sample id</td>
-                    <td>
-                    <select id="opt_sampleid">
-                            <option label=" "></option>
-                            {% for val in fsampleid %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                    </select>
-                    </td>
-                    <td>Age</td>
-                    <td>
-                    <select id="opt_age">
-                            <option label=" "></option>
-                            {% for val in fage %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                    </select>
-                    </td>
-                    <td>Cell type</td>
-                    <td>
-                    <select id="opt_prediction">
-                            <option label=" "></option>
-                            {% for val in fprediction %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                    </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>Donor</td>
-                    <td>
-                        <select id="opt_donor">
-                            <option label=" "></option>
-                            {% for val in fdonor %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td>Status</td>
-                     <td>
-                        <select id="opt_status">
-                            <option label=" "></option>
-                            {% for val in fstatus %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td>Dataset</td>
-                    <td>
-                        <select id="opt_dataset">
-                            <option label=" "></option>
-                            {% for val in fdataset %}
-                            <option value="{{val}}">{{val}}</option>
-                            {% endfor %}
-                        </select>
-                    </td>
-                    <td>
-                        <input type="button" value="Search" id="btnSearch" />
-                        <input type="button" value="Clear" id="btnClear" />
-                    </td>
-                </tr>
-            </tbody>
+            </thead>
         </table>
+
+        <div class="row justify-content-center" style="padding-top: 30px">
+            <div id="chart" class="chart"></div>
+        </div>
+
+
+        <div class="jumbotron" hidden>
+            <h4>Please choose any of the option below for data manipulation.</h4>
+
+            <!-- Edited by Junyi 0628 -->
+
+            <div id="message" style="display: none">
+                <div id="message-screen-mask" class="ui-widget-overlay ui-front"></div>
+                <div id="message-text"
+                    class="ui-dialog ui-widget ui-widget-content ui-corner-all ui-front ui-draggable ui-resizable waitmessage">
+                    Please wait...</div>
+            </div>
+        </div>
+
     </div>
+</div>
 
 
-    <table id="empTable" class="table table-hover table-striped table-responsive">
-        <thead>
-        <tr>
-            <th>id</th>
-            <th>sampleId</th>
-            <th>age</th>
-            <th>prediction</th>
-            <th>donor</th>
-            <th>dataset</th>
-            <th>status</th>
-        </tr>
-        </thead>
-    </table>
-        <div class="jumbotron">
-                <h4>
-       Please choose any of the option below for data manipulation.
-    </h4>
-    <form action="{{ url_for('tasks.download_meta')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary" name="download" type="submit"> Download metadata </button>
-    </form>
-
-    <form action="{{ url_for('tasks.download_umap')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary" name="download_umap" type="submit"> Download UMAP </button>
-    </form>
-
-    <form action="{{ url_for('tasks.show_plot')}}" method="get" style="display:inline-block">
-      <button class="btn btn-primary" name="show_plot" type="submit"> Show tSNE plot </button>
-    </form>
-
-    <form action="{{ url_for('tasks.download_matrix')}}" method="post" style="display:inline-block">
-      <button class="btn btn-primary" name="download_matrix" type="submit"> Download matrix </button>
-    </form>
-    </div>
-
-  </div>
 {% endblock %}
 
 {% block scripts %}
 
 <style>
-    .dataTables_filter { display: none;}
+    .dataTables_filter {
+        display: none;
+    }
+
+    .page-item.active .page-link {
+        background-color: #04AA6D !important;
+        border: 1px solid #ffffff;
+    }
+
+    .page-link {
+        color: black !important;
+    }
 </style>
 <script>
-$(document).ready(function() {
+    // $.fn.DataTable.ext.pager.numbers_length = 20;
 
-    $('#empTable').DataTable({
-                'processing':true,
-                'language': {
-                    'processing': '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>'
-                 },
-                'serverSide': true,
-                'serverMethod': 'post',
-                'ajax': {
-                    'url':'{{ url_for('tasks.api_db')}}'
-                },
-                'lengthMenu': [[5, 10, 25, 50, -1], [5, 10, 25, 50, "All"]],
-                searching: true,
-                sort: false,
-                'columns': [
-                    { data: 'id' },
-                    { data: 'sample_id' },
-                    { data: 'age' },
-                    { data: 'prediction' },
-                    { data: 'donor' },
-                    { data: 'dataset' },
-                    { data: 'status'}
-                ],
-                initComplete : function() {
-                    var input = $('#customSearchBox').unbind(),
-                        self = this.api(),
-                        $searchButton = $('#btnGSearch')
-                                   .text('search')
-                                   .click(function() {
-                                      self.search(input.val()).draw();
-                                   }),
-                        $clearButton = $('#btnGClear')
-                                   .text('clear')
-                                   .click(function() {
-                                      input.val('');
-                                      $searchButton.click();
-                                   })
+
+    $(document).ready(function () {
+
+        $(function () { $('.download').click(function () { ShowDownloadMessage(); }); })
+
+
+        $("#downloadMatrix").on('submit', function (e) {
+            var entrieString = $('#empTable_info').text();
+            var entries = entrieString.split('of ').pop().split(' entries')[0];
+            entries = entries.replaceAll(',', '');
+            console.log("hello",entries);
+            if (Number(entries) > 2000) {
+                e.preventDefault();
+                $.ajax({
+                    type: "POST",
+                    url: '{{ url_for('tasks.download_matrix')}}',
+                    data: $("#downloadMatrix").serialize(),
+                    success: function () {
+                        //success message mybe...
+
+                        console.log("cell number > 2000")
+                        ShowQueueMessage();
+                        // hide after 10 seconds
+                        $('#message').delay(10000).fadeOut();
+
+                    }
+                });
+            }
+        });
+
+        function ShowDownloadMessage() {
+            $('#message-text').text('Your file is downloading. Please wait...');
+            $('#message').show();
+            // window.addEventListener('focus', HideDownloadMessage, false);
+        }
+
+        function ShowQueueMessage() {
+            $('#message-text').text('Download link for your requested file will be sent to your email within a few hours.');
+            $('#message').show();
+            // window.addEventListener('focus', HideDownloadMessage, false);
+        }
+
+
+        function HideDownloadMessage() {
+            // window.removeEventListener('focus', HideDownloadMessage, false);
+            $('#message-text').text('Your file completed download!');
+            $('#message').show();
+        }
+
+        function HideForm() {
+            $('.overlay').hide();
+        }
+
+        $('ul.product-info li a').click(function (event) {
+            event.preventDefault();
+            $(this).next('div').slideToggle(200);
+        });
+
+        $('.download').click(
+            function (event) {
+                var target = event.target;
+                // When tracking the download, we're going to have
+                // the server echo back a cookie that will be set
+                // when the download Response has been received.
+                var downloadID = (new Date()).getTime();
+                // Update the URL that is *currently being requested*
+                // to contain the downloadID. This will then be response
+                // cookie header.
+                target.href += ("?downloadID=" + downloadID);
+                // The local cookie cache is defined in the browser
+                // as one large string; we need to search for the
+                // name-value pattern with the above ID.
+                var cookiePattern = new RegExp(("downloadID"), "i");
+                // Now, we need to start watching the local Cookies to
+                // see when the download ID has been updated by the
+                // response headers.
+                var cookieTimer = setInterval(checkCookies, 500);
+                // I check the local cookies for an update.
+                function checkCookies() {
+                    // If the local cookies have been updated, clear
+                    // the timer and say thanks!
+                    console.log(document.cookie.search(cookiePattern));
+                    if (document.cookie.search(cookiePattern) >= 0) {
+                        clearInterval(cookieTimer);
+                        HideDownloadMessage();
+                        return (
+                            console.log("Download complete!!Remove downloadID cookie!")
+                        );
+                    }
+
+                    ShowDownloadMessage();
+
+                    //console.log(
+                    //    "File still downloading...",
+                    //    new Date().getTime()
+                    //);
                 }
+            }
+        );
 
-            });
-
-            oTable = $('#empTable').DataTable();
-            $('#btnSearch').click(function () {
-                //Apply search for Employee Name // DataTable column index 0
-                oTable.columns(0).search($('#txt_id').val().trim());
-                //Apply search for Country // DataTable column index 3
-                oTable.columns(1).search($('#opt_sampleid').val().trim());
-                oTable.columns(2).search($('#opt_age').val().trim());
-                oTable.columns(3).search($('#opt_prediction').val().trim());
-                oTable.columns(4).search($('#opt_donor').val().trim());
-                oTable.columns(5).search($('#opt_dataset').val().trim());
-                oTable.columns(6).search($('#opt_status').val().trim());
-                //hit search on server
-                oTable.draw();
-            });
-            $('#btnClear').click(function () {
-
-                oTable.columns().search('').draw();
-                document.getElementById("txt_id").value = "";
-                $('#opt_sampleid').val('').trigger('change');
-                $('#opt_age').val('').trigger('change');
-                $('#opt_prediction').val('').trigger('change');
-                $('#opt_donor').val('').trigger('change');
-                $('#opt_dataset').val('').trigger('change');
-                $('#opt_status').val('').trigger('change');
+        $('#downloadMatrix').submit(
+            function (event) {
+                HideForm()
+            })
 
 
-            });
+        $("#globalsearch").hide();
 
-});
+        $("#matrixDownloadButton").hide();
+
+        // $("#btnAdvance").click(function () {
+        //     $("#globalsearch").toggle();
+        // });
+
+        $('#opt_sampleid').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Sample id',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
+
+        $('#opt_age').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Age',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
+
+        $('#opt_donor').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Donor',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
+
+        $('#opt_dataset').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Dataset',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
+
+        $('#opt_status').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Status',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
+
+        $('#opt_prediction').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Cell type',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
+
+        $('#opt_onset').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Days from onset',
+            buttonWidth: '300px',
+            maxHeight: 450
+        });
+
+        $('#opt_outcome').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Outcome',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
+
+        $('#opt_gender').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Gender',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
 
 
-$('select').selectpicker();
+        $('#opt_country').multiselect({
+            includeSelectAllOption: true,
+            enableFiltering: true,
+            enableCaseInsensitiveFiltering: true,
+            filterPlaceholder: 'Search for something...',
+            nonSelectedText: 'Country',
+            buttonWidth: '150px',
+            maxHeight: 450
+        });
 
-  document.getElementById('select').onclick = function () {
-    var selected = [];
-    for (var option of document.getElementById('multiselect').options) {
-      if (option.selected) {
-        selected.push(option.value);
-      }
+
+        $('#empTable').DataTable({
+            'pagingType': "input",
+            'processing': true,
+            'language': {
+                'processing': '<i class="fa fa-spinner fa-spin fa-3x fa-fw"></i>'
+            },
+            'serverSide': true,
+            'serverMethod': 'post',
+            'ajax': {
+                'url': '{{ url_for('tasks.api_db', main=link)}}'
+                },
+            'lengthMenu': [[10, 25, 50, 100], [10, 25, 50, 100]],
+            searching: true,
+            sort: false,
+            'columns': [
+                { data: 'id' },
+                { data: 'sample_id' },
+                { data: 'age' },
+                { data: 'prediction' },
+                { data: 'donor' },
+                { data: 'dataset' },
+                { data: 'status' },
+                { data: 'onset' },
+                { data: 'outcome' },
+                { data: 'gender' },
+                { data: 'country' },
+
+            ],
+            "columnDefs": [
+                { "width": "28%", "targets": 0 },
+                { "width": "14%", "targets": 1 },
+                { "width": "7%", "targets": 2 },
+                { "width": "7%", "targets": 3 },
+                { "width": "14%", "targets": 4 },
+                { "width": "14%", "targets": 5 },
+                { "width": "14%", "targets": 6 },
+                { "width": "14%", "targets": 7 },
+                { "width": "14%", "targets": 8 },
+                { "width": "14%", "targets": 9 },
+                { "width": "14%", "targets": 10 },
+            ],
+            initComplete: function () {
+                var input = $('#customSearchBox').unbind(),
+                    self = this.api(),
+                    $searchButton = $('#btnGSearch')
+                        .text('search')
+                        .click(function () {
+                            self.search(input.val()).draw();
+                        }),
+                    $clearButton = $('#btnGClear')
+                        .text('clear')
+                        .click(function () {
+                            input.val('');
+                            $searchButton.click();
+                            //var perviousEntries = Number(entries);
+                        })
+            }
+
+        });
+
+        oTable = $('#empTable').DataTable();
+
+        $('#btnSearch').click(function () {
+            //Apply search for Employee Name // DataTable column index 0
+            oTable.columns(0).search($('#txt_id').val().trim());
+            //Apply search for Country // DataTable column index 3
+            oTable.columns(1).search($('#opt_sampleid').val().join("|"));
+            oTable.columns(2).search($('#opt_age').val().join("|"));
+            oTable.columns(3).search($('#opt_prediction').val().join("|"));
+            oTable.columns(4).search($('#opt_donor').val().join("|"));
+            oTable.columns(5).search($('#opt_dataset').val().join("|"));
+            oTable.columns(6).search($('#opt_status').val().join("|"));
+            oTable.columns(7).search($('#opt_onset').val().join("|"));
+            oTable.columns(8).search($('#opt_outcome').val().join("|"));
+            oTable.columns(9).search($('#opt_gender').val().join("|"));
+            oTable.columns(10).search($('#opt_country').val().join("|"));
+            //hit search on server
+            oTable.draw();
+            //document.getElementById("test").style.visibility = "visible";
+        });
+
+        $('#btnClear').click(function () {
+
+            oTable.columns().search('').draw();
+            document.getElementById("txt_id").value = "";
+            $("#opt_sampleid").multiselect('clearSelection');
+            $('#opt_age').multiselect('clearSelection');
+            $('#opt_prediction').multiselect('clearSelection');
+            $('#opt_donor').multiselect('clearSelection');
+            $('#opt_dataset').multiselect('clearSelection');
+            $('#opt_status').multiselect('clearSelection');
+            $('#opt_onset').multiselect('clearSelection');
+            $('#opt_outcome').multiselect('clearSelection');
+            $('#opt_gender').multiselect('clearSelection');
+            $('#opt_country').multiselect('clearSelection');
+
+
+        });
+
+    });
+
+
+</script>
+
+<!-- <script>
+    
+    onclick="document.getElementById('scfform').submit();document.getElementById('dsform').submit();
+</script>
+ -->
+<script>
+    function getURL() {
+        console.log("The URL of this page is: " + window.location.href);
     }
-    alert("Successfully selected the following donors for filtering" + selected);
 
-  }
+    $('#return_home').click(function () {
+        var url = window.location.href;
+        var arr = url.split("?");
+        arr.pop();
+        console.log(arr[0]);
+        window.location.href = arr[0];
+        { { url_for('frontend.index') } }
+    });
+
+    //$('#scfbutton').click(function () {
+    // document.getElementById('dsform').submit();
+    //document.getElementById('scfform').submit();
+
+    //});
+    var startTime;
+    var endTime;
+    var diff;
+
+    window.addEventListener('load', function () {
+        console.log('All datatable records loaded');
+        console.log(Date($.now()));
+    });
+
+    $('#empTable').on('page.dt', function () {
+        console.log("Page start change");
+        startTime = new Date();
+        //console.log(startTime);
+    });
+
+    var getEntries = function () {
+        var entrieString = $('#empTable_info').text();
+        var entries = entrieString.split('of ').pop().split(' entries')[0];
+        entries = entries.replaceAll(',', '');
+
+        if (Number(entries) < 2000) {
+            $("#matrixFormButton").hide();
+            $("#matrixDownloadButton").show();
+            $('#emailInput').removeAttr('required');
+        } else {
+            $("#matrixFormButton").show();
+            $("#matrixDownloadButton").hide();
+            $('#emailInput').attr('required', 'required');
+        }
+        //0324 EDIT by junyi
+        if (Number(entries) < 1) {
+            var myButtonArray = [ "UMAPbutton", "mdownloadbutton", "charabutton","scfbutton","scfnotify" ];
+
+            $.each(myButtonArray, function( index, value ){
+
+                let element = document.getElementById(value);
+                element.setAttribute("hidden", "hidden");
+            });
+
+        }
+        console.log("Number of queired records",Number(entries))
+
+        return Number(entries);
+    }
+
+    $('#empTable').on('draw.dt', function () {
+        console.log("Page finish change");
+        //console.log($.now());
+        endTime = new Date();
+        diff = (endTime - startTime);
+        console.log(diff);
+        getEntries();
+    });
+
+    var showDLform = function () {
+        $("#DownloadMatrixForm").css("display", "block")
+    }
+
+    var showGuide = function () {
+        $("#scfeatureGuide").css("display", "block")
+    }
+
+    // 0321 Added by junyi to hid button
+    $("#btnSearch").click(function(){
+
+        var myButtonArray = [ "UMAPbutton", "mdownloadbutton", "charabutton","scfbutton","scfnotify" ];
+
+        var entrieString = $('#empTable_info').text();
+        var entries = entrieString.split('of ').pop().split(' entries')[0];
+        entries = entries.replaceAll(',', '');
+        console.log("Number of selected records",entries);
+        if(Number(entries)>1){
+            $.each(myButtonArray, function( index, value ){
+
+            let element = document.getElementById(value);
+            element.setAttribute("hidden", "hidden");
+            let hidden = element.getAttribute("hidden");
+            if (hidden) {
+                element.removeAttribute("hidden");
+            }
+            });
+
+        };
+
+    })
+    $("#btnClear").click(function(){
+
+        var myButtonArray = [ "UMAPbutton", "mdownloadbutton", "charabutton","scfbutton","scfnotify" ];
+
+        $.each(myButtonArray, function( index, value ){
+
+            let element = document.getElementById(value);
+            //element.setAttribute("hidden", "hidden");
+            let hidden = element.getAttribute("hidden");
+            element.setAttribute("hidden", "hidden");
+            
+            // console.log( index + ": " + value );
+        });
+    })
+
+
+</script>
+
+
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script type="text/javascript">
+    var graphs = {{ graphJSON | safe }};
+
+    Plotly.plot('chart', graphs, {});
 
 </script>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function (event) {
+        var scrollpos = localStorage.getItem('scrollpos');
+        if (scrollpos) window.scrollTo(0, scrollpos);
+    });
 
-
+    window.onbeforeunload = function (e) {
+        localStorage.setItem('scrollpos', window.scrollY);
+    };
 </script>
 
+<!-- Show loading box -->
+<script type="text/javascript">// <![CDATA[
+    function loading() {
+        $("#loadingbox").show();
+    }
+
+    function showplot() {
+        window.location.href = '{{ url_for( 'tasks.show_plot') }}';
+        $("#loadingbox").show();
+    }
+
+    function showSearchPlot() {
+        window.location.href = '{{ url_for( 'tasks.show_search') }}';
+        $("#loadingbox").show();
+    }
+  // ]]></script>
+<!-- Limit select box dataset -->
+<!-- <script type="text/javascript">
+    $(document).ready(function() {
+        var last_valid_selection = null;
+        $('#opt_dataset').change(function(event) {
+            if ($(this).val().length > 3) {
+            $(this).val(last_valid_selection);
+            } else {
+                last_valid_selection = $(this).val();
+            }
+        });
+    });
+</script> -->
 
 {% endblock %}

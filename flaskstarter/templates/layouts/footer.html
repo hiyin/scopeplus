@@ -1,10 +1,97 @@
-<div class="footer">
-    <div class="container">
-        <a class="navbar-brand" href="{{ url_for('tasks.home') }}"><img
-                src="{{url_for('static', filename='D24H_Logo.png')}}" width="273" height="129" /></a>
-        <div class="d-flex justify-content-between">
-            <p>Copyright © 2022 Laboratory of Data Discovery for Health (D²4H). All Rights Reserved.</p>
-            <p><a class="link" href="https://www.d24h.hk/disclaimer-and-privacy-policy/">| Disclaimer and Privacy Policy</a></p>
+<div class="footer" style="padding: 60px 200px 30px 200px;">
+    <div class="container" style="margin: 0px; padding:0px;">
+        <div class="row" style="margin: 0px; padding:0px;">
+            <div class="col-12 col-lg-3 justify-content-start" style="padding:0px;">
+                <a class="navbar-brand" href="{{ url_for('frontend.index') }}"><img
+                        src="{{url_for('static', filename='D24H_Logo.png')}}" width="273" height="129"
+                        style="margin:-20px 0px 0px -38px;" /></a>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block justify-content-start" style="padding:0px 60px 0px 60px;">
+                <div class="row" style="margin: 0px; padding:12px 0px 0px 0px;">
+                    <img src="{{url_for('static', filename='tel icon.svg')}}" />
+                    <div class="regularauto16" style="margin-left: 8px; color:hsla(176, 39%, 15%, 1);">+852 3910 3800
+                    </div>
+                </div>
+                <div class="row" style="margin: 0px; padding:12px 0px 0px 0px;">
+                    <img src="{{url_for('static', filename='tel icon.svg')}}" />
+                    <div class="regularauto16" style="margin-left: 8px; color:hsla(176, 39%, 15%, 1);">+852 2793 3233
+                    </div>
+                </div>
+                <div class="row" style="margin: 0px; padding:12px 0px 0px 0px;">
+                    <img src="{{url_for('static', filename='mail icon.svg')}}" />
+                    <div class="regularauto16" style="margin-left: 8px; color:hsla(176, 39%, 15%, 1);">
+                        covidscope@gmail.com
+                    </div>
+                </div>
+                <div class="row" style="margin: 0px; padding:12px 0px 0px 0px;">
+                    <img src="{{url_for('static', filename='link icon.svg')}}" />
+                    <div class="regularauto16"><a href="https://www.d24h.hk/"
+                            style="margin-left: 8px; color: hsla(176, 39%, 15%, 1)"
+                            target="_blank">https://www.d24h.hk/</a></div>
+                </div>
+                <div class="row" style="margin: 0px; padding:12px 0px 0px 0px;">
+                    <div class="align-top"><img src="{{url_for('static', filename='location icon.svg')}}" /></div>
+                    <div class="regularauto16" style="margin-left: 8px; color:hsla(176, 39%, 15%, 1);width:80%;">Units
+                        1201 -
+                        1206, 1223 & 1225,
+                        12/F,
+                        Building 19W, 19 Science Park West Avenue, Hong Kong
+                        Science Park, Pak Shek Kok, New Territories, Hong Kong</div>
+                </div>
+                <div class="row" style="margin:0px; padding:12px 0px 0px 0px">
+                    <a href="https://www.facebook.com/hkud24h/" target="_blank"><img
+                            src="{{url_for('static', filename='facebook.svg')}}" width="20" height="20" /></a>
+                    <a href="https://www.instagram.com/hkud24h/" target="_blank" style="margin-left: 12px"><img
+                            src="{{url_for('static', filename='instagram.svg')}}" width="20" height="20" /></a>
+                    <a href="https://www.linkedin.com/company/d24h/mycompany/" target="_blank"
+                        style="margin-left: 12px"><img src="{{url_for('static', filename='linkin.svg')}}" width="20"
+                            height="20" /></a>
+                    <a href="https://twitter.com/hku_d24h?lang=en" target="_blank" style="margin-left: 12px"><img
+                            src="{{url_for('static', filename='twitter.svg')}}" width="20" height="20" /></a>
+                    <a href="https://vimeo.com/user132573468" target="_blank" style="margin-left: 12px"><img
+                            src="{{url_for('static', filename='vimeo.svg')}}" width="20" height="20" /></a>
+                </div>
+            </div>
+            <div class="col-lg-3 d-none d-lg-block d-xl-block justify-content-end" style="padding:0px 0px 0px 60px;">
+                <div class="row justify-content-end" style="margin: 15px 0px 30px 0px; padding:0px">
+                    <div class="mediumauto18"><a href="{{ url_for('tasks.table_view') }}"
+                            style="color: hsla(169, 91%, 17%, 1)">Explore</a></div>
+                </div>
+                <div class="row justify-content-end" style="margin: 30px 0px; padding:0px;">
+                    <div class="mediumauto18" style="color: hsla(169, 91%, 17%, 1)"><a
+                            href="{{ url_for('frontend.data') }}" style="color: hsla(169, 91%, 17%, 1)">Data</a>
+                    </div>
+                </div>
+                <div class="row justify-content-end" style="margin: 30px 0px; padding:0px;">
+                    <div class="mediumauto18" style="color: hsla(169, 91%, 17%, 1)"><a
+                            href="{{ url_for('frontend.tutorial') }}" style="color: hsla(169, 91%, 17%, 1)">Tutorial</a>
+                    </div>
+                </div>
+                <!-- <div class="row justify-content-end" style="margin: 30px 0px; padding:0px;">
+                    <div class="mediumauto18" style="color: hsla(169, 91%, 17%, 1)"><a
+                            href="{{ url_for('tasks.contribute') }}"
+                            style="color: hsla(169, 91%, 17%, 1)">Contribute</a></div>
+                </div> -->
+                <div class="row justify-content-end" style="margin: 30px 0px; padding:0px;">
+                    <div class="mediumauto18" style="color: hsla(169, 91%, 17%, 1)"><a
+                            href="{{ url_for('frontend.contact_us') }}" style="color: hsla(169, 91%, 17%, 1)">Contact
+                            us</a></div>
+                </div>
+            </div>
         </div>
+        <div class="row justify-content-between" style="margin: 50px 0px 0px 0px; color: #173533 !important;">
+            <div>
+                <p>Copyright © 2022 Laboratory of Data Discovery for Health (D²4H). All rights reserved.</p>
+            </div>
+            <div>
+                <p><a class="link" href="https://www.d24h.hk/disclaimer-and-privacy-policy/"
+                        style="color: #1CA68C !important;">Disclaimer and privacy policy</a></p>
+            </div>
+        </div>
+
     </div>
 </div>
+
+{% block scripts %}
+
+{% endblock %}
