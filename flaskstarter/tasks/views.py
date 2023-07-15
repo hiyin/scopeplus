@@ -1517,7 +1517,7 @@ def query_builder(map):
     print(map)
     re_match = re.compile(r'^-?\d{1,10}\.?\d{0,10}$')
     for k in map:
-        if (k in ["meta_age_category", "meta_sample_id2", "meta_dataset", "level2", "meta_severity", "meta_days_from_onset_of_symptoms", "meta_outcome", "meta_gender", "meta_patient_id", "Country"]):
+        if (k in ["meta_age_category", "meta_sample_id2","meta_patient_id", "meta_dataset", "level2", "meta_severity", "meta_days_from_onset_of_symptoms", "meta_outcome", "meta_gender", "Country"]):
             l = []
             for ki in map[k]:
                 if re_match.findall(ki):
