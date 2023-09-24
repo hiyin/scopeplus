@@ -11,7 +11,7 @@ from typing import final
 import uuid
 from flask_login import login_required, current_user
 from flask_mail import Message
-from ..extensions import db, mongo,scfeature, mail
+from ..extensions import db, mongo, mail
 import sys
 from plotly.subplots import make_subplots
 import csv

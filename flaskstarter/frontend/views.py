@@ -36,11 +36,11 @@ def dashboard():
     return render_template('dashboard/dashboard.html', task_form=_task_form, _active_dash=True)
 
 
-def get_all_study_meta():
-    res = list(mongo.pbmc_all_study_meta_v4.find())
-    print(res[1])
-    #uniq_field = mongo.single_cell_meta.aggregate([{"$group": {"_id": '$%s' % field_name}}]);
-    #key = [r['_id'] for r in uniq_field]
+# def get_all_study_meta():
+#     res = list(mongo.pbmc_all_study_meta_v4.find())
+#     print(res[1])
+#     #uniq_field = mongo.single_cell_meta.aggregate([{"$group": {"_id": '$%s' % field_name}}]);
+#     #key = [r['_id'] for r in uniq_field]
     
     return res
 
@@ -84,14 +84,14 @@ df = df.dropna(subset=['Country Code'])
 @frontend.route('/', methods=["GET", "POST"])
 def index():
     data = df.to_dict()
-    fdataset = get_all_study_meta()
+    # fdataset = get_all_study_meta() # remove this from architecture version
     res = get_celltype_count()
-    counting = get_overview()
-    counts = counting
+    #counting = get_overview()
+    # counts = counting
     #pprint.pprint(res)
     if current_user.is_authenticated:
-        return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res, counting=counting, counts=counts)
-    return render_template('tasks/landing.html',  data=data, _active_home=True, fdataset=fdataset, fcelltype=res, counting=counting, counts=counts)
+        return render_template('tasks/landing.html',  data=data, _active_home=True, fcelltype=res)
+    return render_template('tasks/landing.html',  data=data, _active_home=True, fcelltype=res)
 # @frontend.route('/')
 # def index():
 #     # current_app.logger.debug('debug')
