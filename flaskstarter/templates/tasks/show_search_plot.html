@@ -9,6 +9,11 @@
 <div class="section03" style="padding-top:0px;">
   <div class="container" style="margin:0px; padding: 0px;">
     <div class="row">
+      <div class="row justify-content-end" style="padding-top: 30px;">
+      <form action="{{ url_for('tasks.table_view')}}" method="get" style="display:inline-block">
+        <button class="mediumButton" name="jump_home" type="submit"> Go to homepage</button>
+      </form>
+      </div>
       <div class="col-lg justify-content-center">
         <div class="row justify-content-center" style="padding-top: 100px">
           <div class="boldauto36">Barplot of Cell Type Counts</div>
