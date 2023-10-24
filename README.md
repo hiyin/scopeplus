@@ -4,7 +4,7 @@
   <img width="500"  src="/screenshots/Logo_gradient.png">
 </p>
 
-Scope+ is a modern, scalable and generalized single-cell atlas portal archictecture. The architecture applied to 5 Million single-cell immune and blood cells data with realization in Covidscope web portal (https://www.covidsc.d24h.hk/). 
+Scope+ is a modern, scalable and generalized single-cell atlas portal archictecture. The architecture has been applied to 5 million single-cell COVID-19 immune and blood cells data with realization in Covidscope web portal (https://www.covidsc.d24h.hk/). 
 
 ## Tutorial
 The tutorial for implementation of Scope+ to adapt user's own atlas datasets is available at: [https://hiyin.github.io/scopeplus-user-tutorial/](https://hiyin.github.io/scopeplus-user-tutorial/)
