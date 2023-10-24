@@ -1,6 +1,8 @@
 # Scope+
 
-Scope+ is the framework with realization in Covidscope (https://www.covidsc.d24h.hk/). Scope+ is a modern, scalable and novel web application framework developed as a community resource which serves as a generalized single-cell atlas portal archictecture. 
+Scope+ is a modern, scalable and novel web application framework developed as a community resource which serves as a generalized single-cell atlas portal archictecture. 
+
+Scope+ is the architecture applied to 5 Million single-cell immune and blood cells data with realization in Covidscope web portal (https://www.covidsc.d24h.hk/). 
 
 Existing single-cell atlas portal allow dataset-level browsing, no integrative cell-level browsing, while Scope+ provide efficient access, cell-level categorical selections and filtering of cells for meta-analysis for users who wish to use and adopt Scope+ to their own atlas data. Single cell gene expression data is sparse high-dimentional, the data query, retrieval and data visualization in Scope+ at cell-level granularity is accelerated by various computational optimization strategies, up to 1000 times faster. 
 
