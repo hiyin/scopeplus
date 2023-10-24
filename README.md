@@ -1,7 +1,7 @@
 # Scope+
 
 <p align="center">
-  <img width="200"  src="/screenshots/Logo_gradient.png">
+  <img width="600"  src="/screenshots/Logo_gradient.png">
 </p>
 
 Scope+ is developed as a community resource which serves as a modern, scalable and generalized single-cell atlas portal archictecture. 
