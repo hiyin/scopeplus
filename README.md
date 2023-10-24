@@ -1,6 +1,6 @@
 # Scope+
 
-![logo](./screenshots/logo.png)
+![logo](./screenshots/Logo_gradient.png)
 
 Scope+ is developed as a community resource which serves as a modern, scalable and generalized single-cell atlas portal archictecture. 
 
