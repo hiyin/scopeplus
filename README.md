@@ -1,5 +1,7 @@
 # Scope+
 
+![logo](./screenshots/logo.png)
+
 Scope+ is a modern, scalable and novel web application framework developed as a community resource which serves as a generalized single-cell atlas portal archictecture. 
 
 Scope+ is the architecture applied to 5 Million single-cell immune and blood cells data with realization in Covidscope web portal (https://www.covidsc.d24h.hk/). 
