@@ -19,7 +19,7 @@ allows real-time data subsetting and visualizations of the large single cell exp
 ## Implication
 Existing single-cell atlas portal allow dataset-level browsing, no integrative cell-level browsing, while Scope+ provide efficient access, cell-level categorical selections and filtering of cells for meta-analysis for users who wish to use and adopt Scope+ to their own atlas data. Single cell gene expression data is sparse high-dimentional, the data query, retrieval and data visualization in Scope+ at cell-level granularity is accelerated by various computational optimization strategies. 
 
-The development timeline for single cell atlas portal is around 1 to 2 years, with the help of Scope+, it can be streamlined to 2-3 days. Ultimately, Scope+ can translate any single cell atlases into a openly accessible data web portal for reproducible science, and making single-cell research data avaialble for community timely, this is particularly important for pandemics. 
+The development timeline for single cell atlas portal is around 1 to 2 years, with the help of Scope+, it can be streamlined to a weeke or two. Ultimately, Scope+ can translate any single cell atlases into a openly accessible data web portal for reproducible science, and making single-cell research data avaialble for community timely, this is particularly important for pandemics. 
 
 ## Liscence
 The software architecture is open-sourced in this repository and for use under the MIT License.
