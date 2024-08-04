@@ -5,10 +5,10 @@
 
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-  <meta name="description" content="Covidscope - Covid-19 atlas web portal">
+  <meta name="description" content="CellMontage - Cross-species prediction web portal">
   <meta name="author" content="github.com/">
 
-  <title>{% block title %}{{ page_title|default('Flask-Starter') }}{% endblock %} - Covidscope</title>
+  <title>{% block title %}{{ page_title|default('Flask-Starter') }}{% endblock %} - CellMontage</title>
 
   <!-- Bootstrap core CSS -->
   <link href="{{ url_for('static', filename='bootstrap.min.css')}}" rel="stylesheet">
@@ -70,6 +70,8 @@
 
   <script type="text/javascript" charset="utf8"
     src="https://cdn.datatables.net/plug-ins/1.12.1/pagination/input.js"></script>
+
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 
   {% block scripts %}{% endblock %}
 

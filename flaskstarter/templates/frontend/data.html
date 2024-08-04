@@ -7,348 +7,205 @@
 {% block body %}
 <div class="section03" style="padding-left: 120px; padding-right: 120px;">
     <div class="row justify-content-center">
-      <div class="boldauto36" style="margin-bottom: 50px;">Data</div>
+      <div class="boldauto36" style="margin-bottom: 50px;">Cross-Species Prediction</div>
     </div>
 
-
   <div class="container tutorialCard collapsible" style="padding: 0px; margin-bottom: 24px;">
-    <div class="row tutorialTitle boldH160">Our complete data sets (meta data, raw count data and integrated count data) can be downloaded below:</div>
+    <div class="row tutorialTitle boldH160">Start your cross-species prediction of interest here:</div>
     <div class="row container collapsible-text"
       style="padding: 30px 40px 30px 40px; border-top: 1px solid #B4B6B8;">
       <div class="row tutorialContent regularauto16">
       </div>
       <div class="row tutorialContent regularauto16">
-        <p>You can generate a 10X-like summary report with our metadata after downloading it, using our code 
-            <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/html_codes.zip">here</a>
+        <p>You can perform cross-species mapping using our algorithms
         </p>
+      </div>
+
+<div class="container" style="padding: 200px;">
+  <div class="row justify-content-center">
+    <div class="container" style="padding: 0px;">
+      <div class="row justify-content-center boldauto36" style="padding-bottom: 20px;">Upload your data</div>
+      <div class="row justify-content-center mediumauto16" style="padding-bottom: 65px;">Please upload file in .rds or
+        h5ad format.
+      </div>
+      <div class="row justify-content-center" style="padding-bottom: 60px;">
+        <form id="upload" method="POST" action="{{ url_for('tasks.upload_file')}}" enctype="multipart/form-data">
+          <div class="input-group">
+            <div class="custom-file">
+              <input type="file" class="custom-file-input" id="inputGroupFile01"
+                aria-describedby="inputGroupFileAddon01" name="file">
+              <label class="custom-file-label" for="inputGroupFile01">Choose file</label>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="row justify-content-center">
+        <button type="submit" form="upload" class="uploadButton mediumauto22">Upload user files</button>
       </div>
     </div>
 
- 
-  <div id="searchPage" class="container" style="padding: 0px;"></div>
-        <table id="data_download_links" class="table table-hover table-striped" style="width:100%; padding:0px;">
-                <thead><tr><th title="Field #1">Category</th>
-                <th title="Field #2">Subcategory</th>
-                <th title="Field #3">Description</th>
-                <th title="Field #4">Raw data</th>
-                <th title="Field #5">Integrated data</th>
-                </tr></thead>
-                <tbody><tr>
-                <td>Metadata</td>
-                <td>-</td>
-                <td>meta.csv</td>
-                <td><a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/meta.csv">meta.csv</a></td>
-                <td><a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/meta.csv">meta.csv</a></td>
-                </tr>
-                <tr>
-                <td>Count data</td>
-                <td>Arunachalam_2020</td>
-                <td>arunachalam</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/arunachalam/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/arunachalam/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/arunachalam/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/arunachalam/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/arunachalam/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/arunachalam/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Bost_2021</td>
-                <td>bost</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/bost/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/bost/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/bost/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/bost/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/bost/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/bost/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Combat_2022</td>
-                <td>combat</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combat/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combat/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combat/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combat/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combat/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combat/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Combes_2021</td>
-                <td>combes</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combes/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combes/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/combes/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combes/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combes/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/combes/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Lee_2020</td>
-                <td>lee</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/lee/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/lee/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/lee/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/lee/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/lee/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/lee/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Liu_2021</td>
-                <td>liu</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/liu/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/liu/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/liu/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/liu/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/liu/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/liu/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Ramaswamy_2021</td>
-                <td>ramaswamy</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ramaswamy/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ramaswamy/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ramaswamy/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ramaswamy/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ramaswamy/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ramaswamy/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Ren_2021</td>
-                <td>ren</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ren/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ren/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/ren/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ren/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ren/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/ren/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Schulte-Schrepping_2020</td>
-                <td>schulte-schrepping</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schulte-schrepping/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schulte-schrepping/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schulte-schrepping/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schulte-schrepping/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schulte-schrepping/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schulte-schrepping/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Schuurman_2021</td>
-                <td>schuurman</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schuurman/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schuurman/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/schuurman/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schuurman/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schuurman/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/schuurman/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Sinha_2022</td>
-                <td>sinha</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/sinha/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/sinha/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/sinha/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/sinha/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/sinha/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/sinha/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Stephenson_2021</td>
-                <td>stephenson</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/stephenson/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/stephenson/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/stephenson/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/stephenson/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/stephenson/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/stephenson/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Su_2020</td>
-                <td>su</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/su/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/su/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/su/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/su/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/su/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/su/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Thompson_2021</td>
-                <td>thompson</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/thompson/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/thompson/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/thompson/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/thompson/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/thompson/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/thompson/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Unterman_2022</td>
-                <td>unterman</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/unterman/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/unterman/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/unterman/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/unterman/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/unterman/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/unterman/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Wilk_2021</td>
-                <td>wilk</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/wilk/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/wilk/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/wilk/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/wilk/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/wilk/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/wilk/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Yao_2021</td>
-                <td>yao</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/yao/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/yao/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/yao/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/yao/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/yao/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/yao/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Zhao_2021</td>
-                <td>zhao</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhao/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhao/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhao/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhao/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhao/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhao/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                <tr>
-                <td> </td>
-                <td>Zhu_2020</td>
-                <td>zhu</td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhu/barcodes.tsv.gz">barcodes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhu/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/raw/zhu/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                <td>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhu/barcodes.tsv.gz">barcoes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhu/genes.tsv.gz">genes.tsv.gz</a>
-                  <a href="https://covidscope-public-repository.s3.ap-east-1.amazonaws.com/integrated/zhu/matrix.mtx.gz">matrix.mtx.gz</a>
-                </td>
-                </tr>
-                </tbody></table>
-    </div>   
+
   </div>
+
+
+<div class="jumbotron">
+    <div class="row tutorialContent regularauto16">
+        <p>Please select the options for cross-species comparison:</p>
+    </div>
+    <form name="matching_Form" id="matching_Form">
+        <div class="form-group">
+            <label for="milo1">Milo1 File:</label>
+            <select id="milo1" name="milo1" class="form-control">
+                <option value="mmusculus_geneBasis.h5ad">Mouse</option>
+                <option value="ocunicuus_geneBasis.h5ad">Rabbit</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="milo2">Milo2 File:</label>
+            <select id="milo2" name="milo2" class="form-control">
+                <option value="mmusculus_geneBasis.h5ad">Mouse</option>
+                <option value="ocunicuus_geneBasis.h5ad">Rabbit</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="matchtable">Match Table:</label>
+            <input type="text" id="matchtable" name="matchtable" class="form-control" value="mmusculus_ocunicuus_matches.csv">
+        </div>
+        <div class="form-group">
+            <label for="aglabel">Aglabel:</label>
+            <input type="text" id="aglabel" name="aglabel" class="form-control" value="celltype">
+        </div>
+        <div class="form-group">
+            <label for="agfactor">Agfactor:</label>
+            <input type="number" id="agfactor" name="agfactor" class="form-control" value="1" step="0.1">
+        </div>
+        <div class="form-group">
+            <label for="agdrop">Agdrop:</label>
+            <input type="number" id="agdrop" name="agdrop" class="form-control" value="0.5" step="0.1">
+        </div>
+        <div class="form-group">
+            <label for="holdout">Holdout:</label>
+            <input type="text" id="holdout" name="holdout" class="form-control" value="stage=E6.75,E7.0__celltype=Epiblast">
+        </div>
+    </form>
+
+    <div class="row justify-content-start" style="margin-top: 24px;">
+        <div>
+            <input type="button" class="darkButton" style="display:inline-block;" value="Run prediction" id="btnSearch" />
+        </div>
+    </div>
+
+
+
 </div>
+
+
+
+<div class="jumbotron">
+    <div class="row tutorialContent regularauto16">
+        <p>Please select the options for visualization:</p>
+    </div>
+        <form name="viz_Form" id="viz_Form">
+            <div class="form-group">
+                <label for="colannot">Column Annotation:</label>
+                <select id="colannot" name="colannot" class="form-control">
+                    <option value="stage">stage</option>
+                    <!-- Add more options as needed -->
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="vizMilo1">Milo1 File:</label>
+                <select id="vizMilo1" name="vizMilo1" class="form-control">
+                    <option value="mmusculus_geneBasis.h5ad">Mouse</option>
+                    <option value="ocunicuus_geneBasis.h5ad">Rabbit</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="predpath">Prediction Path:</label>
+                <input type="text" id="predpath" name="predpath" value="mmusculus_geneBasis_ocunicuus_geneBasis_hold__stage=E6.75,E7.0" class="form-control">
+            </div>
+            <input type="button" class="lightButton" style="display:inline-block;" value="Run Visualization" id="btnRunVisualize">
+        </form>
+
+
+
+</div>
+
+
+
+
+</div>
+</div>
+          <div id="visualization-container"></div>
+</div>
+
+</div>
+
+
 {% endblock %}
 
 {% block scripts %}
-<style>
-  a {
-    color: #1CA68C;
-  }
-
-  a:hover {
-  color: #173533;
-  }
-
-</style>
 <script>
-$(document).ready(function () {
-    $('#data_download_links').DataTable({
-        // order by first column
-        order: [[0, 'desc']],
-        "pageLength": 50,
+$(document).ready(function() {
+    $("#btnRunVisualize").click(function() {
+    var formData = {
+        colannot: $('#colannot').val(),
+        milo1: $('#milo1').val(),
+        predpath: $('#predpath').val()
+    };
+    alert("Initiating visualization task...", formData);
+
+    $.ajax({
+        type: "POST",
+        url: "{{ url_for('tasks.run_visualization') }}",
+        data: JSON.stringify(formData),
+        contentType: "application/json",
+        dataType: "json",
+        success: function(response) {
+            alert("Visualization process started.", response);
+            $('#visualization-container').html(response.html);
+            var gd = document.getElementsByClassName('js-plotly-plot');
+            for(var i=0; i<gd.length; i++){
+                Plotly.Plots.resize(gd[i]);
+            }
+
+        },
+        error: function(error) {
+            alert("An error occurred while starting the visualization.", error);
+        }
     });
-  });
-</script>    
+});
+
+
+
+
+    $("#btnSearch").click(function() {
+        var formData = {
+            milo1: $('#milo1').val(),
+            milo2: $('#milo2').val(),
+            matchtable: $('#matchtable').val(),
+            aglabel: $('#aglabel').val(),
+            agfactor: $('#agfactor').val(),
+            agdrop: $('#agdrop').val(),
+            holdout: $('#holdout').val(),
+        };
+
+        $.ajax({
+            type: "POST",
+            url: "{{ url_for('tasks.run_crosscompare') }}",
+            data: JSON.stringify(formData),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function(response) {
+                console.log(response);
+                alert("Prediction run successfully!");
+            },
+            error: function(error) {
+                console.log(error);
+                alert("An error occurred while running the prediction. Please try again.");
+            }
+        });
+    });
+});
+</script>
 {% endblock %}

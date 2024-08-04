@@ -26,6 +26,8 @@ application.app_context().push()
 application.test_request_context().push()
 register_celery(application)
 
+
+
 #
 # if __name__ == "__main__":
 #     application.run()

@@ -33,7 +33,6 @@ logging.basicConfig(level=logging.DEBUG,
 
 logger = logging.getLogger()
 
-
 def create_app(config=None, app_name=None, blueprints=None):
     # Create a Flask app
 

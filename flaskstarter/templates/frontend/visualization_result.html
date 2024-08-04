@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visualization Result</title>
+
+    <!-- Include Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <!-- Insert the visualization HTML -->
+    <div id="visualization-container">
+        {{ visualization_html | safe }}
+    </div>
+
+    <script>
+        // This script ensures that Plotly plots are properly resized
+        window.onload = function() {
+            var gd = document.getElementsByClassName('js-plotly-plot');
+            for(var i=0; i<gd.length; i++){
+                Plotly.Plots.resize(gd[i]);
+            }
+        }
+    </script>
+</body>
+</html>

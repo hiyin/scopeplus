@@ -45,8 +45,9 @@ import subprocess
 import plotly.graph_objects as go
 
 
-tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
 
+tasks = Blueprint('tasks', __name__, url_prefix='/tasks')
+main_dir = TMP_FOLDER + "/cross_species_compare/"
 
 # set in-memory storage for collection of ids for meta data table display
 matrixid = []
@@ -75,6 +76,9 @@ def make_summary_report(tmp_path):
 def contribute():
     return render_template('tasks/contribute.html')
 
+@tasks.route('/data')
+def data():
+    return render_template('frontend/data.html')
 
 scClassify_input = []
 
@@ -753,6 +757,91 @@ def plot_umap(cell_color='scClassify_prediction',gene_color=None,tmp_folder=".")
         graphJSON2 = None
 
     return graphJSON,graphJSON2,df_plot
+
+@tasks.route('/run_visualization', methods=['POST'])
+def run_visualization():
+    data = request.get_json()
+    colannot = data['colannot']
+    milo1 = data['milo1']
+    predpath = data['predpath']
+
+    # Start the Celery task
+    print("start executing task")
+    njob = 12
+    command = [
+       "python", main_dir + "script_milos_prediction_visualization.py",
+       "--njobs", str(njob),
+       "--colannot", colannot,
+       "--milo1", main_dir + milo1,
+       "--predpath", "/Users/dyin/PycharmProjects/scopeplus/preds_mmusculus_geneBasis_ocunicuus_geneBasis/preds_holdout/" + predpath
+    ]
+
+    print(command)
+    result = subprocess.run(command, capture_output=True, text=True)
+    html_path = "/Users/dyin/PycharmProjects/scopeplus/preds_mmusculus_geneBasis_ocunicuus_geneBasis/preds_holdout/"
+
+    matching_files = [os.path.join(html_path, f) for f in os.listdir(html_path) if
+                      f.endswith("__visualisation_predictions.html")]
+    # Assuming you have the file path in matching_files[0]
+    file_path = matching_files[0]
+
+    with open(file_path, 'r') as file:
+        visualization_html = file.read()
+
+    # Read the contents of the HTML file
+    if file_path:
+        return jsonify({
+            'status': 'success',
+            'message': 'Visualization generated successfully',
+            'html': visualization_html
+        })
+    else:
+        return jsonify({
+            'message': 'Error running cross-comparison',
+            'stdout': result.stdout,
+            'stderr': result.stderr
+        }), 500
+
+
+@tasks.route('/run_crosscompare', methods=['POST'])
+def run_crosscompare():
+
+    try:
+        data = request.get_json()
+
+        # Construct the command
+        command = [
+            "python", main_dir + "script_milos_prediction.py",
+            "--milo1", main_dir + data['milo1'],
+            "--milo2", main_dir + data['milo2'],
+            "--matchtable", main_dir + data['matchtable'],
+            "--aglabel", data['aglabel'],
+            "--agfactor", data['agfactor'],
+            "--agdrop", data['agdrop'],
+            "--holdout", data['holdout'],
+            "--predict",
+            "--outmatrix"
+        ]
+        print(command)
+        # Run the command
+        result = subprocess.run(command, capture_output=True, text=True)
+
+        if result.returncode == 0:
+            return jsonify({
+                'message': 'Cross-comparison run successfully',
+                'stdout': result.stdout,
+                'stderr': result.stderr
+            }), 200
+        else:
+            return jsonify({
+                'message': 'Error running cross-comparison',
+                'stdout': result.stdout,
+                'stderr': result.stderr
+            }), 500
+
+    except Exception as e:
+        print(f"Error: {e}")
+        return jsonify({'message': 'An error occurred', 'error': str(e)}), 500
 
 
 @tasks.route('/run_scclassify', methods=['GET', 'POST'])

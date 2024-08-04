@@ -2,23 +2,23 @@
 
 <div class="d-flex flex-column justify-content-center" id="banner">
     <div id="projectName" class="d-flex justify-content-center">
-        COVID<span>SCOPE</span>
+        Cell<span>Montage</span>
     </div>
     <div class="d-flex justify-content-center boldH72">
         <div class="typed-strings">
-            <h1>Explore single-cell immunology</h1>
+            <h1>Explore embryogenesis atlases</h1>
         </div>
         <span class="typed"></span>
     </div>
     <div class="d-flex justify-content-center boldH72">
         <div class="typed-strings2">
-            <h1>of SARS-CoV-2 infection</h1>
+            <h1>and in-silico cross-species gastrulation prediction</h1>
         </div>
         <span class="typed2"></span>
     </div>
     <div class="d-flex justify-content-center lightS18" style="margin-top: 40px;">
         <div class="typed-strings">
-            Continuously updated | Standardized | Download-ready | Open data sets
+            Knowledge transfer across species |  Integration-free cross-species mapping | Weighted Bipartite Graph Mapping
         </div>
         <span class="typed"></span>
     </div>
@@ -29,16 +29,16 @@
         <div class="dash-item">
             <div class="item1"><img src="{{url_for('static', filename='Group.png')}}" width="64" height="64" /></div>
             <div class="item2">
-                <h2 id="animatedCellCount">50000000</h2>
+                <h2 id="animatedCellCount">1 Million</h2>
             </div>
             <div class="item3">Cells</div>
         </div>
         <div class="dash-item">
             <div class="item1"><img src="{{url_for('static', filename='Group 38.png')}}" width="76" height="53" /></div>
             <div class="item2">
-                <h2 id="animatedDonorCount">1000</h2>
+                <h2 id="animatedDonorCount">3</h2>
             </div>
-            <div class="item3">Donors</div>
+            <div class="item3">Species</div>
         </div>
         <div class="dash-item">
             <div class="item1"><img src="{{url_for('static', filename='Group 36.png')}}" width="64" height="64" /></div>
@@ -50,7 +50,7 @@
         <div class="dash-item">
             <div class="item1"><img src="{{url_for('static', filename='Group 37.png')}}" width="64" height="64" /></div>
             <div class="item2">
-                <h2>Oct, 2022</h2>
+                <h2>June, 2024</h2>
             </div>
             <div class="item3">Data date processed</div>
         </div>
@@ -76,13 +76,13 @@
     }
 
     const obj = document.getElementById("animatedCellCount");
-    animateValue(obj, 0, 4899035, 5000);
+    animateValue(obj, 0, 1899035, 5000);
 
     const obj2 = document.getElementById("animatedDonorCount");
-    animateValue(obj2, 0, 963, 5000);
+    animateValue(obj2, 0, 3, 1);
 
     const obj3 = document.getElementById("animatedDatasetCount");
-    animateValue(obj3, 0, 20, 5000);
+    animateValue(obj3, 0, 3, 1);
 
     var typed = new Typed('.typed', {
         typeSpeed: 50,

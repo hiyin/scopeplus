@@ -53,7 +53,7 @@ a {
     line-height: 58px;
     text-align: left;
     margin-bottom: 15px;
-    color: #045547;
+    color: #f42959;
 }
 
 .boldauto36 {
@@ -63,7 +63,7 @@ a {
     font-size: 36px;
     line-height: 44px;
     text-align: left;
-    color: #045547;
+    color: #f42959;
 }
 
 .boldauto22 {
@@ -72,7 +72,7 @@ a {
     font-weight: 700;
     font-size: 22px;
     line-height: 30px;
-    color: #045547;
+    color: #f42959;
 }
 
 .mediumH22 {
@@ -127,6 +127,7 @@ a {
     font-weight: bold;
     font-size: 18px;
     line-height: 22px;
+    color: #f42959;
 }
 
 .lightS18 {
@@ -164,7 +165,7 @@ a {
     font-weight: 400;
     font-size: 16px;
     line-height: 19px;
-    color: #607673;
+    color: #f42959;
 }
 
 .mediumauto16 {
@@ -174,13 +175,13 @@ a {
     font-size: 16px;
     line-height: 19px;
     text-align: center;
-    color: #607673;
+    color: #f42959;
 }
 
 /*button*/
 
 .darkButton {
-    background: #045547;
+    background: #f42959;
     box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
     border-radius: 8px;
     padding: 10px 40px;
@@ -209,12 +210,12 @@ a {
 }
 
 .lightButton {
-    background: #E2EEE8;
+    background: #fde8ee;
     box-shadow: 0px 8px 16px -2px rgba(35, 101, 89, 0.3);
     border-radius: 8px;
     padding: 10px 40px;
     border: 0px;
-    color: #045547;
+    color: #f42959;
     -webkit-appearance: none;
     font-size: 15px;
     display: inline-block;
@@ -243,7 +244,7 @@ a {
     font-weight: 700;
     font-size: 21px;
     line-height: 23px;
-    color: #066453;
+    color: #f42959;
     padding: 12px;
 }
 
@@ -252,12 +253,12 @@ a {
 }
 
 .nav-item>a:hover {
-    color: #1CA68C !important;
+    color: #db8f9f !important;
 }
 
 #banner {
-    background-image: url(../Dataset_Banner.jpeg);
-    height: 550px;
+    background-image: url(../Dataset_Banner.png);
+    height: 750px;
 }
 
 #projectName {
@@ -269,7 +270,7 @@ a {
     text-align: center;
     letter-spacing: 0.105em;
     margin-bottom: 10px;
-    color: #6EA69D;
+    color: #80f8fa;
 }
 
 #projectName span {
@@ -305,7 +306,7 @@ a {
 
 .dash-item {
     padding: 20px;
-    color: #6EA69D;
+    color: #90bcbe;
     display: grid;
     grid-template-columns: auto 15px auto;
     grid-template-rows: auto auto auto;
@@ -540,7 +541,7 @@ body {
 }
 
 .footer {
-    background: rgba(239, 239, 239);
+    background: rgba(242,238,239,255);
     padding-top: 50px;
     padding-bottom: 50px;
     z-index: 2;
@@ -575,7 +576,7 @@ body {
 .section01 {
     margin-top: 150px;
     position: relative;
-    background: rgba(110, 166, 157, 0.2);
+    background-image: url(../Banner2.png);
     padding-top: 150px;
     padding-bottom: 150px;
     overflow-y: hidden;
@@ -602,7 +603,7 @@ body {
     line-height: 220%;
     text-align: center;
     letter-spacing: 0.015em;
-    color: #275950;
+    color: #ffffff;
     padding-left: 10%;
     padding-right: 10%;
     margin-bottom: 100px;
@@ -863,7 +864,7 @@ body {
     display: flex;
     justify-content: flex-end;
     margin-top: 80px;
-    color: #045547;
+    color: #f42959;
 }
 
 .paginate_button {
@@ -885,14 +886,14 @@ body {
 
 #empTable_paginate .last,
 .first {
-    background-color: #045547;
+    background-color: #f42959;
     color: #ffffff;
 }
 
 #empTable_paginate .previous,
 .next {
-    background-color: #EEF4F3;
-    color: #045547;
+    background-color: #fde8ee;
+    color: #f42959;
 }
 
 #empTable_paginate .previous {
