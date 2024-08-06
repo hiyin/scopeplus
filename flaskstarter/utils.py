@@ -4,7 +4,7 @@
 """
 
 import os
-
+from celery import Celery
 import datetime
 # TMP path, this stores all flask required files
 TMP_FOLDER = os.environ.get('HOME') + '/flask_resources'
@@ -22,6 +22,19 @@ PASSWORD_LEN_MAX = 16
 # Model
 STRING_LEN = 64
 
+def make_celery(app):
+    celery = Celery(app.import_name)
+
+    # add beat tasks if you have them here
+    # celery.config_from_object(celery_config)
+
+    class ContextTask(celery.Task):
+        def __call__(self, *args, **kwargs):
+            with app.app_context():
+                return self.run(*args, **kwargs)
+
+    celery.Task = ContextTask
+    return celery
 
 def get_current_time():
     return datetime.datetime.utcnow()

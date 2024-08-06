@@ -8,7 +8,7 @@ from .settings import settings
 from .tasks import tasks
 from .frontend import frontend, ContactUsAdmin
 from .extensions import db, mail, cache, login_manager, admin, mongo
-from .utils import pretty_date
+from .utils import pretty_date, make_celery
 import logging
 import os
 from datetime import timedelta
@@ -16,9 +16,11 @@ from datetime import timedelta
 from pymongo import MongoClient
 from .model.umap import UmapView
 from .model.meta import MetaView
-
+from celery import Celery
 # For import *
 __all__ = ['create_app']
+
+celery_app = Celery()
 
 DEFAULT_BLUEPRINTS = (
     frontend,
@@ -51,6 +53,9 @@ def create_app(config=None, app_name=None, blueprints=None):
 
     # add db
 
+    celery = make_celery(app)
+    celery.set_default()
+
 
     configure_app(app, config)
     configure_hook(app)
@@ -60,7 +65,7 @@ def create_app(config=None, app_name=None, blueprints=None):
     configure_template_filters(app)
     configure_error_handlers(app)
 
-    return app
+    return app, celery
 
 
 def configure_app(app, config=None):

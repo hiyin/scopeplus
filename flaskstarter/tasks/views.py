@@ -803,8 +803,9 @@ def run_visualization():
         }), 500
 
 
-@tasks.route('/run_crosscompare', methods=['POST'])
-def run_crosscompare():
+#@tasks.route('/run_crosscompare', methods=['POST'])
+@shared_task()
+def run_crosscompare_task():
 
     try:
         data = request.get_json()
@@ -842,6 +843,12 @@ def run_crosscompare():
     except Exception as e:
         print(f"Error: {e}")
         return jsonify({'message': 'An error occurred', 'error': str(e)}), 500
+
+
+@tasks.route('/run_crosscompare', methods=['POST'])
+def run_crosscompare():
+    run_crosscompare_task.delay()
+    print("runnnnnn!!!")
 
 
 @tasks.route('/run_scclassify', methods=['GET', 'POST'])

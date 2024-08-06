@@ -7,8 +7,13 @@ from flask_login import LoginManager
 from flask_admin import Admin, AdminIndexView
 from flask_admin.menu import MenuLink
 from pymongo import MongoClient
+from celery import Celery
 # connect to default sqlite db
 db = SQLAlchemy()
+
+
+
+
 
 # connect to mongo db
 client = MongoClient('mongodb://localhost:27017/', connect=False)
