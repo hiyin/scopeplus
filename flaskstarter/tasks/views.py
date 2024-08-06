@@ -805,11 +805,8 @@ def run_visualization():
 
 #@tasks.route('/run_crosscompare', methods=['POST'])
 @shared_task()
-def run_crosscompare_task():
-
+def run_crosscompare_task(data):
     try:
-        data = request.get_json()
-
         # Construct the command
         command = [
             "python", main_dir + "script_milos_prediction.py",
@@ -828,27 +825,29 @@ def run_crosscompare_task():
         result = subprocess.run(command, capture_output=True, text=True)
 
         if result.returncode == 0:
-            return jsonify({
+            return {
                 'message': 'Cross-comparison run successfully',
                 'stdout': result.stdout,
                 'stderr': result.stderr
-            }), 200
+            }
         else:
-            return jsonify({
+            return {
                 'message': 'Error running cross-comparison',
                 'stdout': result.stdout,
                 'stderr': result.stderr
-            }), 500
+            }
 
     except Exception as e:
         print(f"Error: {e}")
-        return jsonify({'message': 'An error occurred', 'error': str(e)}), 500
-
+        return {'message': 'An error occurred', 'error': str(e)}
 
 @tasks.route('/run_crosscompare', methods=['POST'])
 def run_crosscompare():
-    run_crosscompare_task.delay()
-    print("runnnnnn!!!")
+    if request:
+        data = request.get_json()
+        task = run_crosscompare_task.delay(data)
+        print("Task started!")
+        return (request.referrer)
 
 
 @tasks.route('/run_scclassify', methods=['GET', 'POST'])
