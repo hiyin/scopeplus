@@ -818,7 +818,8 @@ def run_crosscompare_task(data):
             "--agdrop", data['agdrop'],
             "--holdout", data['holdout'],
             "--predict",
-            "--outmatrix"
+            "--outmatrix",
+            "--outdir",
         ]
         print(command)
         # Run the command
