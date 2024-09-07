@@ -8,11 +8,11 @@ from .settings import settings
 from .tasks import tasks
 from .frontend import frontend, ContactUsAdmin
 from .extensions import db, mail, cache, login_manager, admin, mongo
-from .utils import pretty_date
+from .utils import pretty_date, make_celery
 import logging
 import os
 from datetime import timedelta
-
+from celery import Celery
 from pymongo import MongoClient
 from .model.umap import UmapView
 from .model.meta import MetaView
@@ -51,7 +51,8 @@ def create_app(config=None, app_name=None, blueprints=None):
     app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(minutes=30)
 
     # add db
-
+    celery = make_celery(app)
+    celery.set_default()
 
     configure_app(app, config)
     configure_hook(app)
@@ -61,7 +62,7 @@ def create_app(config=None, app_name=None, blueprints=None):
     configure_template_filters(app)
     configure_error_handlers(app)
 
-    return app
+    return app, celery
 
 
 def configure_app(app, config=None):

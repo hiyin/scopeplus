@@ -1150,6 +1150,7 @@ def write_10x_mtx_small(path, gene_dict, barcode_dict, query):
 # 0816 added by junyi
 #@shared_task(rate_limit="1/h")
 # this rate_limit is to limit the number of jobs that a worker can process in a limited time - as specified in celery
+@shared_task()
 def write_10x_mtx(path, gene_dict, barcode_dict, doc_count, query, user_email):
     abs_path = path
     fn = path + '/matrix.mtx'

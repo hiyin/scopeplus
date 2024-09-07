@@ -11,20 +11,22 @@ from flask_pymongo import PyMongo
 # monkey.patch_all()
 
 from celery import Celery
+def make_celery(app):
+    celery = Celery(app.import_name)
 
-def register_celery(app):
-    #celery.from_config_object("celeryconfig")
+    # add beat tasks if you have them here
+    # celery.config_from_object(celery_config)
+
     class ContextTask(celery.Task):
         def __call__(self, *args, **kwargs):
             with app.app_context():
                 return self.run(*args, **kwargs)
-    celery.Task = ContextTask
 
-celery = Celery(__name__, broker='redis://localhost:6379/0')
-application = create_app()
-application.app_context().push()
-application.test_request_context().push()
-register_celery(application)
+    celery.Task = ContextTask
+    return celery
+
+application, celery = create_app()
+celery.conf.broker_url = 'redis://localhost:6379/0'
 
 #
 # if __name__ == "__main__":
