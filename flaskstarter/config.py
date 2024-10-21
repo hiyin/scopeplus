@@ -20,7 +20,6 @@ class BaseConfig(object):
 
 
 class DefaultConfig(BaseConfig):
-    FLASK_ENV = 'development'
     DEBUG = True
 
     # Flask-Sqlalchemy

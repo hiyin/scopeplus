@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from sqlalchemy.orm.mapper import configure_mappers
-
+from flask import Flask
 from flaskstarter import create_app
 from flaskstarter.extensions import db
 from flaskstarter.user import Users, ADMIN, USER, ACTIVE
+
 
 
 from flask_pymongo import PyMongo
@@ -57,7 +58,7 @@ celery.conf.broker_url = 'redis://localhost:6379/0'
 
 
 #
-# if __name__ == "__main__":
+#if __name__ == "__main__":
 #     application.run()
 #
 #

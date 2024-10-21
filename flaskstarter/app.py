@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from flask import Flask
-
+from os.path import join, dirname
+from dotenv import load_dotenv, find_dotenv
 from .config import DefaultConfig
 from .user import Users, UsersAdmin
 from .settings import settings
@@ -71,6 +72,8 @@ def create_app(config=None, app_name=None, blueprints=None):
 def configure_app(app, config=None):
     # Different ways of configurations i.e local or production
     logger.info(f"Starting app in %s environment" % os.getenv('FLASK_ENV'))
+    dotenv_path = join(dirname(__file__), '.env')
+    load_dotenv(find_dotenv())
     flask_env = os.environ.get('FLASK_ENV')
     if 'development' in flask_env:
         print('configuring for development')

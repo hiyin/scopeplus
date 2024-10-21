@@ -24,3 +24,9 @@ The development timeline for single cell atlas portal is around 1 to 2 years, wi
 ## Liscence
 The software architecture is open-sourced in this repository and for use under the MIT License.
 
+## Development note
+export FLASK_APP=manage.py
+export FLASK_ENV=development
+Run `celery -A manage worker --loglevel debug --pool gevent` in cross species prediction app
+
+
